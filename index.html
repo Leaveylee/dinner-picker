@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>等下吃什麼？</title>
+    
+    <!-- PWA 相關設定 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FFE4D6">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="等下吃什麼？">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #FFF3E6 0%, #FFE4D6 100%);
+            padding: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(184, 134, 113, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #B86E52;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(184, 110, 82, 0.1);
+        }
+
+        .result-container {
+            margin-bottom: 2rem;
+            padding: 0.5rem;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #FFB68E 0%, #FFD0B8 100%);
+        }
+
+        .result {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: #444;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .result.animating {
+            transform: scale(1.02);
+            background: #f8f9fa;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #E67E51 0%, #F1945E 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(230, 126, 81, 0.2);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(230, 126, 81, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(230, 126, 81, 0.2);
+        }
+
+        .button:disabled {
+            background: linear-gradient(135deg, #FFD0B8 0%, #FFE4D6 100%);
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .remaining-choices {
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            color: #8B6153;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            border: 1px solid rgba(184, 110, 82, 0.1);
+        }
+
+        .cooldown-info {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #8B6153;
+        }
+
+        .food-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 1.5rem;
+            }
+            .title {
+                font-size: 1.8rem;
+            }
+            .result {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="food-icon">🍚</div>
+        <h1 class="title">等下吃什麼？</h1>
+        <div class="result-container">
+            <div id="result" class="result">點擊按鈕選擇餐點</div>
+        </div>
+        <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
+        <div id="remainingChoices" class="remaining-choices"></div>
+        <div id="cooldownInfo" class="cooldown-info"></div>
+    </div>
+
+    <script>
+        let foodHistory = {};
+        
+        const dinnerOptions = [
+            // 原有選項
+            '紅燒牛肉麵', '日式咖哩飯', '韓式烤肉', '清蒸魚配時蔬',
+            '義大利麵', '港式燒臘飯', '泰式打拋雞肉飯', '滷肉飯',
+            '火鍋', '炒飯', '親子丼', '豬排丼', '鮭魚茶泡飯',
+            '蛋包飯', '炸豬排定食', '烏龍麵', '天婦羅蓋飯',
+            '鮪魚蓋飯', '日式叉燒拉麵', '炸雞定食',
+            // 中式料理
+            '港式雲吞麵', '叉燒油雞飯', '燒鴨飯', '乾炒牛河',
+            '星洲炒米', '蔥油雞飯', '三寶飯', '肉絲炒麵',
+            '榨菜肉絲麵', '餛飩麵', '陽春麵', '炸醬麵',
+            '肉燥飯', '雞肉飯', '排骨飯', '蝦仁炒飯',
+            '蛋花湯餃', '燒肉飯', '油雞飯', '叉燒包配粥'
+        ];
+
+        let isAnimating = false;
+        let lastChoice = null;
+
+        function getHistory() {
+            return foodHistory;
+        }
+
+        function saveHistory(history) {
+            foodHistory = history;
+        }
+
+        function clearHistory() {
+            foodHistory = {};
+            updateAvailableCount();
+        }
+
+        function isAvailable(food) {
+            const history = getHistory();
+            const lastPickTime = history[food];
+            
+            if (!lastPickTime) return true;
+
+            const now = new Date().getTime();
+            const lastTime = new Date(lastPickTime).getTime();
+            const hoursDiff = (now - lastTime) / (1000 * 60 * 60);
+            
+            if (hoursDiff < 4) {
+                const remainingMinutes = Math.ceil((4 - hoursDiff) * 60);
+                document.getElementById('cooldownInfo').textContent = 
+                    `${food} 冷卻中：還需要 ${remainingMinutes} 分鐘`;
+            }
+            
+            return hoursDiff >= 4;
+        }
+
+        function updateAvailableCount() {
+            const availableCount = dinnerOptions.filter(food => isAvailable(food)).length;
+            const elem = document.getElementById('remainingChoices');
+            elem.textContent = `🍚 可選擇的餐點：${availableCount}/${dinnerOptions.length}`;
+        }
+
+        function getRandomFood() {
+            const availableFoods = dinnerOptions.filter(food => isAvailable(food));
+
+            if (availableFoods.length === 0) {
+                return '所有餐點都在冷卻時間中，請稍後再試 😅';
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableFoods.length);
+            return availableFoods[randomIndex];
+        }
+
+        function pickFood() {
+            if (isAnimating) return;
+
+            const resultElem = document.getElementById('result');
+            const buttonElem = document.getElementById('pickButton');
+            
+            isAnimating = true;
+            buttonElem.disabled = true;
+            resultElem.classList.add('animating');
+
+            let finalChoice = null;
+            let counter = 0;
+            
+            const spinInterval = setInterval(() => {
+                if (counter === 0) {
+                    finalChoice = getRandomFood();
+                }
+                
+                if (counter < 9) {
+                    resultElem.textContent = dinnerOptions[Math.floor(Math.random() * dinnerOptions.length)];
+                } else {
+                    resultElem.textContent = finalChoice;
+                }
+                
+                counter++;
+                if (counter >= 10) {
+                    clearInterval(spinInterval);
+                    isAnimating = false;
+                    buttonElem.disabled = false;
+                    resultElem.classList.remove('animating');
+                    
+                    if (!finalChoice.includes('冷卻時間')) {
+                        const history = getHistory();
+                        history[finalChoice] = new Date().toISOString();
+                        saveHistory(history);
+                        lastChoice = finalChoice;
+                    }
+                    
+                    updateAvailableCount();
+                }
+            }, 50);
+        }
+
+        // PWA 相關設定稍後再加
+
+        window.onload = function() {
+            updateAvailableCount();
+        };
+    </script>
+</body>
+</html>
