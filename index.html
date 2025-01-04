@@ -12,7 +12,77 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="等下吃什麼？">
-    
+</head>
+<body>
+    <div class="card">
+        <div class="food-icon">🍚</div>
+        <h1 class="title">等下吃什麼？</h1>
+
+        <!-- 篩選器 -->
+        <div class="filters">
+            <div class="filter-group">
+                <label class="filter-label">餐點類型</label>
+                <select id="typeFilter">
+                    <option value="">不指定</option>
+                    <option value="飯類">飯類</option>
+                    <option value="麵類">麵類</option>
+                    <option value="米粉類">米粉類</option>
+                    <option value="義大利麵類">義大利麵類</option>
+                    <option value="壽司類">壽司類</option>
+                    <option value="點心類">點心類</option>
+                    <option value="湯類">湯類</option>
+                    <option value="鍋物類">鍋物類</option>
+                    <option value="定食類">定食類</option>
+                    <option value="生魚片類">生魚片類</option>
+                    <option value="排餐類">排餐類</option>
+                    <option value="套餐類">套餐類</option>
+                    <option value="小菜類">小菜類</option>
+                    <option value="主食類">主食類</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">料理國家</label>
+                <select id="countryFilter">
+                    <option value="">不指定</option>
+                    <option value="中式">中式</option>
+                    <option value="日式">日式</option>
+                    <option value="韓式">韓式</option>
+                    <option value="義式">義式</option>
+                    <option value="墨式">墨式</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">價格區間</label>
+                <select id="priceFilter">
+                    <option value="">不指定</option>
+                    <option value="100以下">100元以下</option>
+                    <option value="100-150">100-150元</option>
+                    <option value="150-250">150-250元</option>
+                    <option value="250-500">250-500元</option>
+                    <option value="500-1000">500-1000元</option>
+                    <option value="1000以上">1000元以上</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="result-container">
+            <div id="result" class="result">點擊按鈕選擇餐點</div>
+            <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
+                <span class="favorite-icon">⭐</span>
+                <span class="favorite-text">點擊收藏</span>
+            </button>
+        </div>
+        <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
+        <div id="remainingChoices" class="remaining-choices"></div>
+        <div id="cooldownInfo" class="cooldown-info"></div>
+        <div id="favoriteList" class="favorite-list">
+            <h3>收藏清單</h3>
+            <div id="favoriteItems" class="favorite-items"></div>
+        </div>
+    </div>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
 
@@ -43,6 +113,51 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             animation: fadeIn 0.5s ease-out;
+        }
+
+        /* 篩選器樣式 */
+        .filters {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            text-align: left;
+        }
+
+        .filter-label {
+            font-size: 0.9rem;
+            color: #B86E52;
+            font-weight: 500;
+        }
+
+        select {
+            padding: 0.5rem;
+            border: 1px solid rgba(184, 110, 82, 0.2);
+            border-radius: 8px;
+            background: white;
+            color: #444;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        select:hover {
+            border-color: rgba(184, 110, 82, 0.4);
+        }
+
+        select:focus {
+            border-color: #B86E52;
+            box-shadow: 0 0 0 2px rgba(184, 110, 82, 0.1);
         }
 
         @keyframes fadeIn {
@@ -217,46 +332,296 @@
             }
         }
     </style>
-</head>
-<body>
-    <div class="card">
-        <div class="food-icon">🍚</div>
-        <h1 class="title">等下吃什麼？</h1>
-        <div class="result-container">
-            <div id="result" class="result">點擊按鈕選擇餐點</div>
-            <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
-                <span class="favorite-icon">⭐</span>
-                <span class="favorite-text">點擊收藏</span>
-            </button>
-        </div>
-        <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
-        <div id="remainingChoices" class="remaining-choices"></div>
-        <div id="cooldownInfo" class="cooldown-info"></div>
-        <div id="favoriteList" class="favorite-list">
-            <h3>收藏清單</h3>
-            <div id="favoriteItems" class="favorite-items"></div>
-        </div>
-    </div>
+<script>
+        // 餐點資料庫
+        const menuItems = [
+            // 中式料理
+            {
+                name: "肉燥飯",
+                type: "飯類",
+                country: "中式",
+                price: "100以下"
+            },
+            {
+                name: "小籠包",
+                type: "點心類",
+                country: "中式",
+                price: "100以下"
+            },
+            {
+                name: "燒賣便當",
+                type: "飯類",
+                country: "中式",
+                price: "100-150"
+            },
+            {
+                name: "炒米粉",
+                type: "米粉類",
+                country: "中式",
+                price: "100-150"
+            },
+            {
+                name: "牛肉麵",
+                type: "麵類",
+                country: "中式",
+                price: "150-250"
+            },
+            {
+                name: "燒臘便當",
+                type: "飯類",
+                country: "中式",
+                price: "150-250"
+            },
+            {
+                name: "港式燒味套餐",
+                type: "飯類",
+                country: "中式",
+                price: "250-500"
+            },
+            {
+                name: "砂鍋粥",
+                type: "粥類",
+                country: "中式",
+                price: "250-500"
+            },
+            {
+                name: "魚翅湯套餐",
+                type: "湯類",
+                country: "中式",
+                price: "500-1000"
+            },
+            {
+                name: "頂級燉湯",
+                type: "湯類",
+                country: "中式",
+                price: "500-1000"
+            },
+            {
+                name: "佛跳牆",
+                type: "湯類",
+                country: "中式",
+                price: "1000以上"
+            },
 
-    <script>
-        const dinnerOptions = [
-            '紅燒牛肉麵', '日式咖哩飯', '韓式烤肉', '清蒸魚配時蔬',
-            '義大利麵', '港式燒臘飯', '泰式打拋雞肉飯', '滷肉飯',
-            '火鍋', '炒飯', '親子丼', '豬排丼', '鮭魚茶泡飯',
-            '蛋包飯', '炸豬排定食', '烏龍麵', '天婦羅蓋飯',
-            '鮪魚蓋飯', '日式叉燒拉麵', '炸雞定食',
-            '港式雲吞麵', '叉燒油雞飯', '燒鴨飯', '乾炒牛河',
-            '星洲炒米', '蔥油雞飯', '三寶飯', '肉絲炒麵',
-            '榨菜肉絲麵', '餛飩麵', '陽春麵', '炸醬麵',
-            '肉燥飯', '雞肉飯', '排骨飯', '蝦仁炒飯',
-            '蛋花湯餃', '燒肉飯', '油雞飯', '叉燒包配粥'
+            // 日式料理
+            {
+                name: "味噌湯",
+                type: "湯類",
+                country: "日式",
+                price: "100以下"
+            },
+            {
+                name: "小份壽司",
+                type: "壽司類",
+                country: "日式",
+                price: "100以下"
+            },
+            {
+                name: "便當式拉麵",
+                type: "麵類",
+                country: "日式",
+                price: "100-150"
+            },
+            {
+                name: "關東煮",
+                type: "湯類",
+                country: "日式",
+                price: "100-150"
+            },
+            {
+                name: "壽司套餐",
+                type: "壽司類",
+                country: "日式",
+                price: "150-250"
+            },
+            {
+                name: "炸豬排便當",
+                type: "飯類",
+                country: "日式",
+                price: "150-250"
+            },
+            {
+                name: "壽喜燒套餐",
+                type: "鍋物類",
+                country: "日式",
+                price: "250-500"
+            },
+            {
+                name: "天婦羅定食",
+                type: "定食類",
+                country: "日式",
+                price: "250-500"
+            },
+            {
+                name: "高級生魚片套餐",
+                type: "生魚片類",
+                country: "日式",
+                price: "500-1000"
+            },
+            {
+                name: "懷石料理",
+                type: "套餐類",
+                country: "日式",
+                price: "1000以上"
+            },
+
+            // 韓式料理
+            {
+                name: "韓式泡菜",
+                type: "小菜類",
+                country: "韓式",
+                price: "100以下"
+            },
+            {
+                name: "部隊鍋泡麵",
+                type: "麵類",
+                country: "韓式",
+                price: "100-150"
+            },
+            {
+                name: "韓式炸雞",
+                type: "點心類",
+                country: "韓式",
+                price: "100-150"
+            },
+            {
+                name: "石鍋拌飯",
+                type: "飯類",
+                country: "韓式",
+                price: "150-250"
+            },
+            {
+                name: "韓式拉麵",
+                type: "麵類",
+                country: "韓式",
+                price: "150-250"
+            },
+            {
+                name: "韓式烤肉套餐",
+                type: "套餐類",
+                country: "韓式",
+                price: "250-500"
+            },
+            {
+                name: "部隊鍋",
+                type: "鍋物類",
+                country: "韓式",
+                price: "250-500"
+            },
+            {
+                name: "豪華韓式烤肉",
+                type: "套餐類",
+                country: "韓式",
+                price: "500-1000"
+            },
+            {
+                name: "帝王蟹韓式料理",
+                type: "套餐類",
+                country: "韓式",
+                price: "1000以上"
+            },
+
+            // 義式料理
+            {
+                name: "蒜香麵包",
+                type: "點心類",
+                country: "義式",
+                price: "100以下"
+            },
+            {
+                name: "番茄義大利麵",
+                type: "義大利麵類",
+                country: "義式",
+                price: "150-250"
+            },
+            {
+                name: "白醬義大利麵",
+                type: "義大利麵類",
+                country: "義式",
+                price: "150-250"
+            },
+            {
+                name: "瑪格麗特披薩",
+                type: "披薩類",
+                country: "義式",
+                price: "250-500"
+            },
+            {
+                name: "海鮮義大利麵",
+                type: "義大利麵類",
+                country: "義式",
+                price: "250-500"
+            },
+            {
+                name: "松露義大利麵",
+                type: "義大利麵類",
+                country: "義式",
+                price: "500-1000"
+            },
+            {
+                name: "龍蝦義大利麵",
+                type: "義大利麵類",
+                country: "義式",
+                price: "1000以上"
+            },
+
+            // 墨西哥料理
+            {
+                name: "玉米餅",
+                type: "點心類",
+                country: "墨式",
+                price: "100以下"
+            },
+            {
+                name: "塔可餅",
+                type: "點心類",
+                country: "墨式",
+                price: "100-150"
+            },
+            {
+                name: "墨西哥捲餅",
+                type: "主食類",
+                country: "墨式",
+                price: "150-250"
+            },
+            {
+                name: "法希塔套餐",
+                type: "套餐類",
+                country: "墨式",
+                price: "250-500"
+            },
+            {
+                name: "豪華墨西哥拼盤",
+                type: "套餐類",
+                country: "墨式",
+                price: "500-1000"
+            }
         ];
 
         let foodHistory = {};
         let favorites = new Set();
         let currentFood = null;
         let isAnimating = false;
-        let lastChoice = null;
+
+        // 取得選中的篩選條件
+        function getFilters() {
+            return {
+                type: document.getElementById('typeFilter').value,
+                country: document.getElementById('countryFilter').value,
+                price: document.getElementById('priceFilter').value
+            };
+        }
+
+        // 根據篩選條件過濾餐點
+        function getFilteredItems() {
+            const filters = getFilters();
+            return menuItems.filter(item => {
+                const typeMatch = !filters.type || item.type === filters.type;
+                const countryMatch = !filters.country || item.country === filters.country;
+                const priceMatch = !filters.price || item.price === filters.price;
+                return typeMatch && countryMatch && priceMatch;
+            });
+        }
 
         function toggleFavorite() {
             if (!currentFood) return;
@@ -338,20 +703,22 @@
         }
 
         function updateAvailableCount() {
-            const availableCount = dinnerOptions.filter(food => isAvailable(food)).length;
+            const filteredItems = getFilteredItems();
+            const availableCount = filteredItems.filter(item => isAvailable(item.name)).length;
             const elem = document.getElementById('remainingChoices');
-            elem.textContent = `🍚 可選擇的餐點：${availableCount}/${dinnerOptions.length}`;
+            elem.textContent = `🍚 可選擇的餐點：${availableCount}/${filteredItems.length}`;
         }
 
         function getRandomFood() {
-            const availableFoods = dinnerOptions.filter(food => isAvailable(food));
+            const filteredItems = getFilteredItems();
+            const availableFoods = filteredItems.filter(item => isAvailable(item.name));
 
             if (availableFoods.length === 0) {
                 return '所有餐點都在冷卻時間中，請稍後再試 😅';
             }
 
             const randomIndex = Math.floor(Math.random() * availableFoods.length);
-            return availableFoods[randomIndex];
+            return availableFoods[randomIndex].name;
         }
 
         function pickFood() {
@@ -373,7 +740,9 @@
                 }
                 
                 if (counter < 9) {
-                    resultElem.textContent = dinnerOptions[Math.floor(Math.random() * dinnerOptions.length)];
+                    const filteredItems = getFilteredItems();
+                    const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
+                    resultElem.textContent = randomItem.name;
                 } else {
                     resultElem.textContent = finalChoice;
                 }
@@ -389,7 +758,6 @@
                         const history = getHistory();
                         history[finalChoice] = new Date().toISOString();
                         saveHistory(history);
-                        lastChoice = finalChoice;
                         currentFood = finalChoice;
                         updateFavoriteButton();
                     }
@@ -399,8 +767,14 @@
             }, 50);
         }
 
+        // 頁面載入時初始化
         window.onload = function() {
             updateAvailableCount();
+
+            // 監聽篩選器變化
+            document.getElementById('typeFilter').addEventListener('change', updateAvailableCount);
+            document.getElementById('countryFilter').addEventListener('change', updateAvailableCount);
+            document.getElementById('priceFilter').addEventListener('change', updateAvailableCount);
         };
     </script>
 </body>
