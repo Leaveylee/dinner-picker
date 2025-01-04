@@ -151,6 +151,7 @@
             margin-top: 1rem;
             font-size: 0.9rem;
             color: #8B6153;
+            display: none;
         }
 
         .favorite-list {
@@ -225,7 +226,7 @@
             <div id="result" class="result">點擊按鈕選擇餐點</div>
             <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
                 <span class="favorite-icon">⭐</span>
-                <span class="favorite-text">收藏</span>
+                <span class="favorite-text">點擊收藏</span>
             </button>
         </div>
         <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
@@ -283,7 +284,7 @@
                 button.querySelector('.favorite-text').textContent = '已收藏';
             } else {
                 button.classList.remove('active');
-                button.querySelector('.favorite-text').textContent = '收藏';
+                button.querySelector('.favorite-text').textContent = '點擊收藏';
             }
         }
 
@@ -332,12 +333,6 @@
             const now = new Date().getTime();
             const lastTime = new Date(lastPickTime).getTime();
             const hoursDiff = (now - lastTime) / (1000 * 60 * 60);
-            
-            if (hoursDiff < 4) {
-                const remainingMinutes = Math.ceil((4 - hoursDiff) * 60);
-                document.getElementById('cooldownInfo').textContent = 
-                    `${food} 冷卻中：還需要 ${remainingMinutes} 分鐘`;
-            }
             
             return hoursDiff >= 4;
         }
