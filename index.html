@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="等下吃什麼？">
-
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
 
@@ -114,6 +114,29 @@
             cursor: not-allowed;
         }
 
+        .favorite-button {
+            background: none;
+            border: none;
+            padding: 0.5rem 1rem;
+            margin-top: 1rem;
+            cursor: pointer;
+            color: #B86E52;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem auto;
+            transition: all 0.3s ease;
+        }
+
+        .favorite-button:hover {
+            transform: scale(1.1);
+        }
+
+        .favorite-button.active {
+            color: #FFB68E;
+        }
+
         .remaining-choices {
             margin-top: 1.5rem;
             font-size: 1rem;
@@ -128,6 +151,45 @@
             margin-top: 1rem;
             font-size: 0.9rem;
             color: #8B6153;
+        }
+
+        .favorite-list {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(184, 110, 82, 0.2);
+        }
+
+        .favorite-list h3 {
+            color: #B86E52;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .favorite-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .favorite-item {
+            background: rgba(255, 182, 142, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: #B86E52;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .favorite-item button {
+            background: none;
+            border: none;
+            color: #E67E51;
+            cursor: pointer;
+            padding: 0;
+            font-size: 1rem;
         }
 
         .food-icon {
@@ -161,23 +223,27 @@
         <h1 class="title">等下吃什麼？</h1>
         <div class="result-container">
             <div id="result" class="result">點擊按鈕選擇餐點</div>
+            <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
+                <span class="favorite-icon">⭐</span>
+                <span class="favorite-text">收藏</span>
+            </button>
         </div>
         <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
         <div id="remainingChoices" class="remaining-choices"></div>
         <div id="cooldownInfo" class="cooldown-info"></div>
+        <div id="favoriteList" class="favorite-list">
+            <h3>收藏清單</h3>
+            <div id="favoriteItems" class="favorite-items"></div>
+        </div>
     </div>
 
     <script>
-        let foodHistory = {};
-        
         const dinnerOptions = [
-            // 原有選項
             '紅燒牛肉麵', '日式咖哩飯', '韓式烤肉', '清蒸魚配時蔬',
             '義大利麵', '港式燒臘飯', '泰式打拋雞肉飯', '滷肉飯',
             '火鍋', '炒飯', '親子丼', '豬排丼', '鮭魚茶泡飯',
             '蛋包飯', '炸豬排定食', '烏龍麵', '天婦羅蓋飯',
             '鮪魚蓋飯', '日式叉燒拉麵', '炸雞定食',
-            // 中式料理
             '港式雲吞麵', '叉燒油雞飯', '燒鴨飯', '乾炒牛河',
             '星洲炒米', '蔥油雞飯', '三寶飯', '肉絲炒麵',
             '榨菜肉絲麵', '餛飩麵', '陽春麵', '炸醬麵',
@@ -185,8 +251,64 @@
             '蛋花湯餃', '燒肉飯', '油雞飯', '叉燒包配粥'
         ];
 
+        let foodHistory = {};
+        let favorites = new Set();
+        let currentFood = null;
         let isAnimating = false;
         let lastChoice = null;
+
+        function toggleFavorite() {
+            if (!currentFood) return;
+
+            if (favorites.has(currentFood)) {
+                favorites.delete(currentFood);
+            } else {
+                favorites.add(currentFood);
+            }
+
+            updateFavoriteButton();
+            updateFavoritesList();
+        }
+
+        function updateFavoriteButton() {
+            const button = document.getElementById('favoriteButton');
+            if (!currentFood) {
+                button.style.display = 'none';
+                return;
+            }
+
+            button.style.display = 'flex';
+            if (favorites.has(currentFood)) {
+                button.classList.add('active');
+                button.querySelector('.favorite-text').textContent = '已收藏';
+            } else {
+                button.classList.remove('active');
+                button.querySelector('.favorite-text').textContent = '收藏';
+            }
+        }
+
+        function updateFavoritesList() {
+            const container = document.getElementById('favoriteItems');
+            container.innerHTML = '';
+
+            favorites.forEach(food => {
+                const item = document.createElement('div');
+                item.className = 'favorite-item';
+                item.innerHTML = `
+                    ${food}
+                    <button onclick="removeFavorite('${food}')">×</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function removeFavorite(food) {
+            favorites.delete(food);
+            updateFavoritesList();
+            if (food === currentFood) {
+                updateFavoriteButton();
+            }
+        }
 
         function getHistory() {
             return foodHistory;
@@ -273,14 +395,14 @@
                         history[finalChoice] = new Date().toISOString();
                         saveHistory(history);
                         lastChoice = finalChoice;
+                        currentFood = finalChoice;
+                        updateFavoriteButton();
                     }
                     
                     updateAvailableCount();
                 }
             }, 50);
         }
-
-        // PWA 相關設定稍後再加
 
         window.onload = function() {
             updateAvailableCount();
