@@ -21,35 +21,14 @@
         <!-- 篩選器 -->
         <div class="filters">
             <div class="filter-group">
-                <label class="filter-label">餐點類型</label>
-                <select id="typeFilter">
-                    <option value="">不指定</option>
-                    <option value="飯類">飯類</option>
-                    <option value="麵類">麵類</option>
-                    <option value="米粉類">米粉類</option>
-                    <option value="義大利麵類">義大利麵類</option>
-                    <option value="壽司類">壽司類</option>
-                    <option value="點心類">點心類</option>
-                    <option value="湯類">湯類</option>
-                    <option value="鍋物類">鍋物類</option>
-                    <option value="定食類">定食類</option>
-                    <option value="生魚片類">生魚片類</option>
-                    <option value="排餐類">排餐類</option>
-                    <option value="套餐類">套餐類</option>
-                    <option value="小菜類">小菜類</option>
-                    <option value="主食類">主食類</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
                 <label class="filter-label">料理國家</label>
                 <select id="countryFilter">
                     <option value="">不指定</option>
                     <option value="中式">中式</option>
                     <option value="日式">日式</option>
-                    <option value="韓式">韓式</option>
                     <option value="義式">義式</option>
-                    <option value="墨式">墨式</option>
+                    <option value="美式">美式</option>
+                    <option value="墨西哥式">墨西哥式</option>
                 </select>
             </div>
 
@@ -57,12 +36,9 @@
                 <label class="filter-label">價格區間</label>
                 <select id="priceFilter">
                     <option value="">不指定</option>
-                    <option value="100以下">100元以下</option>
-                    <option value="100-150">100-150元</option>
-                    <option value="150-250">150-250元</option>
-                    <option value="250-500">250-500元</option>
+                    <option value="150以下">150元以下</option>
+                    <option value="150-500">150-500元</option>
                     <option value="500-1000">500-1000元</option>
-                    <option value="1000以上">1000元以上</option>
                 </select>
             </div>
         </div>
@@ -333,272 +309,189 @@
         }
     </style>
 <script>
-        // 餐點資料庫
         const menuItems = [
-            // 中式料理
-            {
-                name: "肉燥飯",
-                type: "飯類",
-                country: "中式",
-                price: "100以下"
-            },
-            {
-                name: "小籠包",
-                type: "點心類",
-                country: "中式",
-                price: "100以下"
-            },
-            {
-                name: "燒賣便當",
-                type: "飯類",
-                country: "中式",
-                price: "100-150"
-            },
-            {
-                name: "炒米粉",
-                type: "米粉類",
-                country: "中式",
-                price: "100-150"
-            },
-            {
-                name: "牛肉麵",
-                type: "麵類",
-                country: "中式",
-                price: "150-250"
-            },
-            {
-                name: "燒臘便當",
-                type: "飯類",
-                country: "中式",
-                price: "150-250"
-            },
-            {
-                name: "港式燒味套餐",
-                type: "飯類",
-                country: "中式",
-                price: "250-500"
-            },
-            {
-                name: "砂鍋粥",
-                type: "粥類",
-                country: "中式",
-                price: "250-500"
-            },
-            {
-                name: "魚翅湯套餐",
-                type: "湯類",
-                country: "中式",
-                price: "500-1000"
-            },
-            {
-                name: "頂級燉湯",
-                type: "湯類",
-                country: "中式",
-                price: "500-1000"
-            },
-            {
-                name: "佛跳牆",
-                type: "湯類",
-                country: "中式",
-                price: "1000以上"
-            },
+            // 150元以下 - 中式
+            { name: "魯肉飯套餐", country: "中式", price: "150以下" },
+            { name: "雞腿便當", country: "中式", price: "150以下" },
+            { name: "牛肉湯麵", country: "中式", price: "150以下" },
+            { name: "排骨飯", country: "中式", price: "150以下" },
+            { name: "雞肉粥套餐", country: "中式", price: "150以下" },
+            { name: "燒賣便當", country: "中式", price: "150以下" },
+            { name: "炒米粉便當", country: "中式", price: "150以下" },
+            { name: "蔥油餅加豆漿", country: "中式", price: "150以下" },
+            { name: "雞肉飯", country: "中式", price: "150以下" },
+            { name: "蛋餅套餐", country: "中式", price: "150以下" },
+            { name: "紅燒牛肉麵", country: "中式", price: "150以下" },
+            { name: "港式燒臘套餐", country: "中式", price: "150以下" },
 
-            // 日式料理
-            {
-                name: "味噌湯",
-                type: "湯類",
-                country: "日式",
-                price: "100以下"
-            },
-            {
-                name: "小份壽司",
-                type: "壽司類",
-                country: "日式",
-                price: "100以下"
-            },
-            {
-                name: "便當式拉麵",
-                type: "麵類",
-                country: "日式",
-                price: "100-150"
-            },
-            {
-                name: "關東煮",
-                type: "湯類",
-                country: "日式",
-                price: "100-150"
-            },
-            {
-                name: "壽司套餐",
-                type: "壽司類",
-                country: "日式",
-                price: "150-250"
-            },
-            {
-                name: "炸豬排便當",
-                type: "飯類",
-                country: "日式",
-                price: "150-250"
-            },
-            {
-                name: "壽喜燒套餐",
-                type: "鍋物類",
-                country: "日式",
-                price: "250-500"
-            },
-            {
-                name: "天婦羅定食",
-                type: "定食類",
-                country: "日式",
-                price: "250-500"
-            },
-            {
-                name: "高級生魚片套餐",
-                type: "生魚片類",
-                country: "日式",
-                price: "500-1000"
-            },
-            {
-                name: "懷石料理",
-                type: "套餐類",
-                country: "日式",
-                price: "1000以上"
-            },
+            // 150元以下 - 日式
+            { name: "拉麵套餐", country: "日式", price: "150以下" },
+            { name: "親子丼", country: "日式", price: "150以下" },
+            { name: "烏龍麵套餐", country: "日式", price: "150以下" },
+            { name: "壽司便當", country: "日式", price: "150以下" },
+            { name: "天婦羅定食", country: "日式", price: "150以下" },
+            { name: "味噌拉麵", country: "日式", price: "150以下" },
+            { name: "炸豬排便當", country: "日式", price: "150以下" },
+            { name: "壽喜燒飯", country: "日式", price: "150以下" },
+            { name: "烤魚便當", country: "日式", price: "150以下" },
+            { name: "鰻魚飯（小份）", country: "日式", price: "150以下" },
+            { name: "三角飯糰", country: "日式", price: "150以下" },
+            { name: "日式咖哩飯", country: "日式", price: "150以下" },
+// 150元以下 - 義式
+            { name: "番茄義大利麵", country: "義式", price: "150以下" },
+            { name: "青醬義大利麵", country: "義式", price: "150以下" },
+            { name: "奶油培根麵", country: "義式", price: "150以下" },
+            { name: "義式雞肉燉飯", country: "義式", price: "150以下" },
+            { name: "瑪格麗塔披薩", country: "義式", price: "150以下" },
+            { name: "蘑菇披薩", country: "義式", price: "150以下" },
+            { name: "義式帕尼尼", country: "義式", price: "150以下" },
+            { name: "義式蔬菜湯套餐", country: "義式", price: "150以下" },
+            { name: "義式肉丸套餐", country: "義式", price: "150以下" },
+            { name: "義式香腸麵", country: "義式", price: "150以下" },
+            { name: "焗烤義大利麵", country: "義式", price: "150以下" },
 
-            // 韓式料理
-            {
-                name: "韓式泡菜",
-                type: "小菜類",
-                country: "韓式",
-                price: "100以下"
-            },
-            {
-                name: "部隊鍋泡麵",
-                type: "麵類",
-                country: "韓式",
-                price: "100-150"
-            },
-            {
-                name: "韓式炸雞",
-                type: "點心類",
-                country: "韓式",
-                price: "100-150"
-            },
-            {
-                name: "石鍋拌飯",
-                type: "飯類",
-                country: "韓式",
-                price: "150-250"
-            },
-            {
-                name: "韓式拉麵",
-                type: "麵類",
-                country: "韓式",
-                price: "150-250"
-            },
-            {
-                name: "韓式烤肉套餐",
-                type: "套餐類",
-                country: "韓式",
-                price: "250-500"
-            },
-            {
-                name: "部隊鍋",
-                type: "鍋物類",
-                country: "韓式",
-                price: "250-500"
-            },
-            {
-                name: "豪華韓式烤肉",
-                type: "套餐類",
-                country: "韓式",
-                price: "500-1000"
-            },
-            {
-                name: "帝王蟹韓式料理",
-                type: "套餐類",
-                country: "韓式",
-                price: "1000以上"
-            },
+            // 150元以下 - 美式
+            { name: "起司漢堡套餐", country: "美式", price: "150以下" },
+            { name: "熱狗套餐", country: "美式", price: "150以下" },
+            { name: "美式炸雞餐", country: "美式", price: "150以下" },
+            { name: "烤雞三明治", country: "美式", price: "150以下" },
+            { name: "薯條漢堡套餐", country: "美式", price: "150以下" },
+            { name: "墨西哥捲餅", country: "美式", price: "150以下" },
+            { name: "凱撒沙拉套餐", country: "美式", price: "150以下" },
+            { name: "迷你披薩", country: "美式", price: "150以下" },
+            { name: "小份牛肉燉飯", country: "美式", price: "150以下" },
+            { name: "牛肉三明治套餐", country: "美式", price: "150以下" },
 
-            // 義式料理
-            {
-                name: "蒜香麵包",
-                type: "點心類",
-                country: "義式",
-                price: "100以下"
-            },
-            {
-                name: "番茄義大利麵",
-                type: "義大利麵類",
-                country: "義式",
-                price: "150-250"
-            },
-            {
-                name: "白醬義大利麵",
-                type: "義大利麵類",
-                country: "義式",
-                price: "150-250"
-            },
-            {
-                name: "瑪格麗特披薩",
-                type: "披薩類",
-                country: "義式",
-                price: "250-500"
-            },
-            {
-                name: "海鮮義大利麵",
-                type: "義大利麵類",
-                country: "義式",
-                price: "250-500"
-            },
-            {
-                name: "松露義大利麵",
-                type: "義大利麵類",
-                country: "義式",
-                price: "500-1000"
-            },
-            {
-                name: "龍蝦義大利麵",
-                type: "義大利麵類",
-                country: "義式",
-                price: "1000以上"
-            },
+            // 150元以下 - 墨西哥式
+            { name: "墨西哥烤雞捲", country: "墨西哥式", price: "150以下" },
+            { name: "玉米餅套餐", country: "墨西哥式", price: "150以下" },
+            { name: "墨西哥雞肉飯", country: "墨西哥式", price: "150以下" },
+            { name: "牛肉捲餅套餐", country: "墨西哥式", price: "150以下" },
+            { name: "墨西哥燉豆飯", country: "墨西哥式", price: "150以下" },
+            { name: "墨西哥辣味烤雞", country: "墨西哥式", price: "150以下" },
+            { name: "墨西哥海鮮飯", country: "墨西哥式", price: "150以下" },
+            { name: "墨西哥湯套餐", country: "墨西哥式", price: "150以下" },
+            { name: "玉米餅配燉雞", country: "墨西哥式", price: "150以下" },
+            { name: "墨西哥牛肉飯", country: "墨西哥式", price: "150以下" },
+// 150-500元 - 中式
+            { name: "紅燒牛肉麵套餐", country: "中式", price: "150-500" },
+            { name: "三杯雞飯", country: "中式", price: "150-500" },
+            { name: "港式燒臘套餐", country: "中式", price: "150-500" },
+            { name: "砂鍋粥", country: "中式", price: "150-500" },
+            { name: "炒飯套餐", country: "中式", price: "150-500" },
+            { name: "豬腳飯", country: "中式", price: "150-500" },
+            { name: "雙拼便當", country: "中式", price: "150-500" },
+            { name: "燒鵝飯", country: "中式", price: "150-500" },
+            { name: "清蒸石斑飯", country: "中式", price: "150-500" },
+            { name: "麻辣火鍋套餐", country: "中式", price: "150-500" },
 
-            // 墨西哥料理
-            {
-                name: "玉米餅",
-                type: "點心類",
-                country: "墨式",
-                price: "100以下"
-            },
-            {
-                name: "塔可餅",
-                type: "點心類",
-                country: "墨式",
-                price: "100-150"
-            },
-            {
-                name: "墨西哥捲餅",
-                type: "主食類",
-                country: "墨式",
-                price: "150-250"
-            },
-            {
-                name: "法希塔套餐",
-                type: "套餐類",
-                country: "墨式",
-                price: "250-500"
-            },
-            {
-                name: "豪華墨西哥拼盤",
-                type: "套餐類",
-                country: "墨式",
-                price: "500-1000"
-            }
+            // 150-500元 - 日式
+            { name: "壽司定食", country: "日式", price: "150-500" },
+            { name: "生魚片蓋飯", country: "日式", price: "150-500" },
+            { name: "日式火鍋套餐", country: "日式", price: "150-500" },
+            { name: "天婦羅飯", country: "日式", price: "150-500" },
+            { name: "鰻魚蒲燒套餐", country: "日式", price: "150-500" },
+            { name: "壽喜燒鍋套餐", country: "日式", price: "150-500" },
+            { name: "和風燉牛飯", country: "日式", price: "150-500" },
+            { name: "刺身便當", country: "日式", price: "150-500" },
+            { name: "燒鳥套餐", country: "日式", price: "150-500" },
+            { name: "日式烤魚定食", country: "日式", price: "150-500" },
+
+            // 150-500元 - 義式
+            { name: "海鮮義大利麵", country: "義式", price: "150-500" },
+            { name: "松露燉飯", country: "義式", price: "150-500" },
+            { name: "義式牛排套餐", country: "義式", price: "150-500" },
+            { name: "烤雞義大利麵", country: "義式", price: "150-500" },
+            { name: "烤羊排套餐", country: "義式", price: "150-500" },
+            { name: "義式香腸披薩", country: "義式", price: "150-500" },
+            { name: "義式燉牛肉", country: "義式", price: "150-500" },
+            { name: "義式海鮮飯", country: "義式", price: "150-500" },
+            { name: "義式焗烤麵", country: "義式", price: "150-500" },
+            { name: "烤蔬菜披薩", country: "義式", price: "150-500" },
+// 150-500元 - 美式
+            { name: "烤肋排套餐", country: "美式", price: "150-500" },
+            { name: "牛排套餐", country: "美式", price: "150-500" },
+            { name: "烤雞沙拉餐", country: "美式", price: "150-500" },
+            { name: "美式燉牛肉", country: "美式", price: "150-500" },
+            { name: "美式披薩套餐", country: "美式", price: "150-500" },
+            { name: "美式烤蝦", country: "美式", price: "150-500" },
+            { name: "烤雞腿套餐", country: "美式", price: "150-500" },
+            { name: "烤魚便當", country: "美式", price: "150-500" },
+            { name: "美式早餐組合", country: "美式", price: "150-500" },
+            { name: "迷你牛排餐", country: "美式", price: "150-500" },
+
+            // 150-500元 - 墨西哥式
+            { name: "墨西哥烤牛排套餐", country: "墨西哥式", price: "150-500" },
+            { name: "墨西哥燉牛肉飯", country: "墨西哥式", price: "150-500" },
+            { name: "海鮮玉米餅", country: "墨西哥式", price: "150-500" },
+            { name: "烤豬肉捲", country: "墨西哥式", price: "150-500" },
+            { name: "辣味雞肉飯套餐", country: "墨西哥式", price: "150-500" },
+            { name: "牛肉捲餅餐", country: "墨西哥式", price: "150-500" },
+            { name: "墨西哥雞肉沙拉", country: "墨西哥式", price: "150-500" },
+            { name: "燉豆飯套餐", country: "墨西哥式", price: "150-500" },
+            { name: "墨西哥烤蝦飯", country: "墨西哥式", price: "150-500" },
+            { name: "墨西哥燉雞湯", country: "墨西哥式", price: "150-500" },
+
+            // 500-1000元 - 中式
+            { name: "佛跳牆套餐", country: "中式", price: "500-1000" },
+            { name: "龍蝦伊麵套餐", country: "中式", price: "500-1000" },
+            { name: "燒鵝雙拼便當", country: "中式", price: "500-1000" },
+            { name: "螃蟹粥套餐", country: "中式", price: "500-1000" },
+            { name: "鮑魚燉雞飯", country: "中式", price: "500-1000" },
+            { name: "高級烤鴨套餐", country: "中式", price: "500-1000" },
+            { name: "清蒸石斑套餐", country: "中式", price: "500-1000" },
+            { name: "龍蝦粥套餐", country: "中式", price: "500-1000" },
+            { name: "酸菜魚套餐", country: "中式", price: "500-1000" },
+            { name: "魚翅羹套餐", country: "中式", price: "500-1000" },
+// 500-1000元 - 日式
+            { name: "懷石料理套餐", country: "日式", price: "500-1000" },
+            { name: "和牛壽喜燒鍋", country: "日式", price: "500-1000" },
+            { name: "河豚料理套餐", country: "日式", price: "500-1000" },
+            { name: "龍蝦天婦羅套餐", country: "日式", price: "500-1000" },
+            { name: "海膽飯套餐", country: "日式", price: "500-1000" },
+            { name: "鮑魚刺身套餐", country: "日式", price: "500-1000" },
+            { name: "鰻魚蒲燒雙拼", country: "日式", price: "500-1000" },
+            { name: "松葉蟹火鍋", country: "日式", price: "500-1000" },
+            { name: "高級刺身拼盤", country: "日式", price: "500-1000" },
+            { name: "壽司刺身定食", country: "日式", price: "500-1000" },
+
+            // 500-1000元 - 義式
+            { name: "義式龍蝦麵", country: "義式", price: "500-1000" },
+            { name: "松露義大利燉飯", country: "義式", price: "500-1000" },
+            { name: "烤鴨胸套餐", country: "義式", price: "500-1000" },
+            { name: "義式烤羊排", country: "義式", price: "500-1000" },
+            { name: "龍蝦披薩", country: "義式", price: "500-1000" },
+            { name: "義式燉牛肉套餐", country: "義式", price: "500-1000" },
+            { name: "松露海鮮義大利麵", country: "義式", price: "500-1000" },
+            { name: "義式烤鱸魚", country: "義式", price: "500-1000" },
+            { name: "高級焗烤龍蝦", country: "義式", price: "500-1000" },
+            { name: "義式海鮮拼盤", country: "義式", price: "500-1000" },
+
+            // 500-1000元 - 美式
+            { name: "頂級牛排套餐", country: "美式", price: "500-1000" },
+            { name: "烤龍蝦套餐", country: "美式", price: "500-1000" },
+            { name: "烤鱸魚便當", country: "美式", price: "500-1000" },
+            { name: "美式海鮮拼盤", country: "美式", price: "500-1000" },
+            { name: "烤豬肋排套餐", country: "美式", price: "500-1000" },
+            { name: "烤雞腿雙拼", country: "美式", price: "500-1000" },
+            { name: "龍蝦燉飯", country: "美式", price: "500-1000" },
+            { name: "美式烤牛排", country: "美式", price: "500-1000" },
+            { name: "美式早午餐套餐", country: "美式", price: "500-1000" },
+            { name: "烤蝦牛排拼盤", country: "美式", price: "500-1000" },
+
+            // 500-1000元 - 墨西哥式
+            { name: "墨西哥頂級牛排", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥龍蝦捲", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥燉海鮮飯", country: "墨西哥式", price: "500-1000" },
+            { name: "烤鱸魚玉米餅", country: "墨西哥式", price: "500-1000" },
+            { name: "龍蝦燉豆飯", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥烤牛肉拼盤", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥烤蝦沙拉", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥雞肉燉飯", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥燉牛尾", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥頂級燉雞湯", country: "墨西哥式", price: "500-1000" }
         ];
-
-        let foodHistory = {};
+let foodHistory = {};
         let favorites = new Set();
         let currentFood = null;
         let isAnimating = false;
@@ -606,7 +499,6 @@
         // 取得選中的篩選條件
         function getFilters() {
             return {
-                type: document.getElementById('typeFilter').value,
                 country: document.getElementById('countryFilter').value,
                 price: document.getElementById('priceFilter').value
             };
@@ -616,10 +508,9 @@
         function getFilteredItems() {
             const filters = getFilters();
             return menuItems.filter(item => {
-                const typeMatch = !filters.type || item.type === filters.type;
                 const countryMatch = !filters.country || item.country === filters.country;
                 const priceMatch = !filters.price || item.price === filters.price;
-                return typeMatch && countryMatch && priceMatch;
+                return countryMatch && priceMatch;
             });
         }
 
@@ -772,7 +663,6 @@
             updateAvailableCount();
 
             // 監聽篩選器變化
-            document.getElementById('typeFilter').addEventListener('change', updateAvailableCount);
             document.getElementById('countryFilter').addEventListener('change', updateAvailableCount);
             document.getElementById('priceFilter').addEventListener('change', updateAvailableCount);
         };
