@@ -42,8 +42,7 @@
                 </select>
             </div>
         </div>
-
-        <div class="result-container">
+<div class="result-container">
             <div id="result" class="result">點擊按鈕選擇餐點</div>
             <div class="button-group">
                 <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
@@ -84,8 +83,8 @@
     </div>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
-* {
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -161,8 +160,7 @@
             outline: none;
             transition: all 0.3s ease;
         }
-
-        select:hover {
+select:hover {
             border-color: rgba(184, 110, 82, 0.4);
         }
 
@@ -226,13 +224,13 @@
             transform: none;
             cursor: not-allowed;
         }
-.button-group {
+
+        .button-group {
             display: flex;
             gap: 1rem;
             justify-content: center;
         }
-
-        .favorite-button, .recipe-button {
+.favorite-button, .recipe-button {
             background: none;
             border: none;
             padding: 0.5rem 1rem;
@@ -300,8 +298,7 @@
             align-items: center;
             gap: 0.5rem;
         }
-
-        /* 食譜彈出視窗樣式 */
+/* 食譜彈出視窗樣式 */
         .modal {
             display: none;
             position: fixed;
@@ -338,7 +335,7 @@
             color: #B86E52;
             margin-bottom: 1.5rem;
             font-size: 1.8rem;
-            text-align: center;
+            text-align: left;
         }
 
         .recipe-content {
@@ -353,23 +350,76 @@
             border-radius: 12px;
         }
 
-        .ingredients h3, .steps h3, .ingredients h4 {
+        .ingredients h3, 
+        .steps h3, 
+        .ingredients h4 {
             color: #B86E52;
             margin-bottom: 1rem;
             font-size: 1.2rem;
+            text-align: left;
         }
 
         .ingredients h4 {
             font-size: 1.1rem;
             margin-top: 1rem;
         }
-
-        .ingredients ul, .steps ol {
-            padding-left: 1.5rem;
+.ingredients-list {
             margin-bottom: 1rem;
         }
 
-        .ingredients li, .steps li {
+        .ingredient-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+            gap: 0.5rem;
+        }
+
+        .ingredient-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #B86E52;
+            border-radius: 4px;
+            margin-top: 2px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .ingredient-checkbox:checked {
+            background-color: #B86E52;
+        }
+
+        .ingredient-checkbox:checked::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+        }
+
+        .ingredient-label {
+            flex: 1;
+            color: #444;
+            line-height: 1.5;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .ingredient-label.checked {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .steps ol {
+            padding-left: 1.5rem;
+            text-align: left;
+        }
+
+        .steps li {
             margin-bottom: 0.8rem;
             color: #444;
             line-height: 1.5;
@@ -503,8 +553,7 @@
             { name: "義式海鮮飯", country: "義式", price: "150-500" },
             { name: "義式焗烤麵", country: "義式", price: "150-500" },
             { name: "烤蔬菜披薩", country: "義式", price: "150-500" },
-
-            // 150-500元 - 美式
+// 150-500元 - 美式
             { name: "烤肋排套餐", country: "美式", price: "150-500" },
             { name: "牛排套餐", country: "美式", price: "150-500" },
             { name: "烤雞沙拉餐", country: "美式", price: "150-500" },
@@ -527,7 +576,8 @@
             { name: "燉豆飯套餐", country: "墨西哥式", price: "150-500" },
             { name: "墨西哥烤蝦飯", country: "墨西哥式", price: "150-500" },
             { name: "墨西哥燉雞湯", country: "墨西哥式", price: "150-500" },
-// 500-1000元 - 中式
+
+            // 500-1000元 - 中式
             { name: "佛跳牆套餐", country: "中式", price: "500-1000" },
             { name: "龍蝦伊麵套餐", country: "中式", price: "500-1000" },
             { name: "燒鵝雙拼便當", country: "中式", price: "500-1000" },
@@ -538,8 +588,7 @@
             { name: "龍蝦粥套餐", country: "中式", price: "500-1000" },
             { name: "酸菜魚套餐", country: "中式", price: "500-1000" },
             { name: "魚翅羹套餐", country: "中式", price: "500-1000" },
-
-            // 500-1000元 - 日式
+// 500-1000元 - 日式
             { name: "懷石料理套餐", country: "日式", price: "500-1000" },
             { name: "和牛壽喜燒鍋", country: "日式", price: "500-1000" },
             { name: "河豚料理套餐", country: "日式", price: "500-1000" },
@@ -574,8 +623,7 @@
             { name: "美式烤牛排", country: "美式", price: "500-1000" },
             { name: "美式早午餐套餐", country: "美式", price: "500-1000" },
             { name: "烤蝦牛排拼盤", country: "美式", price: "500-1000" },
-
-            // 500-1000元 - 墨西哥式
+// 500-1000元 - 墨西哥式
             { name: "墨西哥頂級牛排", country: "墨西哥式", price: "500-1000" },
             { name: "墨西哥龍蝦捲", country: "墨西哥式", price: "500-1000" },
             { name: "墨西哥燉海鮮飯", country: "墨西哥式", price: "500-1000" },
@@ -587,7 +635,8 @@
             { name: "墨西哥燉牛尾", country: "墨西哥式", price: "500-1000" },
             { name: "墨西哥頂級燉雞湯", country: "墨西哥式", price: "500-1000" }
         ];
-// 食譜資料庫
+
+        // 食譜資料庫
         const recipes = {
             "親子丼": {
                 ingredients: {
@@ -617,8 +666,7 @@
             }
             // 之後可以繼續添加其他料理的食譜
         };
-
-        // 顯示食譜的函數
+// 顯示食譜的函數
         function showRecipe() {
             const modal = document.getElementById('recipeModal');
             const titleElem = document.getElementById('recipeTitle');
@@ -635,16 +683,26 @@
             // 設定標題
             titleElem.textContent = currentFood + ' 食譜';
 
-            // 設定食材清單
+            // 設定食材清單，使用自定義複選框
             ingredientsListElem.innerHTML = `
                 <h4>主要食材</h4>
-                <ul>
-                    ${recipe.ingredients.main.map(item => `<li>${item}</li>`).join('')}
-                </ul>
+                <div class="ingredients-list">
+                    ${recipe.ingredients.main.map((item, index) => `
+                        <div class="ingredient-item">
+                            <input type="checkbox" id="main-${index}" class="ingredient-checkbox">
+                            <label for="main-${index}" class="ingredient-label">${item}</label>
+                        </div>
+                    `).join('')}
+                </div>
                 <h4>調味料</h4>
-                <ul>
-                    ${recipe.ingredients.seasoning.map(item => `<li>${item}</li>`).join('')}
-                </ul>
+                <div class="ingredients-list">
+                    ${recipe.ingredients.seasoning.map((item, index) => `
+                        <div class="ingredient-item">
+                            <input type="checkbox" id="seasoning-${index}" class="ingredient-checkbox">
+                            <label for="seasoning-${index}" class="ingredient-label">${item}</label>
+                        </div>
+                    `).join('')}
+                </div>
             `;
 
             // 設定步驟清單
@@ -653,6 +711,19 @@
                     ${recipe.steps.map(step => `<li>${step}</li>`).join('')}
                 </ol>
             `;
+
+            // 添加複選框事件監聽器
+            const checkboxes = document.querySelectorAll('.ingredient-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const label = this.nextElementSibling;
+                    if (this.checked) {
+                        label.classList.add('checked');
+                    } else {
+                        label.classList.remove('checked');
+                    }
+                });
+            });
 
             // 顯示彈出視窗
             modal.style.display = 'block';
@@ -670,7 +741,8 @@
                 }
             };
         }
-let foodHistory = {};
+
+        let foodHistory = {};
         let favorites = new Set();
         let currentFood = null;
         let isAnimating = false;
