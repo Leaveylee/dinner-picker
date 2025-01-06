@@ -623,7 +623,8 @@ select:hover {
             { name: "美式烤牛排", country: "美式", price: "500-1000" },
             { name: "美式早午餐套餐", country: "美式", price: "500-1000" },
             { name: "烤蝦牛排拼盤", country: "美式", price: "500-1000" },
-// 500-1000元 - 墨西哥式
+
+            // 500-1000元 - 墨西哥式
             { name: "墨西哥頂級牛排", country: "墨西哥式", price: "500-1000" },
             { name: "墨西哥龍蝦捲", country: "墨西哥式", price: "500-1000" },
             { name: "墨西哥燉海鮮飯", country: "墨西哥式", price: "500-1000" },
@@ -724,8 +725,7 @@ select:hover {
                     }
                 });
             });
-
-            // 顯示彈出視窗
+// 顯示彈出視窗
             modal.style.display = 'block';
 
             // 綁定關閉按鈕事件
@@ -794,8 +794,7 @@ select:hover {
                 button.querySelector('.favorite-text').textContent = '點擊收藏';
             }
         }
-
-        function updateFavoritesList() {
+function updateFavoritesList() {
             const container = document.getElementById('favoriteItems');
             container.innerHTML = '';
 
@@ -835,16 +834,50 @@ select:hover {
             const history = getHistory();
             const lastPickTime = history[food];
             
+            // 如果這個餐點從未被選過，直接返回可用
             if (!lastPickTime) return true;
 
-            const now = new Date().getTime();
-            const lastTime = new Date(lastPickTime).getTime();
-            const hoursDiff = (now - lastTime) / (1000 * 60 * 60);
+            // 獲取當前篩選條件下的所有餐點
+            const filteredItems = getFilteredItems();
             
-            return hoursDiff >= 4;
+            // 檢查在當前篩選條件下的所有餐點是否都被選過
+            const allSelected = filteredItems.every(item => {
+                const itemLastPick = history[item.name];
+                return itemLastPick && new Date(itemLastPick) >= new Date(lastPickTime);
+            });
+
+            // 如果所有餐點都被選過了，則重置這個篩選條件下所有餐點的歷史
+            if (allSelected) {
+                clearFilteredHistory();
+                return true;
+            }
+
+            return false;
         }
 
-        function updateAvailableCount() {
+        function clearFilteredHistory() {
+            const history = getHistory();
+            const filteredItems = getFilteredItems();
+            
+            // 找出最早的選擇時間
+            let earliestTime = new Date().toISOString();
+            filteredItems.forEach(item => {
+                if (history[item.name]) {
+                    earliestTime = history[item.name] < earliestTime ? history[item.name] : earliestTime;
+                }
+            });
+
+            // 清除在這個時間點之後的所有選擇記錄
+            filteredItems.forEach(item => {
+                if (history[item.name] && history[item.name] >= earliestTime) {
+                    delete history[item.name];
+                }
+            });
+
+            saveHistory(history);
+            updateAvailableCount();
+        }
+function updateAvailableCount() {
             const filteredItems = getFilteredItems();
             const availableCount = filteredItems.filter(item => isAvailable(item.name)).length;
             const elem = document.getElementById('remainingChoices');
@@ -856,9 +889,29 @@ select:hover {
             const availableFoods = filteredItems.filter(item => isAvailable(item.name));
 
             if (availableFoods.length === 0) {
-                return '所有餐點都在冷卻時間中，請稍後再試 😅';
+                return '發生錯誤，請重試 😅';
             }
 
+            // 獲取上一次選中的餐點
+            const lastSelectedFood = Object.entries(getHistory())
+                .sort((a, b) => new Date(b[1]) - new Date(a[1]))
+                [0]?.[0];
+
+            // 如果只有一個選項可用，且是上一次選的，就重置歷史
+            if (availableFoods.length === 1 && availableFoods[0].name === lastSelectedFood) {
+                clearFilteredHistory();
+                return getRandomFood(); // 遞迴調用重新選擇
+            }
+
+            // 從可用選項中排除上一次選中的餐點
+            const foodsExcludeLast = availableFoods.filter(food => food.name !== lastSelectedFood);
+            
+            // 如果還有其他選項，就從其他選項中選擇
+            if (foodsExcludeLast.length > 0) {
+                const randomIndex = Math.floor(Math.random() * foodsExcludeLast.length);
+                return foodsExcludeLast[randomIndex].name;
+            }
+            
             const randomIndex = Math.floor(Math.random() * availableFoods.length);
             return availableFoods[randomIndex].name;
         }
@@ -898,7 +951,7 @@ select:hover {
                     buttonElem.disabled = false;
                     resultElem.classList.remove('animating');
                     
-                    if (!finalChoice.includes('冷卻時間')) {
+                    if (!finalChoice.includes('錯誤')) {
                         const history = getHistory();
                         history[finalChoice] = new Date().toISOString();
                         saveHistory(history);
