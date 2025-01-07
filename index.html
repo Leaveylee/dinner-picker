@@ -808,7 +808,7 @@
                 watchId = null;
             }
         }
-
+        
         function searchNearbyRestaurant() {
             if (!currentFood) return;
 
@@ -823,32 +823,34 @@
                 return;
             }
 
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            const searchQuery = encodeURIComponent(currentFood);
             const lat = lastKnownPosition.coords.latitude;
             const lng = lastKnownPosition.coords.longitude;
             const radius = 500; // 500公尺
+    
+            // 使用不同的 URL 格式處理移動設備和桌面版
+            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                // 移動設備版本
+                const mapUrl = `comgooglemaps://?q=${encodeURIComponent(currentFood)}&center=${lat},${lng}&zoom=16`;
+                const webFallback = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z/data=!4m2!2m1!6e5`;
 
-            let mapUrl;
-            if (isMobile) {
-                // 移動設備使用不同的 URL 格式
-                mapUrl = `https://maps.google.com/?q=${searchQuery}&sll=${lat},${lng}&z=17`;
+                // 嘗試開啟 Google Maps App，如果失敗則開啟網頁版
+                setTimeout(function() { 
+                    window.location = webFallback; 
+                }, 2000);
+                window.location = mapUrl;
             } else {
-                // 桌面版使用更詳細的參數
+                // 桌面版本
                 const params = new URLSearchParams({
-                    'q': currentFood,
-                    'sll': `${lat},${lng}`,
-                    'center': `${lat},${lng}`,
-                    'radius': radius.toString(),
-                    'zoom': '17'
+                    query: currentFood,
+                    api: '1',
+            center: `${lat},${lng}`,
+                    search_query: currentFood,
+                    zoom: '16'
                 });
-                mapUrl = `https://www.google.com/maps/search/?api=1&${params.toString()}`;
-            }
-
-            try {
+        
+                // 添加搜尋半徑參數
+                const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z/data=!3m1!4b1!4m5!2m4!5e2!6e6!7e2!8e2`;
                 window.open(mapUrl, '_blank');
-            } catch (e) {
-                window.location.href = mapUrl;
             }
         }
 function getLocationErrorMessage(error) {
