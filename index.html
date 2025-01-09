@@ -925,27 +925,73 @@
             elem.textContent = `🍚 可選擇的餐點：${availableCount}/${filteredItems.length}`;
         }
 
-        function pickFood() {
-            if (isAnimating) return;
+       function pickFood() {
+    if (isAnimating) return;
 
-            const resultElem = document.getElementById('result');
-            const buttonElem = document.getElementById('pickButton');
-            const recipeButton = document.getElementById('recipeButton');
-            const mapButton = document.getElementById('mapButton');
-            
-            isAnimating = true;
-            buttonElem.disabled = true;
-            resultElem.classList.add('animating');
-            recipeButton.style.display = 'none';
-            mapButton.style.display = 'none';
+    const resultElem = document.getElementById('result');
+    const buttonElem = document.getElementById('pickButton');
+    const favoriteButton = document.getElementById('favoriteButton');
+    const recipeButton = document.getElementById('recipeButton');
+    const mapButton = document.getElementById('mapButton');
+    
+    isAnimating = true;
+    buttonElem.disabled = true;
+    resultElem.classList.add('animating');
+    recipeButton.style.display = 'none';
+    mapButton.style.display = 'none';
+    favoriteButton.style.display = 'none';
 
-            let finalChoice = null;
-            let counter = 0;
+    let finalChoice = null;
+    let counter = 0;
+    
+    const spinInterval = setInterval(() => {
+        if (counter === 0) {
+            finalChoice = getRandomFood();
+            console.log("Selected food:", finalChoice); // 用於調試
+        }
+
+        if (counter < 9) {
+            const filteredItems = getFilteredItems();
+            if (filteredItems.length > 0) {
+                const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
+                resultElem.textContent = randomItem.name;
+            }
+        } else {
+            resultElem.textContent = finalChoice;
+        }
+        
+        counter++;
+        if (counter >= 10) {
+            clearInterval(spinInterval);
+            isAnimating = false;
+            buttonElem.disabled = false;
+            resultElem.classList.remove('animating');
             
-            const spinInterval = setInterval(() => {
-                if (counter === 0) {
-                    finalChoice = getRandomFood();
+            if (!finalChoice.includes('錯誤')) {
+                const history = getHistory();
+                history[finalChoice] = new Date().toISOString();
+                saveHistory(history);
+                currentFood = finalChoice;
+                
+                // 更新按鈕顯示
+                favoriteButton.style.display = 'flex';
+                updateFavoriteButton();
+                
+                // 顯示食譜按鈕
+                if (recipes[finalChoice]) {
+                    recipeButton.style.display = 'flex';
+                } else {
+                    recipeButton.style.display = 'none';
                 }
+                
+                // 顯示地圖按鈕
+                mapButton.style.display = 'flex';
+            }
+            
+            updateAvailableCount();
+        }
+    }, 100); // 將間隔時間改為 100ms，使動畫更明顯
+}
 
                 if (counter < 9) {
                     const filteredItems = getFilteredItems();
