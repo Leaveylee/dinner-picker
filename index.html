@@ -12,10 +12,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="等下吃什麼？">
-    
-    <!-- 新增：防止移動設備上的連結反白 -->
-    <meta name="format-detection" content="telephone=no">
-    <meta name="msapplication-tap-highlight" content="no">
 </head>
 <body>
     <div class="card">
@@ -36,7 +32,7 @@
                     <option value="飲料">飲料</option>
                 </select>
             </div>
-            <div class="filter-group">
+<div class="filter-group">
                 <label class="filter-label">價格區間</label>
                 <select id="priceFilter">
                     <option value="">不指定</option>
@@ -46,19 +42,19 @@
                 </select>
             </div>
         </div>
-<div class="result-container">
+
+        <div class="result-container">
             <div id="result" class="result">點擊按鈕選擇餐點</div>
             <div class="button-group">
-                <!-- 改進：添加 pointer-events-none 類來防止觸控反白 -->
-                <button id="favoriteButton" class="favorite-button no-highlight" onclick="toggleFavorite()" style="display: none">
+                <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
                     <span class="favorite-icon">⭐</span>
                     <span class="favorite-text">點擊收藏</span>
                 </button>
-                <button id="recipeButton" class="recipe-button no-highlight" onclick="showRecipe()" style="display: none">
+                <button id="recipeButton" class="recipe-button" onclick="showRecipe()" style="display: none">
                     <span class="recipe-icon">📖</span>
                     <span class="recipe-text">點擊看食譜</span>
                 </button>
-                <button id="mapButton" class="map-button no-highlight" onclick="searchNearbyRestaurant()" style="display: none">
+                <button id="mapButton" class="map-button" onclick="searchNearbyRestaurant()" style="display: none">
                     <span class="map-icon">🗺️</span>
                     <span class="map-text">搜尋附近店家</span>
                 </button>
@@ -72,11 +68,10 @@
             <h3>收藏清單</h3>
             <div id="favoriteItems" class="favorite-items"></div>
         </div>
-
-        <!-- 食譜彈出視窗 -->
+<!-- 食譜彈出視窗 -->
         <div id="recipeModal" class="modal">
             <div class="modal-content">
-                <button class="close" onclick="closeModal('recipeModal')">&times;</button>
+                <span class="close">&times;</span>
                 <h2 id="recipeTitle" class="modal-title"></h2>
                 <div id="recipeContent" class="recipe-content">
                     <div class="ingredients">
@@ -91,11 +86,10 @@
             </div>
         </div>
 
-        <!-- 新的模態框設計，改善iPad上的體驗 -->
         <!-- 地圖搜尋錯誤提示框 -->
         <div id="mapErrorModal" class="modal">
             <div class="modal-content">
-                <button class="close" onclick="closeModal('mapErrorModal')">&times;</button>
+                <span class="close">&times;</span>
                 <h2 class="modal-title">提示</h2>
                 <p id="mapErrorMessage" class="error-message"></p>
             </div>
@@ -114,43 +108,14 @@
                 </button>
             </div>
         </div>
-
-        <!-- Loading 提示框 -->
-        <div id="loadingModal" class="modal">
-            <div class="modal-content loading-content">
-                <div class="loading-spinner"></div>
-                <p class="loading-message">地圖載入中...</p>
-            </div>
-        </div>
-
-        <!-- 通用錯誤提示框 -->
-        <div id="generalErrorModal" class="modal">
-            <div class="modal-content">
-                <button class="close" onclick="closeModal('generalErrorModal')">&times;</button>
-                <h2 class="modal-title">系統提示</h2>
-                <p id="generalErrorMessage" class="error-message"></p>
-                <button onclick="closeModal('generalErrorModal')" class="error-button">
-                    確定
-                </button>
-            </div>
-        </div>
     </div>
-<style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* 防止所有元素的點擊反白 */
-        }
-
-        /* 新增：專門處理移動設備上的點擊反白問題 */
-        .no-highlight {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-            outline: none;
         }
 
         body {
@@ -161,7 +126,6 @@
             align-items: center;
             background: linear-gradient(135deg, #FFF3E6 0%, #FFE4D6 100%);
             padding: 20px;
-            touch-action: manipulation; /* 優化移動設備上的點擊體驗 */
         }
 
         .card {
@@ -175,7 +139,6 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             animation: fadeIn 0.5s ease-out;
-            position: relative; /* 新增：確保模態框定位正確 */
         }
 
         @keyframes fadeIn {
@@ -191,19 +154,6 @@
             text-shadow: 2px 2px 4px rgba(184, 110, 82, 0.1);
         }
 
-        .food-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            animation: pulse 2s infinite;
-            user-select: none; /* 防止圖標被選中 */
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
         .filters {
             display: flex;
             flex-direction: column;
@@ -212,7 +162,27 @@
             background: rgba(255, 255, 255, 0.7);
             padding: 1rem;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(184, 134, 113, 0.05);
+        }
+
+        .permission-button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+.permission-button:hover {
+            background: #3367d6;
+        }
+
+        .permission-message {
+            color: #666;
+            line-height: 1.5;
+            margin: 15px 0;
         }
 
         .filter-group {
@@ -227,7 +197,8 @@
             color: #B86E52;
             font-weight: 500;
         }
-select {
+
+        select {
             padding: 0.5rem;
             border: 1px solid rgba(184, 110, 82, 0.2);
             border-radius: 8px;
@@ -237,13 +208,6 @@ select {
             cursor: pointer;
             outline: none;
             transition: all 0.3s ease;
-            -webkit-appearance: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B86E52' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 0.7rem center;
-            background-size: 1em;
-            padding-right: 2.5em;
         }
 
         select:hover {
@@ -260,7 +224,6 @@ select {
             padding: 0.5rem;
             border-radius: 16px;
             background: linear-gradient(135deg, #FFB68E 0%, #FFD0B8 100%);
-            box-shadow: 0 4px 12px rgba(184, 134, 113, 0.1);
         }
 
         .result {
@@ -276,74 +239,13 @@ select {
             color: #444;
             transition: all 0.3s ease;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-            user-select: none;
         }
-
-        .result.animating {
+.result.animating {
             transform: scale(1.02);
             background: #f8f9fa;
         }
 
-        .button-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: center;
-            margin-top: 1rem;
-        }
-
-        /* 改進的按鈕樣式，修復觸控反白問題 */
-        .favorite-button, .recipe-button, .map-button {
-            background: none;
-            border: none;
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0.5rem;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-            border-radius: 8px;
-            touch-action: manipulation;
-        }
-
-        .favorite-button {
-            color: #B86E52;
-        }
-
-        .recipe-button {
-            color: #2E7D32;
-        }
-
-        .map-button {
-            color: #4285f4;
-            position: relative; /* 新增：用於處理反白效果 */
-            overflow: hidden; /* 新增：確保反白效果不超出按鈕範圍 */
-        }
-
-        /* 新增：自定義按鈕反白效果 */
-        .favorite-button::after, 
-        .recipe-button::after, 
-        .map-button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: currentColor;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            border-radius: 8px;
-        }
-
-        .favorite-button:active::after,
-        .recipe-button:active::after,
-        .map-button:active::after {
-            opacity: 0.1;
-        }
-.button {
+        .button {
             background: linear-gradient(135deg, #E67E51 0%, #F1945E 100%);
             color: white;
             border: none;
@@ -354,10 +256,6 @@ select {
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(230, 126, 81, 0.2);
-            position: relative;
-            overflow: hidden;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
         }
 
         .button:hover {
@@ -376,13 +274,52 @@ select {
             cursor: not-allowed;
         }
 
-        .favorite-button:hover, .recipe-button:hover, .map-button:hover {
-            transform: translateY(-1px);
-            background-color: rgba(0, 0, 0, 0.05);
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
         }
 
-        .favorite-button:active, .recipe-button:active, .map-button:active {
-            transform: translateY(0);
+        .favorite-button, .recipe-button, .map-button {
+            background: none;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem auto;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .favorite-button {
+            color: #B86E52;
+        }
+
+        .recipe-button {
+            color: #2E7D32;
+        }
+
+        .map-button {
+            color: #4285f4;
+        }
+.favorite-button:hover, .recipe-button:hover, .map-button:hover {
+            transform: scale(1.1);
+        }
+
+        .favorite-button:hover {
+            background: rgba(184, 110, 82, 0.1);
+        }
+
+        .recipe-button:hover {
+            background: rgba(46, 125, 50, 0.1);
+        }
+
+        .map-button:hover {
+            background: rgba(66, 133, 244, 0.1);
         }
 
         .favorite-button.active {
@@ -397,7 +334,6 @@ select {
             background: rgba(255, 255, 255, 0.7);
             border-radius: 8px;
             border: 1px solid rgba(184, 110, 82, 0.1);
-            user-select: none;
         }
 
         .cooldown-info {
@@ -407,7 +343,36 @@ select {
             display: none;
         }
 
-        /* 改進的模態框樣式 */
+        .favorite-list {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(184, 110, 82, 0.2);
+        }
+
+        .favorite-list h3 {
+            color: #B86E52;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .favorite-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .favorite-item {
+            background: rgba(255, 182, 142, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: #B86E52;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+/* 食譜彈出視窗樣式 */
         .modal {
             display: none;
             position: fixed;
@@ -418,14 +383,6 @@ select {
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            will-change: opacity;
-        }
-
-        .modal.show {
-            opacity: 1;
         }
 
         .modal-content {
@@ -437,68 +394,15 @@ select {
             border-radius: 16px;
             position: relative;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-            will-change: transform;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-        }
-
-        .modal.show .modal-content {
-            transform: translateY(0);
-        }
-.loading-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            background: rgba(255, 255, 255, 0.95);
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #B86E52;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-            will-change: transform;
-        }
-
-        .loading-message {
-            color: #666;
-            font-size: 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         .close {
             position: absolute;
             right: 1rem;
             top: 1rem;
-            width: 30px;
-            height: 30px;
-            border: none;
-            background: none;
+            font-size: 1.5rem;
             cursor: pointer;
             color: #B86E52;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .close:hover {
-            background: rgba(184, 110, 82, 0.1);
         }
 
         .modal-title {
@@ -506,7 +410,6 @@ select {
             margin-bottom: 1.5rem;
             font-size: 1.8rem;
             text-align: left;
-            padding-right: 2rem;
         }
 
         .recipe-content {
@@ -521,7 +424,20 @@ select {
             border-radius: 12px;
         }
 
-        .ingredients h3, 
+        .error-message {
+            color: #d93025;
+            padding: 1rem;
+            text-align: center;
+            background: rgba(217, 48, 37, 0.1);
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        /* 添加標題和圖標切換動畫 */
+        .food-icon, .title {
+            transition: all 0.3s ease;
+        }
+.ingredients h3, 
         .steps h3, 
         .ingredients h4 {
             color: #B86E52;
@@ -545,7 +461,8 @@ select {
             margin-bottom: 0.8rem;
             gap: 0.5rem;
         }
-.ingredient-checkbox {
+
+        .ingredient-checkbox {
             appearance: none;
             -webkit-appearance: none;
             width: 20px;
@@ -578,15 +495,13 @@ select {
             line-height: 1.5;
             cursor: pointer;
             text-align: left;
-            user-select: none;
         }
 
         .ingredient-label.checked {
             text-decoration: line-through;
             color: #888;
         }
-
-        .steps ol {
+.steps ol {
             padding-left: 1.5rem;
             text-align: left;
         }
@@ -597,97 +512,48 @@ select {
             line-height: 1.5;
         }
 
-        .error-message {
-            color: #d93025;
-            padding: 1rem;
-            text-align: center;
-            background: rgba(217, 48, 37, 0.1);
-            border-radius: 4px;
-            margin: 1rem 0;
+        .food-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
         }
 
-        .error-button {
-            background: #4285f4;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-            width: 100%;
-            max-width: 200px;
-            margin: 1rem auto 0;
-            display: block;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
-        .error-button:hover {
-            background: #3367d6;
-        }
-
-        /* 響應式設計 */
         @media (max-width: 480px) {
             .card {
                 padding: 1.5rem;
             }
-            
             .title {
                 font-size: 1.8rem;
             }
-            
             .result {
                 font-size: 1.2rem;
-                padding: 1rem;
             }
-            
             .modal-content {
                 margin: 10% 5%;
                 padding: 1.5rem;
             }
-            
             .button-group {
                 flex-direction: column;
-                align-items: stretch;
+                align-items: center;
             }
-
-            .favorite-button, 
-            .recipe-button, 
             .map-button {
-                margin: 0.25rem 0;
+                width: 100%;
                 justify-content: center;
             }
         }
-
-        /* iPad 特定優化 */
-        @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
-            .modal-content {
-                margin: 10% auto;
-                max-width: 500px;
-            }
-
-            .map-button {
-                padding: 0.75rem 1.5rem;
-                font-size: 1.1rem;
-            }
-
-            /* 防止iPad上的特殊反白效果 */
-            .button,
-            .favorite-button,
-            .recipe-button,
-            .map-button {
-                -webkit-touch-callout: none;
-                -webkit-user-select: none;
-                user-select: none;
-            }
-        }
     </style>
-<script>
+
+    <script>
         // 位置服務全域變數
         let hasLocationPermission = false;
         let watchId = null;
         let lastKnownPosition = null;
-        let isProcessingMap = false; // 新增：防止重複開啟地圖
 
         // 一般功能變數
         let foodHistory = {};
@@ -695,13 +561,8 @@ select {
         let currentFood = null;
         let isAnimating = false;
 
-        // 設備檢測
-        const isIPad = /iPad|Macintosh/.test(navigator.userAgent) && 'ontouchend' in document;
-        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-        const isAndroid = /Android/.test(navigator.userAgent);
-
         // 餐點資料庫
-        const menuItems = [
+const menuItems = [
             // 飲料類別 - 150元以下
             { name: "茉莉綠茶", country: "飲料", price: "150以下" },
             { name: "阿薩姆紅茶", country: "飲料", price: "150以下" },
@@ -713,19 +574,119 @@ select {
             { name: "8冰綠", country: "飲料", price: "150以下" },
             { name: "養樂多綠（冷飲）", country: "飲料", price: "150以下" },
             { name: "冰淇淋紅茶（冷飲）", country: "飲料", price: "150以下" },
-            // ... [其他飲料項目]
+            { name: "旺來紅（季節限定）", country: "飲料", price: "150以下" },
+            { name: "柚子紅", country: "飲料", price: "150以下" },
+            { name: "四季春+珍波椰", country: "飲料", price: "150以下" },
+            { name: "波霸紅/綠/青/烏", country: "飲料", price: "150以下" },
+            { name: "波霸奶茶", country: "飲料", price: "150以下" },
+            { name: "波霸奶綠", country: "飲料", price: "150以下" },
+            { name: "波霸烏龍奶茶", country: "飲料", price: "150以下" },
+            { name: "珍珠紅/綠/青/烏", country: "飲料", price: "150以下" },
+            { name: "珍珠奶茶", country: "飲料", price: "150以下" },
+            { name: "珍珠奶綠", country: "飲料", price: "150以下" },
+            { name: "椰果奶茶", country: "飲料", price: "150以下" },
+            { name: "布丁奶茶/奶綠", country: "飲料", price: "150以下" },
+            { name: "布丁紅/綠/青/烏", country: "飲料", price: "150以下" },
+            { name: "奶茶", country: "飲料", price: "150以下" },
+            { name: "奶綠", country: "飲料", price: "150以下" },
+{ name: "紅茶瑪奇朵", country: "飲料", price: "150以下" },
+            { name: "烏龍瑪奇朵", country: "飲料", price: "150以下" },
+            { name: "四季奶青", country: "飲料", price: "150以下" },
+            { name: "黃金烏龍奶茶", country: "飲料", price: "150以下" },
+            { name: "阿華田", country: "飲料", price: "150以下" },
+            { name: "可可芭蕾", country: "飲料", price: "150以下" },
+            { name: "檸檬汁", country: "飲料", price: "150以下" },
+            { name: "金桔檸檬", country: "飲料", price: "150以下" },
+            { name: "檸檬梅汁", country: "飲料", price: "150以下" },
+            { name: "檸檬養樂多（冷飲）", country: "飲料", price: "150以下" },
+            { name: "8冰茶", country: "飲料", price: "150以下" },
+            { name: "柚子茶", country: "飲料", price: "150以下" },
+            { name: "紅茶拿鐵", country: "飲料", price: "150以下" },
+            { name: "綠茶拿鐵", country: "飲料", price: "150以下" },
+            { name: "黃金烏龍拿鐵", country: "飲料", price: "150以下" },
+            { name: "阿華田拿鐵", country: "飲料", price: "150以下" },
+            { name: "可可芭蕾拿鐵", country: "飲料", price: "150以下" },
+            { name: "烏龍綠茶", country: "飲料", price: "150以下" },
+            { name: "特級綠茶", country: "飲料", price: "150以下" },
+            { name: "錫蘭紅茶", country: "飲料", price: "150以下" },
+            { name: "極品菁茶", country: "飲料", price: "150以下" },
+            { name: "原鄉四季", country: "飲料", price: "150以下" },
+            { name: "特選普洱", country: "飲料", price: "150以下" },
+            { name: "錫蘭奶紅", country: "飲料", price: "150以下" },
+            { name: "烏龍奶茶", country: "飲料", price: "150以下" },
+{ name: "特級奶綠", country: "飲料", price: "150以下" },
+            { name: "仙草凍奶茶", country: "飲料", price: "150以下" },
+            { name: "暗黑水晶奶茶", country: "飲料", price: "150以下" },
+            { name: "粉圓奶茶", country: "飲料", price: "150以下" },
+            { name: "蜂蜜奶茶", country: "飲料", price: "150以下" },
+            { name: "芝麻奶茶", country: "飲料", price: "150以下" },
+            { name: "珍珠琥珀黑糖鮮奶", country: "飲料", price: "150以下" },
+            { name: "甘蔗鮮奶", country: "飲料", price: "150以下" },
+            { name: "雙凍拿鐵", country: "飲料", price: "150以下" },
+            { name: "茉綠茶凍拿鐵", country: "飲料", price: "150以下" },
+            { name: "鮮奶茶", country: "飲料", price: "150以下" },
+            { name: "珍珠鮮奶茶", country: "飲料", price: "150以下" },
+            { name: "珍珠蜂蜜鮮奶普洱", country: "飲料", price: "150以下" },
+            { name: "可可拿鐵", country: "飲料", price: "150以下" },
+            { name: "鮮奶冬瓜", country: "飲料", price: "150以下" },
+            { name: "咖啡拿鐵", country: "飲料", price: "150以下" },
+            { name: "粉圓鮮奶茶", country: "飲料", price: "150以下" },
+            { name: "珍珠芝麻紅茶拿鐵", country: "飲料", price: "150以下" },
+            { name: "濃情巧克力拿鐵", country: "飲料", price: "150以下" },
+            { name: "梅子綠茶", country: "飲料", price: "150以下" },
+            { name: "蜂蜜烏龍", country: "飲料", price: "150以下" },
+            { name: "蜂蜜綠茶", country: "飲料", price: "150以下" },
+            { name: "頂級可可", country: "飲料", price: "150以下" },
+            { name: "濃情巧克力", country: "飲料", price: "150以下" },
+            { name: "蜜茶", country: "飲料", price: "150以下" },
+{ name: "情人茶", country: "飲料", price: "150以下" },
+            { name: "咖啡奶茶", country: "飲料", price: "150以下" },
+            { name: "芋香奶茶", country: "飲料", price: "150以下" },
+            { name: "紅心芭樂檸檬", country: "飲料", price: "150以下" },
+            { name: "蜜桃凍紅茶", country: "飲料", price: "150以下" },
+            { name: "甘蔗金桔", country: "飲料", price: "150以下" },
+            { name: "甘蔗菁茶", country: "飲料", price: "150以下" },
+            { name: "甘蔗四季", country: "飲料", price: "150以下" },
+            { name: "柳橙綠", country: "飲料", price: "150以下" },
+            { name: "鳳梨紅茶", country: "飲料", price: "150以下" },
+            { name: "蜂蜜檸檬", country: "飲料", price: "150以下" },
+            { name: "蘆薈蜂蜜檸檬", country: "飲料", price: "150以下" },
 
             // 150元以下 - 中式
             { name: "魯肉飯套餐", country: "中式", price: "150以下" },
             { name: "雞腿便當", country: "中式", price: "150以下" },
             { name: "牛肉湯麵", country: "中式", price: "150以下" },
-            // ... [其他餐點項目]
-
-            // 500-1000元 - 美式與墨西哥式
+            { name: "排骨飯", country: "中式", price: "150以下" },
+            { name: "雞肉粥套餐", country: "中式", price: "150以下" },
+            { name: "燒賣便當", country: "中式", price: "150以下" },
+            { name: "炒米粉便當", country: "中式", price: "150以下" },
+            { name: "蔥油餅加豆漿", country: "中式", price: "150以下" },
+            { name: "蛋餅套餐", country: "中式", price: "150以下" },
+            { name: "紅燒牛肉麵", country: "中式", price: "150以下" },
+            { name: "港式燒臘套餐", country: "中式", price: "150以下" },
+// 500-1000元 - 美式
             { name: "頂級牛排套餐", country: "美式", price: "500-1000" },
             { name: "烤龍蝦套餐", country: "美式", price: "500-1000" },
-            { name: "墨西哥頂級牛排", country: "墨西哥式", price: "500-1000" }
-            // ... [其他高價位餐點]
+            { name: "烤鱸魚便當", country: "美式", price: "500-1000" },
+            { name: "美式海鮮拼盤", country: "美式", price: "500-1000" },
+            { name: "烤豬肋排套餐", country: "美式", price: "500-1000" },
+            { name: "烤雞腿雙拼", country: "美式", price: "500-1000" },
+            { name: "龍蝦燉飯", country: "美式", price: "500-1000" },
+            { name: "美式烤牛排", country: "美式", price: "500-1000" },
+            { name: "美式早午餐套餐", country: "美式", price: "500-1000" },
+            { name: "烤蝦牛排拼盤", country: "美式", price: "500-1000" },
+
+            // 500-1000元 - 墨西哥式
+            { name: "墨西哥頂級牛排", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥龍蝦捲", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥燉海鮮飯", country: "墨西哥式", price: "500-1000" },
+            { name: "烤鱸魚玉米餅", country: "墨西哥式", price: "500-1000" },
+            { name: "龍蝦燉豆飯", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥烤牛肉拼盤", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥烤蝦沙拉", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥雞肉燉飯", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥燉牛尾", country: "墨西哥式", price: "500-1000" },
+            { name: "墨西哥頂級燉雞湯", country: "墨西哥式", price: "500-1000" }
         ];
 
         // 食譜資料庫
@@ -741,188 +702,24 @@ select {
                     ],
                     seasoning: [
                         "高湯：80毫升（可用柴魚高湯或雞高湯）",
-                        "醬油：20毫升",
-                        "味醂：20毫升",
+                        "醬油：20毫升（建議使用和風醬油，鹹度較適中）",
+                        "味醂：20毫升（若無味醂，可用等量醬油加少許糖代替）",
                         "米酒：10毫升（或清酒）"
                     ]
                 },
-                steps: [
+steps: [
                     "準備食材：雞腿肉切成適口大小，洋蔥切絲，蔥切蔥花備用。",
                     "調製醬汁：在碗中混合高湯、醬油、味醂和米酒，攪拌均勻備用。",
-                    // ... [其他步驟]
+                    "烹調雞肉與洋蔥：在平底鍋中加熱少許油，放入洋蔥絲，用中火炒至半透明且軟化。將雞肉加入鍋中，拌炒至表面變色。",
+                    "加入醬汁：將調製好的醬汁倒入鍋中，輕輕攪拌，使雞肉和洋蔥均勻吸收醬汁。蓋上鍋蓋，用中小火燉煮約5分鐘，直到雞肉完全熟透，洋蔥軟嫩。",
+                    "加入蛋液：將打散的蛋液分兩次倒入鍋中。第一次倒入一半的蛋液，繞圈淋在雞肉和洋蔥上，蓋上鍋蓋，煮約30秒至蛋液稍微凝固。第二次倒入剩餘的蛋液，重複上述步驟，煮至蛋液達到您喜好的熟度。",
+                    "盛裝與裝飾：將煮好的雞肉、洋蔥和蛋液小心地倒在熱騰騰的白飯上。撒上蔥花作為裝飾，增添風味。",
+                    "享用：可搭配味噌湯和醃漬小菜，組成豐富的一餐。"
                 ]
             }
         };
-// 改進的位置服務相關函數
-        function requestLocationPermission() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        hasLocationPermission = true;
-                        lastKnownPosition = position;
-                        document.getElementById('locationPermissionModal').style.display = 'none';
-                        startWatchingPosition();
-                        // 如果是由地圖搜索觸發的權限請求，則繼續搜索
-                        if (currentFood) {
-                            searchNearbyRestaurant();
-                        }
-                    },
-                    error => {
-                        showMapError(getLocationErrorMessage(error));
-                        hasLocationPermission = false;
-                        stopWatchingPosition();
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
-            }
-        }
 
-        function startWatchingPosition() {
-            // 先清除之前的監控
-            stopWatchingPosition();
-            
-            if (navigator.geolocation) {
-                watchId = navigator.geolocation.watchPosition(
-                    position => {
-                        lastKnownPosition = position;
-                    },
-                    error => {
-                        console.log('位置更新錯誤:', error);
-                        stopWatchingPosition();
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
-            }
-        }
-
-        function stopWatchingPosition() {
-            if (watchId !== null) {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
-            }
-        }
-
-        // 改進的地圖搜索功能
-        function searchNearbyRestaurant() {
-            if (!currentFood || isProcessingMap) return;
-
-            isProcessingMap = true;
-            
-            if (!hasLocationPermission) {
-                document.getElementById('locationPermissionModal').style.display = 'block';
-                isProcessingMap = false;
-                return;
-            }
-
-            if (!lastKnownPosition) {
-                showMapError('無法取得您的位置資訊');
-                isProcessingMap = false;
-                return;
-            }
-
-            const lat = lastKnownPosition.coords.latitude;
-            const lng = lastKnownPosition.coords.longitude;
-            
-            // 顯示載入提示
-            document.getElementById('loadingModal').style.display = 'block';
-
-            try {
-                let mapUrl;
-                let mapWindow;
-
-                if (isIPad) {
-                    // iPad 特殊處理
-                    mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(currentFood)}&ll=${lat},${lng}&z=16`;
-                    mapWindow = window.open(mapUrl, '_blank');
-                    // 如果無法開啟新視窗，則使用內建瀏覽器開啟
-                    if (!mapWindow) {
-                        window.location.href = mapUrl;
-                    }
-                } else if (isIOS) {
-                    // iPhone 使用 Apple Maps
-                    mapUrl = `maps://maps.apple.com/?q=${encodeURIComponent(currentFood)}&ll=${lat},${lng}&z=16`;
-                    window.location.href = mapUrl;
-                    // 如果無法開啟 Apple Maps，則使用 Google Maps
-                    setTimeout(() => {
-                        mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(currentFood)}&ll=${lat},${lng}&z=16`;
-                        window.location.href = mapUrl;
-                    }, 2000);
-                } else if (isAndroid) {
-                    // Android 使用 Google Maps App
-                    mapUrl = `geo:${lat},${lng}?q=${encodeURIComponent(currentFood)}`;
-                    window.location.href = mapUrl;
-                } else {
-                    // 桌面版本
-                    mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z`;
-                    window.open(mapUrl, '_blank');
-                }
-            } catch (error) {
-                console.error('開啟地圖時發生錯誤:', error);
-                showMapError('開啟地圖時發生錯誤，請稍後再試。');
-            } finally {
-                // 延遲關閉載入提示和重設狀態
-                setTimeout(() => {
-                    document.getElementById('loadingModal').style.display = 'none';
-                    isProcessingMap = false;
-                }, 1000);
-            }
-        }
-
-        function getLocationErrorMessage(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    return '請允許網站存取您的位置，才能為您搜尋附近店家。您可以在瀏覽器的設定中更改此權限。';
-                case error.POSITION_UNAVAILABLE:
-                    return '無法取得您的位置資訊。請確認您的裝置 GPS 已開啟。';
-                case error.TIMEOUT:
-                    return '取得位置資訊超時。請檢查您的網路連線並重試。';
-                default:
-                    return '發生未知錯誤，請稍後再試。';
-            }
-        }
-// UI 相關功能
-        function showMapError(message) {
-            const modal = document.getElementById('mapErrorModal');
-            const messageElem = document.getElementById('mapErrorMessage');
-            messageElem.textContent = message;
-            
-            // 使用改進的顯示方法
-            showModal('mapErrorModal');
-            
-            // 3秒後自動關閉
-            setTimeout(() => {
-                hideModal('mapErrorModal');
-            }, 3000);
-        }
-
-        // 改進的模態框控制
-        function showModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.style.display = 'block';
-            // 使用 setTimeout 來確保 display 更改後再添加 show 類
-            setTimeout(() => modal.classList.add('show'), 10);
-        }
-
-        function hideModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.remove('show');
-            // 等待動畫完成後再隱藏
-            setTimeout(() => modal.style.display = 'none', 300);
-        }
-
-        function closeModal(modalId) {
-            hideModal(modalId);
-        }
-
-        // 篩選和類別變更
+        // 處理類別變更
         function handleCategoryChange() {
             const category = document.getElementById('countryFilter').value;
             const titleElement = document.getElementById('mainTitle');
@@ -937,19 +734,219 @@ select {
                 iconElement.textContent = '🍚';
             }
 
-            // 重置當前選擇
-            resetCurrentSelection();
-            updateAvailableCount();
-        }
-
-        function resetCurrentSelection() {
-            currentFood = null;
-            document.getElementById('result').textContent = '點擊按鈕選擇餐點';
-            document.getElementById('favoriteButton').style.display = 'none';
+            // 更新其他 UI
             document.getElementById('recipeButton').style.display = 'none';
             document.getElementById('mapButton').style.display = 'none';
+            updateAvailableCount();
+        }
+// 位置服務相關函數
+        function requestLocationPermission() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        hasLocationPermission = true;
+                        lastKnownPosition = position;
+                        document.getElementById('locationPermissionModal').style.display = 'none';
+                        startWatchingPosition();
+                    },
+                    error => {
+                        showMapError(getLocationErrorMessage(error));
+                        hasLocationPermission = false;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            }
         }
 
+        function startWatchingPosition() {
+            if (navigator.geolocation && !watchId) {
+                watchId = navigator.geolocation.watchPosition(
+                    position => {
+                        lastKnownPosition = position;
+                    },
+                    error => {
+                        console.log('位置更新錯誤:', error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            }
+        }
+
+        function stopWatchingPosition() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+        }
+
+        function searchNearbyRestaurant() {
+            if (!currentFood) return;
+
+            if (!hasLocationPermission) {
+                document.getElementById('locationPermissionModal').style.display = 'block';
+                return;
+            }
+
+            if (!lastKnownPosition) {
+                showMapError('無法取得您的位置資訊');
+                return;
+            }
+
+            const lat = lastKnownPosition.coords.latitude;
+            const lng = lastKnownPosition.coords.longitude;
+            
+            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                // 移動設備版本 - 直接使用 Google Maps App URI scheme
+                const mapUrl = `comgooglemaps://?q=${encodeURIComponent(currentFood)}&center=${lat},${lng}&zoom=16`;
+                window.location.href = mapUrl;
+            } else {
+                // 桌面版本
+                const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z`;
+                window.open(mapUrl, '_blank');
+            }
+        }
+function getLocationErrorMessage(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    return '請允許網站存取您的位置，才能為您搜尋附近店家。您可以在瀏覽器的設定中更改此權限。';
+                case error.POSITION_UNAVAILABLE:
+                    return '無法取得您的位置資訊。請確認您的裝置 GPS 已開啟。';
+                case error.TIMEOUT:
+                    return '取得位置資訊超時。請檢查您的網路連線並重試。';
+                default:
+                    return '發生未知錯誤，請稍後再試。';
+            }
+        }
+
+        function showMapError(message) {
+            const modal = document.getElementById('mapErrorModal');
+            const messageElem = document.getElementById('mapErrorMessage');
+            messageElem.textContent = message;
+            modal.style.display = 'block';
+
+            // 自動關閉錯誤提示
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 5000);
+        }
+
+        // 收藏相關功能
+        function toggleFavorite() {
+            if (!currentFood) return;
+
+            if (favorites.has(currentFood)) {
+                favorites.delete(currentFood);
+            } else {
+                favorites.add(currentFood);
+            }
+
+            updateFavoriteButton();
+            updateFavoritesList();
+        }
+
+        function updateFavoriteButton() {
+            const button = document.getElementById('favoriteButton');
+            if (!currentFood) {
+                button.style.display = 'none';
+                return;
+            }
+
+            button.style.display = 'flex';
+            if (favorites.has(currentFood)) {
+                button.classList.add('active');
+                button.querySelector('.favorite-text').textContent = '已收藏';
+            } else {
+                button.classList.remove('active');
+                button.querySelector('.favorite-text').textContent = '點擊收藏';
+            }
+        }
+function getLocationErrorMessage(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    return '請允許網站存取您的位置，才能為您搜尋附近店家。您可以在瀏覽器的設定中更改此權限。';
+                case error.POSITION_UNAVAILABLE:
+                    return '無法取得您的位置資訊。請確認您的裝置 GPS 已開啟。';
+                case error.TIMEOUT:
+                    return '取得位置資訊超時。請檢查您的網路連線並重試。';
+                default:
+                    return '發生未知錯誤，請稍後再試。';
+            }
+        }
+
+        function showMapError(message) {
+            const modal = document.getElementById('mapErrorModal');
+            const messageElem = document.getElementById('mapErrorMessage');
+            messageElem.textContent = message;
+            modal.style.display = 'block';
+
+            // 自動關閉錯誤提示
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 5000);
+        }
+
+        // 收藏相關功能
+        function toggleFavorite() {
+            if (!currentFood) return;
+
+            if (favorites.has(currentFood)) {
+                favorites.delete(currentFood);
+            } else {
+                favorites.add(currentFood);
+            }
+
+            updateFavoriteButton();
+            updateFavoritesList();
+        }
+
+        function updateFavoriteButton() {
+            const button = document.getElementById('favoriteButton');
+            if (!currentFood) {
+                button.style.display = 'none';
+                return;
+            }
+
+            button.style.display = 'flex';
+            if (favorites.has(currentFood)) {
+                button.classList.add('active');
+                button.querySelector('.favorite-text').textContent = '已收藏';
+            } else {
+                button.classList.remove('active');
+                button.querySelector('.favorite-text').textContent = '點擊收藏';
+            }
+        }
+function updateFavoritesList() {
+            const container = document.getElementById('favoriteItems');
+            container.innerHTML = '';
+
+            favorites.forEach(food => {
+                const item = document.createElement('div');
+                item.className = 'favorite-item';
+                item.innerHTML = `
+                    ${food}
+                    <button onclick="removeFavorite('${food}')">×</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function removeFavorite(food) {
+            favorites.delete(food);
+            updateFavoritesList();
+            if (food === currentFood) {
+                updateFavoriteButton();
+            }
+        }
+
+        // 核心功能函數
         function getFilters() {
             return {
                 country: document.getElementById('countryFilter').value,
@@ -985,173 +982,95 @@ select {
 
             return false;
         }
-// 隨機選擇相關功能
-        function getRandomFood() {
+function getRandomFood() {
             const filteredItems = getFilteredItems();
             const availableFoods = filteredItems.filter(item => isAvailable(item.name));
 
             if (availableFoods.length === 0) {
+                return '發生錯誤，請重試 😅';
+            }
+
+            // 獲取上一次選中的餐點
+            const lastSelectedFood = Object.entries(getHistory())
+                .sort((a, b) => new Date(b[1]) - new Date(a[1]))
+                [0]?.[0];
+
+            // 如果只有一個選項可用，且是上一次選的，就重置歷史
+            if (availableFoods.length === 1 && availableFoods[0].name === lastSelectedFood) {
                 clearFilteredHistory();
-                return getRandomFood();
+                return getRandomFood(); // 遞迴調用重新選擇
             }
 
-            const lastFood = currentFood;
-            let newFood;
+            // 從可用選項中排除上一次選中的餐點
+            const foodsExcludeLast = availableFoods.filter(food => food.name !== lastSelectedFood);
             
-            // 避免連續選到相同的食物
-            do {
-                const randomIndex = Math.floor(Math.random() * availableFoods.length);
-                newFood = availableFoods[randomIndex].name;
-            } while (availableFoods.length > 1 && newFood === lastFood);
-
-            return newFood;
+            // 如果還有其他選項，就從其他選項中選擇
+            if (foodsExcludeLast.length > 0) {
+                const randomIndex = Math.floor(Math.random() * foodsExcludeLast.length);
+                return foodsExcludeLast[randomIndex].name;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * availableFoods.length);
+            return availableFoods[randomIndex].name;
         }
 
-        function pickFood() {
-            if (isAnimating) return;
-
-            const resultElem = document.getElementById('result');
-            const buttonElem = document.getElementById('pickButton');
-            const recipeButton = document.getElementById('recipeButton');
-            const mapButton = document.getElementById('mapButton');
-            const favoriteButton = document.getElementById('favoriteButton');
+        function clearFilteredHistory() {
+            const history = getHistory();
+            const filteredItems = getFilteredItems();
             
-            isAnimating = true;
-            buttonElem.disabled = true;
-            resultElem.classList.add('animating');
-            
-            // 隱藏所有功能按鈕
-            [recipeButton, mapButton, favoriteButton].forEach(btn => {
-                btn.style.display = 'none';
+            let earliestTime = new Date().toISOString();
+            filteredItems.forEach(item => {
+                if (history[item.name]) {
+                    earliestTime = history[item.name] < earliestTime ? history[item.name] : earliestTime;
+                }
             });
 
-            let finalChoice = null;
-            let counter = 0;
-            
-            const spinInterval = setInterval(() => {
-                if (counter === 0) {
-                    finalChoice = getRandomFood();
+            filteredItems.forEach(item => {
+                if (history[item.name] && history[item.name] >= earliestTime) {
+                    delete history[item.name];
                 }
-
-                if (counter < 9) {
-                    const filteredItems = getFilteredItems();
-                    const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
-                    resultElem.textContent = randomItem.name;
-                } else {
-                    resultElem.textContent = finalChoice;
-                }
-                
-                counter++;
-                if (counter >= 10) {
-                    clearInterval(spinInterval);
-                    isAnimating = false;
-                    buttonElem.disabled = false;
-                    resultElem.classList.remove('animating');
-                    
-                    if (finalChoice) {
-                        // 更新歷史記錄
-                        const history = getHistory();
-                        history[finalChoice] = new Date().toISOString();
-                        saveHistory(history);
-                        currentFood = finalChoice;
-                        
-                        // 更新UI
-                        updateFavoriteButton();
-                        recipeButton.style.display = recipes[finalChoice] ? 'flex' : 'none';
-                        mapButton.style.display = 'flex';
-                        favoriteButton.style.display = 'flex';
-                        
-                        // 移除按鈕的觸控反白
-                        setTimeout(() => {
-                            [recipeButton, mapButton, favoriteButton].forEach(btn => {
-                                btn.classList.remove('active');
-                            });
-                        }, 100);
-                    }
-                    
-                    updateAvailableCount();
-                }
-            }, 100);
-        }
-
-        // 收藏相關功能
-        function toggleFavorite() {
-            if (!currentFood) return;
-
-            const button = document.getElementById('favoriteButton');
-            
-            // 添加點擊反饋動畫
-            button.classList.add('active');
-            setTimeout(() => button.classList.remove('active'), 200);
-
-            if (favorites.has(currentFood)) {
-                favorites.delete(currentFood);
-            } else {
-                favorites.add(currentFood);
-            }
-
-            updateFavoriteButton();
-            updateFavoritesList();
-        }
-
-        function updateFavoriteButton() {
-            const button = document.getElementById('favoriteButton');
-            if (!currentFood) {
-                button.style.display = 'none';
-                return;
-            }
-
-            button.style.display = 'flex';
-            if (favorites.has(currentFood)) {
-                button.classList.add('active');
-                button.querySelector('.favorite-text').textContent = '已收藏';
-            } else {
-                button.classList.remove('active');
-                button.querySelector('.favorite-text').textContent = '點擊收藏';
-            }
-        }
-// 收藏列表相關功能
-        function updateFavoritesList() {
-            const container = document.getElementById('favoriteItems');
-            container.innerHTML = '';
-
-            favorites.forEach(food => {
-                const item = document.createElement('div');
-                item.className = 'favorite-item';
-                item.innerHTML = `
-                    ${food}
-                    <button onclick="removeFavorite('${food}')" class="remove-favorite no-highlight">×</button>
-                `;
-                container.appendChild(item);
             });
+
+            saveHistory(history);
+            updateAvailableCount();
+        }
+function getHistory() {
+            return foodHistory;
         }
 
-        function removeFavorite(food) {
-            favorites.delete(food);
-            updateFavoritesList();
-            if (food === currentFood) {
-                updateFavoriteButton();
-            }
+        function saveHistory(history) {
+            foodHistory = history;
         }
 
-        // 食譜顯示功能
+        function clearHistory() {
+            foodHistory = {};
+            updateAvailableCount();
+        }
+
+        function updateAvailableCount() {
+            const filteredItems = getFilteredItems();
+            const availableCount = filteredItems.filter(item => isAvailable(item.name)).length;
+            const elem = document.getElementById('remainingChoices');
+            elem.textContent = `🍚 可選擇的餐點：${availableCount}/${filteredItems.length}`;
+        }
+
         function showRecipe() {
             const modal = document.getElementById('recipeModal');
             const titleElem = document.getElementById('recipeTitle');
             const ingredientsListElem = document.getElementById('ingredientsList');
             const stepsListElem = document.getElementById('stepsList');
 
+            // 檢查是否有食譜
             const recipe = recipes[currentFood];
             if (!recipe) {
-                showModal('generalErrorModal');
-                document.getElementById('generalErrorMessage').textContent = 
-                    '抱歉，此料理的食譜尚未提供。';
+                alert('抱歉，此料理的食譜尚未提供。');
                 return;
             }
 
-            titleElem.textContent = `${currentFood} 食譜`;
+            // 設定標題
+            titleElem.textContent = currentFood + ' 食譜';
 
-            // 設定食材清單
+            // 設定食材清單，使用自定義複選框
             ingredientsListElem.innerHTML = `
                 <h4>主要食材</h4>
                 <div class="ingredients-list">
@@ -1172,8 +1091,7 @@ select {
                     `).join('')}
                 </div>
             `;
-
-            // 設定步驟清單
+// 設定步驟清單
             stepsListElem.innerHTML = `
                 <ol>
                     ${recipe.steps.map(step => `<li>${step}</li>`).join('')}
@@ -1193,46 +1111,69 @@ select {
                 });
             });
 
-            showModal('recipeModal');
+            // 顯示彈出視窗
+            modal.style.display = 'block';
         }
 
-        // 歷史記錄相關功能
-        function getHistory() {
-            return foodHistory;
-        }
+        function pickFood() {
+            if (isAnimating) return;
 
-        function saveHistory(history) {
-            foodHistory = history;
-        }
-
-        function clearHistory() {
-            foodHistory = {};
-            updateAvailableCount();
-        }
-// 更新可用選項數量
-        function updateAvailableCount() {
-            const filteredItems = getFilteredItems();
-            const availableCount = filteredItems.filter(item => isAvailable(item.name)).length;
-            const elem = document.getElementById('remainingChoices');
-            elem.textContent = `🍚 可選擇的餐點：${availableCount}/${filteredItems.length}`;
-        }
-
-        // 清除篩選歷史
-        function clearFilteredHistory() {
-            const history = getHistory();
-            const filteredItems = getFilteredItems();
+            const resultElem = document.getElementById('result');
+            const buttonElem = document.getElementById('pickButton');
+            const recipeButton = document.getElementById('recipeButton');
+            const mapButton = document.getElementById('mapButton');
             
-            filteredItems.forEach(item => {
-                delete history[item.name];
-            });
+            isAnimating = true;
+            buttonElem.disabled = true;
+            resultElem.classList.add('animating');
+            recipeButton.style.display = 'none';
+            mapButton.style.display = 'none';
 
-            saveHistory(history);
-            updateAvailableCount();
+            let finalChoice = null;
+            let counter = 0;
+            
+            const spinInterval = setInterval(() => {
+                if (counter === 0) {
+                    finalChoice = getRandomFood();
+                }
+if (counter < 9) {
+                    const filteredItems = getFilteredItems();
+                    const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
+                    resultElem.textContent = randomItem.name;
+                } else {
+                    resultElem.textContent = finalChoice;
+                }
+                
+                counter++;
+                if (counter >= 10) {
+                    clearInterval(spinInterval);
+                    isAnimating = false;
+                    buttonElem.disabled = false;
+                    resultElem.classList.remove('animating');
+                    
+                    if (!finalChoice.includes('錯誤')) {
+                        const history = getHistory();
+                        history[finalChoice] = new Date().toISOString();
+                        saveHistory(history);
+                        currentFood = finalChoice;
+                        updateFavoriteButton();
+                        
+                        // 顯示食譜按鈕
+                        if (recipes[finalChoice]) {
+                            recipeButton.style.display = 'flex';
+                        }
+                        
+                        // 顯示地圖按鈕
+                        mapButton.style.display = 'flex';
+                    }
+                    
+                    updateAvailableCount();
+                }
+            }, 50);
         }
 
-        // 頁面初始化
+        // 頁面載入初始化
         window.onload = function() {
-            // 初始化計數
             updateAvailableCount();
 
             // 檢查位置權限
@@ -1247,56 +1188,33 @@ select {
                         hasLocationPermission = false;
                         console.log('位置權限未獲得:', error.message);
                     },
-                    { 
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
+                    { enableHighAccuracy: true }
                 );
             }
 
             // 監聽篩選器變化
-            document.getElementById('countryFilter').addEventListener('change', handleCategoryChange);
-            document.getElementById('priceFilter').addEventListener('change', updateAvailableCount);
-
-            // 優化移動設備上的點擊體驗
-            document.addEventListener('touchstart', function() {}, {passive: true});
-
-            // 防止彈出視窗的背景滾動
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-                modal.addEventListener('touchmove', function(e) {
-                    if (e.target === modal) {
-                        e.preventDefault();
-                    }
-                }, { passive: false });
+            document.getElementById('countryFilter').addEventListener('change', () => {
+                handleCategoryChange();
+                updateAvailableCount();
+            });
+            
+            document.getElementById('priceFilter').addEventListener('change', () => {
+                updateAvailableCount();
             });
 
-            // 監聽視窗大小變化，調整模態框位置
-            window.addEventListener('resize', function() {
-                const modals = document.querySelectorAll('.modal');
-                modals.forEach(modal => {
-                    if (modal.style.display === 'block') {
-                        const content = modal.querySelector('.modal-content');
-                        content.style.marginTop = `${Math.max(20, window.innerHeight * 0.1)}px`;
-                    }
-                });
+            // 初始化關閉按鈕事件
+            const closeButtons = document.getElementsByClassName('close');
+            Array.from(closeButtons).forEach(button => {
+                const modal = button.closest('.modal');
+                button.onclick = () => modal.style.display = 'none';
             });
 
-            // 在頁面卸載前停止位置監控
-            window.addEventListener('beforeunload', function() {
-                stopWatchingPosition();
-            });
-
-            // 處理返回按鈕行為
-            window.addEventListener('popstate', function() {
-                const modals = document.querySelectorAll('.modal');
-                modals.forEach(modal => {
-                    if (modal.style.display === 'block') {
-                        hideModal(modal.id);
-                    }
-                });
-            });
+            // 點擊視窗外部關閉
+            window.onclick = event => {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            };
         };
     </script>
 </body>
