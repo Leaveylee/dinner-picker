@@ -714,16 +714,9 @@
 
             const lat = lastKnownPosition.coords.latitude;
             const lng = lastKnownPosition.coords.longitude;
-            
-            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-                // 移動設備版本 - 直接使用 Google Maps App URI scheme
-                const mapUrl = `comgooglemaps://?q=${encodeURIComponent(currentFood)}&center=${lat},${lng}&zoom=16`;
-                window.location.href = mapUrl;
-            } else {
-                // 桌面版本
-                const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z`;
-                window.open(mapUrl, '_blank');
-            }
+
+            const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z`;
+            window.open(mapUrl, '_blank'); // 統一使用 window.open 以在新標籤頁中開啟地圖
         }
 
         function getLocationErrorMessage(error) {
@@ -1028,7 +1021,7 @@
                     resultElem.classList.remove('animating');
                     
                     if (finalChoice === '餐點都被收藏了喔!') {
-                        // 不進行後續操作，僅顯示訊息
+                        // 顯示專屬訊息，不進行後續操作
                         // 您可以根據需要進一步調整此處的行為
                     } else if (!finalChoice.includes('錯誤')) {
                         const history = getHistory();
