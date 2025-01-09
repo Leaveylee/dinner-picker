@@ -640,9 +640,16 @@
             const lat = lastKnownPosition.coords.latitude;
             const lng = lastKnownPosition.coords.longitude;
 
-            // 使用通用的 Google Maps URL，並在新標籤頁打開
             const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z`;
-            window.open(mapUrl, '_blank');
+
+            // 創建一個隱藏的 <a> 元素來打開新標籤頁
+            const link = document.createElement('a');
+            link.href = mapUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
             // 移除按鈕的焦點，防止反白
             document.getElementById('mapButton').blur();
@@ -692,18 +699,17 @@
 
         function updateFavoriteButton() {
             const button = document.getElementById('favoriteButton');
-            if (!currentFood) {
-                button.style.display = 'none';
-                return;
-            }
-
-            button.style.display = 'flex';
-            if (favorites.has(currentFood)) {
-                button.classList.add('active');
-                button.querySelector('.favorite-text').textContent = '已收藏';
+            if (!currentFood || favorites.has(currentFood)) {
+                button.style.display = 'flex';
+                if (favorites.has(currentFood)) {
+                    button.classList.add('active');
+                    button.querySelector('.favorite-text').textContent = '已收藏';
+                } else {
+                    button.classList.remove('active');
+                    button.querySelector('.favorite-text').textContent = '點擊收藏';
+                }
             } else {
-                button.classList.remove('active');
-                button.querySelector('.favorite-text').textContent = '點擊收藏';
+                button.style.display = 'none';
             }
         }
 
@@ -763,7 +769,14 @@
         function getFilteredItems() {
             const filters = getFilters();
             return menuItems.filter(item => {
-                const countryMatch = !filters.country || item.country === filters.country;
+                let countryMatch = false;
+                if (filters.country === "") {
+                    // 當「料理形式」為「不指定」時，排除「飲料」類別
+                    countryMatch = item.country !== "飲料";
+                } else {
+                    countryMatch = item.country === filters.country;
+                }
+
                 const priceMatch = !filters.price || item.price === filters.price;
                 return countryMatch && priceMatch;
             });
