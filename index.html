@@ -68,7 +68,8 @@
             <h3>收藏清單</h3>
             <div id="favoriteItems" class="favorite-items"></div>
         </div>
-    <!-- 食譜彈出視窗 -->
+
+        <!-- 食譜彈出視窗 -->
         <div id="recipeModal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
@@ -106,6 +107,16 @@
                 <button onclick="requestLocationPermission()" class="permission-button">
                     好的，我明白了
                 </button>
+            </div>
+        </div>
+
+        <!-- 手動打開地圖的提示框 -->
+        <div id="manualMapModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="modal-title">手動打開地圖</h2>
+                <p>請點擊以下鏈接以在地圖中查看附近的店家：</p>
+                <a id="manualMapLink" href="#" target="_blank" rel="noopener noreferrer">在地圖中查看</a>
             </div>
         </div>
     </div>
@@ -716,7 +727,23 @@
             const lng = lastKnownPosition.coords.longitude;
 
             const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z`;
-            window.open(mapUrl, '_blank'); // 統一使用 window.open 以在新標籤頁中開啟地圖
+
+            // 嘗試使用隱藏的 <a> 標籤打開
+            try {
+                const a = document.createElement('a');
+                a.href = mapUrl;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } catch (error) {
+                // 如果自動打開失敗，顯示手動鏈接
+                const manualModal = document.getElementById('manualMapModal');
+                const manualLink = document.getElementById('manualMapLink');
+                manualLink.href = mapUrl;
+                manualModal.style.display = 'block';
+            }
         }
 
         function getLocationErrorMessage(error) {
@@ -1021,8 +1048,8 @@
                     resultElem.classList.remove('animating');
                     
                     if (finalChoice === '餐點都被收藏了喔!') {
-                        // 顯示專屬訊息，不進行後續操作
-                        // 您可以根據需要進一步調整此處的行為
+                        // 不進行後續操作，僅顯示訊息
+                        // 可選擇在此處添加額外提示或 UI 變更
                     } else if (!finalChoice.includes('錯誤')) {
                         const history = getHistory();
                         history[finalChoice] = new Date().toISOString();
