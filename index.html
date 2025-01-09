@@ -1115,7 +1115,8 @@
 
             const filteredItems = getFilteredItems();
             const allSelected = filteredItems.every(item => {
-                const itemLastPick = history[item.name + ' ' + item.brand];
+                const key = item.brand ? (item.name + ' ' + item.brand) : item.name;
+                const itemLastPick = history[key];
                 return itemLastPick && new Date(itemLastPick) >= new Date(lastPickTime);
             });
 
@@ -1130,11 +1131,17 @@
         function getRandomFood() {
             const filteredItems = getFilteredItems();
             // 排除已收藏的餐點
-            const availableFoods = filteredItems.filter(item => isAvailable(item.name + ' ' + item.brand) && !favorites.has(item.name + ' ' + item.brand));
+            const availableFoods = filteredItems.filter(item => {
+                const key = item.brand ? (item.name + ' ' + item.brand) : item.name;
+                return isAvailable(key) && !favorites.has(key);
+            });
 
             if (availableFoods.length === 0) {
                 // 檢查是否所有篩選後的餐點都已被收藏
-                const allFavorited = filteredItems.length > 0 && filteredItems.every(item => favorites.has(item.name + ' ' + item.brand));
+                const allFavorited = filteredItems.length > 0 && filteredItems.every(item => {
+                    const key = item.brand ? (item.name + ' ' + item.brand) : item.name;
+                    return favorites.has(key);
+                });
                 if (allFavorited) {
                     return '餐點都被收藏了喔!';
                 }
@@ -1147,22 +1154,28 @@
                 [0]?.[0];
 
             // 如果只有一個選項可用，且是上一次選的，就重置歷史
-            if (availableFoods.length === 1 && availableFoods[0].name + ' ' + availableFoods[0].brand === lastSelectedFood) {
+            if (availableFoods.length === 1 && ((availableFoods[0].brand ? (availableFoods[0].name + ' ' + availableFoods[0].brand) : availableFoods[0].name) === lastSelectedFood)) {
                 clearFilteredHistory();
                 return getRandomFood(); // 遞迴調用重新選擇
             }
 
             // 從可用選項中排除上一次選中的餐點
-            const foodsExcludeLast = availableFoods.filter(food => (food.name + ' ' + food.brand) !== lastSelectedFood);
+            const foodsExcludeLast = availableFoods.filter(item => {
+                const key = item.brand ? (item.name + ' ' + item.brand) : item.name;
+                return key !== lastSelectedFood;
+            });
             
             // 如果還有其他選項，就從其他選項中選擇
             if (foodsExcludeLast.length > 0) {
                 const randomIndex = Math.floor(Math.random() * foodsExcludeLast.length);
-                return foodsExcludeLast[randomIndex].name + ' ' + foodsExcludeLast[randomIndex].brand;
+                const chosenItem = foodsExcludeLast[randomIndex];
+                return chosenItem.brand ? (chosenItem.name + ' ' + chosenItem.brand) : chosenItem.name;
             }
             
+            // 否則，從所有可用選項中隨機選擇
             const randomIndex = Math.floor(Math.random() * availableFoods.length);
-            return availableFoods[randomIndex].name + ' ' + availableFoods[randomIndex].brand;
+            const chosenItem = availableFoods[randomIndex];
+            return chosenItem.brand ? (chosenItem.name + ' ' + chosenItem.brand) : chosenItem.name;
         }
 
         function clearFilteredHistory() {
@@ -1171,14 +1184,14 @@
             
             let earliestTime = new Date().toISOString();
             filteredItems.forEach(item => {
-                const key = item.name + ' ' + item.brand;
+                const key = item.brand ? (item.name + ' ' + item.brand) : item.name;
                 if (history[key]) {
                     earliestTime = history[key] < earliestTime ? history[key] : earliestTime;
                 }
             });
 
             filteredItems.forEach(item => {
-                const key = item.name + ' ' + item.brand;
+                const key = item.brand ? (item.name + ' ' + item.brand) : item.name;
                 if (history[key] && history[key] >= earliestTime) {
                     delete history[key];
                 }
@@ -1204,7 +1217,10 @@
         function updateAvailableCount() {
             const filteredItems = getFilteredItems();
             // 排除已收藏的餐點
-            const availableCount = filteredItems.filter(item => isAvailable(item.name + ' ' + item.brand) && !favorites.has(item.name + ' ' + item.brand)).length;
+            const availableCount = filteredItems.filter(item => {
+                const key = item.brand ? (item.name + ' ' + item.brand) : item.name;
+                return isAvailable(key) && !favorites.has(key);
+            }).length;
             const elem = document.getElementById('remainingChoices');
             elem.textContent = `🍚 可選擇的餐點：${availableCount}/${filteredItems.length}`;
         }
@@ -1294,8 +1310,13 @@
                 }
                 if (counter < 9) {
                     const filteredItems = getFilteredItems();
+                    if (filteredItems.length === 0) {
+                        resultElem.textContent = '沒有可選擇的餐點';
+                        return;
+                    }
                     const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
-                    resultElem.textContent = randomItem.name + ' ' + randomItem.brand;
+                    const key = randomItem.brand ? (randomItem.name + ' ' + randomItem.brand) : randomItem.name;
+                    resultElem.textContent = key;
                 } else {
                     resultElem.textContent = finalChoice;
                 }
