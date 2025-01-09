@@ -1,20 +1,23 @@
 {
-  "name": "等下吃什麼？",
-  "short_name": "吃什麼",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#FFE4D6",
-  "theme_color": "#FFE4D6",
-  "icons": [
-    {
-      "src": "icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+    "name": "等下吃什麼？",
+    "short_name": "等下吃什麼？",
+    "description": "幫你選擇今天的餐點",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#FFE4D6",
+    "theme_color": "#FFE4D6",
+    "icons": [
+        {
+            "src": "icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
 }
