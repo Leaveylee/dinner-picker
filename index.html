@@ -8,121 +8,14 @@
     <!-- PWA 相關設定 -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FFE4D6">
-    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="等下吃什麼？">
-</head>
-<body>
-    <div class="card">
-        <div id="categoryIcon" class="food-icon">🍚</div>
-        <h1 id="mainTitle" class="title">等下吃什麼？</h1>
-
-        <!-- 篩選器 -->
-        <div class="filters">
-            <div class="filter-group">
-                <label class="filter-label">料理形式</label>
-                <select id="countryFilter" onchange="handleCategoryChange()">
-                    <option value="">不指定</option>
-                    <option value="中式">中式</option>
-                    <option value="日式">日式</option>
-                    <option value="義式">義式</option>
-                    <option value="美式">美式</option>
-                    <option value="墨西哥式">墨西哥式</option>
-                    <option value="飲料">飲料</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label class="filter-label">價格區間</label>
-                <select id="priceFilter">
-                    <option value="">不指定</option>
-                    <option value="150以下">150元以下</option>
-                    <option value="150-500">150-500元</option>
-                    <option value="500-1000">500-1000元</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="result-container">
-            <div id="result" class="result">點擊按鈕選擇餐點</div>
-            <div class="button-group">
-                <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
-                    <span class="favorite-icon">⭐</span>
-                    <span class="favorite-text">點擊收藏</span>
-                </button>
-                <button id="recipeButton" class="recipe-button" onclick="showRecipe()" style="display: none">
-                    <span class="recipe-icon">📖</span>
-                    <span class="recipe-text">點擊看食譜</span>
-                </button>
-                <button id="mapButton" class="map-button" onclick="searchNearbyRestaurant()" style="display: none">
-                    <span class="map-icon">🗺️</span>
-                    <span class="map-text">搜尋附近店家</span>
-                </button>
-            </div>
-        </div>
-
-        <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
-        <div id="remainingChoices" class="remaining-choices"></div>
-        <div id="cooldownInfo" class="cooldown-info"></div>
-        <div id="favoriteList" class="favorite-list">
-            <h3>收藏清單</h3>
-            <div id="favoriteItems" class="favorite-items"></div>
-        </div>
-
-        <!-- 食譜彈出視窗 -->
-        <div id="recipeModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2 id="recipeTitle" class="modal-title"></h2>
-                <div id="recipeContent" class="recipe-content">
-                    <div class="ingredients">
-                        <h3>食材準備</h3>
-                        <div id="ingredientsList"></div>
-                    </div>
-                    <div class="steps">
-                        <h3>製作步驟</h3>
-                        <div id="stepsList"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 地圖搜尋錯誤提示框 -->
-        <div id="mapErrorModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2 class="modal-title">提示</h2>
-                <p id="mapErrorMessage" class="error-message"></p>
-            </div>
-        </div>
-
-        <!-- 位置權限提示框 -->
-        <div id="locationPermissionModal" class="modal">
-            <div class="modal-content">
-                <h2 class="modal-title">位置權限請求</h2>
-                <p class="permission-message">
-                    為了能夠幫您搜尋附近的店家，我們需要存取您的位置資訊。
-                    請在接下來的提示中選擇「允許」。
-                </p>
-                <button onclick="requestLocationPermission()" class="permission-button">
-                    好的，我明白了
-                </button>
-            </div>
-        </div>
-
-        <!-- 手動打開地圖的提示框 -->
-        <div id="manualMapModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2 class="modal-title">手動打開地圖</h2>
-                <p>請點擊以下鏈接以在地圖中查看附近的店家：</p>
-                <a id="manualMapLink" href="#" target="_blank" rel="noopener noreferrer">在地圖中查看</a>
-            </div>
-        </div>
-    </div>
-
+    
+    <!-- 您的 CSS 內容 -->
     <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
         * {
             margin: 0;
             padding: 0;
@@ -163,6 +56,7 @@
             color: #B86E52;
             margin-bottom: 2rem;
             text-shadow: 2px 2px 4px rgba(184, 110, 82, 0.1);
+            transition: all 0.3s ease;
         }
 
         .filters {
@@ -186,7 +80,7 @@
             font-size: 1rem;
             transition: background-color 0.3s ease;
         }
-.permission-button:hover {
+        .permission-button:hover {
             background: #3367d6;
         }
 
@@ -251,7 +145,7 @@
             transition: all 0.3s ease;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-.result.animating {
+        .result.animating {
             transform: scale(1.02);
             background: #f8f9fa;
         }
@@ -317,7 +211,7 @@
         .map-button {
             color: #4285f4;
         }
-.favorite-button:hover, .recipe-button:hover, .map-button:hover {
+        .favorite-button:hover, .recipe-button:hover, .map-button:hover {
             transform: scale(1.1);
         }
 
@@ -383,7 +277,7 @@
             align-items: center;
             gap: 0.5rem;
         }
-.favorite-item button {
+        .favorite-item button {
             background: none;
             border: none;
             color: #d93025;
@@ -453,11 +347,32 @@
             margin: 1rem 0;
         }
 
+        /* 新增地圖模態窗口樣式 */
+        #mapModal .modal-content {
+            position: relative;
+            padding-top: 3rem; /* 為返回按鈕留出空間 */
+        }
+
+        .back-button {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #4285f4;
+        }
+
+        .back-button:hover {
+            color: #3367d6;
+        }
+
         /* 添加標題和圖標切換動畫 */
         .food-icon, .title {
             transition: all 0.3s ease;
         }
-.ingredients h3, 
+        .ingredients h3, 
         .steps h3, 
         .ingredients h4 {
             color: #B86E52;
@@ -521,7 +436,7 @@
             text-decoration: line-through;
             color: #888;
         }
-.steps ol {
+        .steps ol {
             padding-left: 1.5rem;
             text-align: left;
         }
@@ -568,6 +483,123 @@
             }
         }
     </style>
+</head>
+<body>
+    <div class="card">
+        <div id="categoryIcon" class="food-icon">🍚</div>
+        <h1 id="mainTitle" class="title">等下吃什麼？</h1>
+
+        <!-- 篩選器 -->
+        <div class="filters">
+            <div class="filter-group">
+                <label class="filter-label">料理形式</label>
+                <select id="countryFilter" onchange="handleCategoryChange()">
+                    <option value="">不指定</option>
+                    <option value="中式">中式</option>
+                    <option value="日式">日式</option>
+                    <option value="義式">義式</option>
+                    <option value="美式">美式</option>
+                    <option value="墨西哥式">墨西哥式</option>
+                    <option value="飲料">飲料</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">價格區間</label>
+                <select id="priceFilter">
+                    <option value="">不指定</option>
+                    <option value="150以下">150元以下</option>
+                    <option value="150-500">150-500元</option>
+                    <option value="500-1000">500-1000元</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="result-container">
+            <div id="result" class="result">點擊按鈕選擇餐點</div>
+            <div class="button-group">
+                <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
+                    <span class="favorite-icon">⭐</span>
+                    <span class="favorite-text">點擊收藏</span>
+                </button>
+                <button id="recipeButton" class="recipe-button" onclick="showRecipe()" style="display: none">
+                    <span class="recipe-icon">📖</span>
+                    <span class="recipe-text">點擊看食譜</span>
+                </button>
+                <button id="mapButton" class="map-button" onclick="searchNearbyRestaurant()" style="display: none">
+                    <span class="map-icon">🗺️</span>
+                    <span class="map-text">搜尋附近店家</span>
+                </button>
+            </div>
+        </div>
+
+        <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
+        <div id="remainingChoices" class="remaining-choices"></div>
+        <div id="cooldownInfo" class="cooldown-info"></div>
+        <div id="favoriteList" class="favorite-list">
+            <h3>收藏清單</h3>
+            <div id="favoriteItems" class="favorite-items"></div>
+        </div>
+    
+        <!-- 食譜彈出視窗 -->
+        <div id="recipeModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="recipeTitle" class="modal-title"></h2>
+                <div id="recipeContent" class="recipe-content">
+                    <div class="ingredients">
+                        <h3>食材準備</h3>
+                        <div id="ingredientsList"></div>
+                    </div>
+                    <div class="steps">
+                        <h3>製作步驟</h3>
+                        <div id="stepsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 地圖搜尋錯誤提示框 -->
+        <div id="mapErrorModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="modal-title">提示</h2>
+                <p id="mapErrorMessage" class="error-message"></p>
+            </div>
+        </div>
+
+        <!-- 位置權限提示框 -->
+        <div id="locationPermissionModal" class="modal">
+            <div class="modal-content">
+                <h2 class="modal-title">位置權限請求</h2>
+                <p class="permission-message">
+                    為了能夠幫您搜尋附近的店家，我們需要存取您的位置資訊。
+                    請在接下來的提示中選擇「允許」。
+                </p>
+                <button onclick="requestLocationPermission()" class="permission-button">
+                    好的，我明白了
+                </button>
+            </div>
+        </div>
+
+        <!-- 地圖模態窗口 -->
+        <div id="mapModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <button id="backButton" class="back-button">← 返回</button>
+                <h2 class="modal-title">附近的餐廳</h2>
+                <iframe
+                    id="embeddedMap"
+                    width="100%"
+                    height="450"
+                    frameborder="0"
+                    style="border:0"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </div>
 
     <script>
         // 位置服務全域變數
@@ -726,24 +758,12 @@
             const lat = lastKnownPosition.coords.latitude;
             const lng = lastKnownPosition.coords.longitude;
 
-            const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z`;
+            // 使用 Google Maps 的地圖 URL
+            const query = encodeURIComponent(currentFood);
+            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${query}&query_place_id=${lat},${lng}`;
 
-            // 嘗試使用隱藏的 <a> 標籤打開
-            try {
-                const a = document.createElement('a');
-                a.href = mapUrl;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            } catch (error) {
-                // 如果自動打開失敗，顯示手動鏈接
-                const manualModal = document.getElementById('manualMapModal');
-                const manualLink = document.getElementById('manualMapLink');
-                manualLink.href = mapUrl;
-                manualModal.style.display = 'block';
-            }
+            // 在新標籤頁中打開 Google Maps
+            window.open(mapUrl, '_blank');
         }
 
         function getLocationErrorMessage(error) {
@@ -1106,13 +1126,36 @@
             const closeButtons = document.getElementsByClassName('close');
             Array.from(closeButtons).forEach(button => {
                 const modal = button.closest('.modal');
-                button.onclick = () => modal.style.display = 'none';
+                button.onclick = () => {
+                    modal.style.display = 'none';
+                    // 清空嵌入的地圖 URL
+                    if (modal.id === 'mapModal') {
+                        const embeddedMap = document.getElementById('embeddedMap');
+                        embeddedMap.src = '';
+                    }
+                };
             });
+
+            // 返回按鈕事件
+            const backButton = document.getElementById('backButton');
+            if (backButton) {
+                backButton.onclick = () => {
+                    const mapModal = document.getElementById('mapModal');
+                    mapModal.style.display = 'none';
+                    const embeddedMap = document.getElementById('embeddedMap');
+                    embeddedMap.src = ''; // 清空嵌入的地圖
+                };
+            }
 
             // 點擊視窗外部關閉
             window.onclick = event => {
                 if (event.target.classList.contains('modal')) {
                     event.target.style.display = 'none';
+                    // 清空嵌入的地圖 URL
+                    const embeddedMap = document.getElementById('embeddedMap');
+                    if (embeddedMap) {
+                        embeddedMap.src = '';
+                    }
                 }
             };
         };
