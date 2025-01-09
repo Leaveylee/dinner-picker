@@ -2,195 +2,607 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>隨機餐點選擇器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>等下吃什麼？</title>
+    
+    <!-- PWA 相關設定 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FFE4D6">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="等下吃什麼？">
+</head>
+<body>
+    <div class="card">
+        <div id="categoryIcon" class="food-icon">🍚</div>
+        <h1 id="mainTitle" class="title">等下吃什麼？</h1>
+
+        <!-- 篩選器 -->
+        <div class="filters">
+            <div class="filter-group">
+                <label class="filter-label">料理形式</label>
+                <select id="countryFilter" onchange="handleCategoryChange()">
+                    <option value="">不指定</option>
+                    <option value="中式">中式</option>
+                    <option value="日式">日式</option>
+                    <option value="韓式">韓式</option>
+                    <option value="義式">義式</option>
+                    <option value="美式">美式</option>
+                    <option value="越式">越式</option>
+                    <option value="飲料">🥤 飲料</option> <!-- 保留飲料分類 -->
+                </select>
+            </div>
+            <div class="filter-group">
+                <label id="priceFilterLabel" class="filter-label">價格區間</label>
+                <select id="priceFilter" onchange="updateAvailableCount()">
+                    <option value="">不指定</option>
+                    <option value="150以下">150元以下</option>
+                    <option value="150-500">150-500元</option>
+                    <option value="500-1000">500-1000元</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="result-container">
+            <div id="result" class="result">點擊按鈕選擇餐點</div>
+            <div class="button-group">
+                <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
+                    <span class="favorite-icon">⭐</span>
+                    <span class="favorite-text">點擊收藏</span>
+                </button>
+                <button id="recipeButton" class="recipe-button" onclick="showRecipe()" style="display: none">
+                    <span class="recipe-icon">📖</span>
+                    <span class="recipe-text">點擊看食譜</span>
+                </button>
+                <button id="mapButton" class="map-button" onclick="searchNearbyRestaurant()" style="display: none">
+                    <span class="map-icon">🗺️</span>
+                    <span class="map-text">搜尋附近店家</span>
+                </button>
+            </div>
+        </div>
+
+        <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
+        <div id="remainingChoices" class="remaining-choices"></div>
+        <div id="cooldownInfo" class="cooldown-info"></div>
+        <div id="favoriteList" class="favorite-list">
+            <h3>收藏清單</h3>
+            <div id="favoriteItems" class="favorite-items"></div>
+        </div>
+
+        <!-- 食譜彈出視窗 -->
+        <div id="recipeModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="recipeTitle" class="modal-title"></h2>
+                <div id="recipeContent" class="recipe-content">
+                    <div class="ingredients">
+                        <h3>食材準備</h3>
+                        <div id="ingredientsList"></div>
+                    </div>
+                    <div class="steps">
+                        <h3>製作步驟</h3>
+                        <div id="stepsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 地圖搜尋錯誤提示框 -->
+        <div id="mapErrorModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="modal-title">提示</h2>
+                <p id="mapErrorMessage" class="error-message"></p>
+            </div>
+        </div>
+
+        <!-- 位置權限提示框 -->
+        <div id="locationPermissionModal" class="modal">
+            <div class="modal-content">
+                <h2 class="modal-title">位置權限請求</h2>
+                <p class="permission-message">
+                    為了能夠幫您搜尋附近的店家，我們需要存取您的位置資訊。
+                    請在接下來的提示中選擇「允許」。
+                </p>
+                <button onclick="requestLocationPermission()" class="permission-button">
+                    好的，我明白了
+                </button>
+            </div>
+        </div>
+
+        <!-- 手動打開地圖的提示框 -->
+        <div id="manualMapModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="modal-title">手動打開地圖</h2>
+                <p>請點擊以下鏈接以在地圖中查看附近的店家：</p>
+                <a id="manualMapLink" href="#" target="_blank" rel="noopener noreferrer">在地圖中查看</a>
+            </div>
+        </div>
+    </div>
+
     <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-        }
-        .filters {
-            margin-bottom: 20px;
-        }
-        .filters select {
-            padding: 10px;
-            margin: 0 10px;
-            font-size: 16px;
-        }
-        #pickButton {
-            padding: 15px 30px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        #result {
-            margin-top: 30px;
-            font-size: 24px;
-            min-height: 30px;
-            transition: all 0.5s ease;
-        }
-        .animating {
-            color: red;
-        }
-        /* Modal Styles */
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 1000; 
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgba(0,0,0,0.4); 
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 10% auto; 
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; 
-            max-width: 600px;
-            text-align: left;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-        }
-        .ingredient-checkbox {
-            margin-right: 10px;
-        }
-        .ingredient-label.checked {
-            text-decoration: line-through;
-            color: gray;
-        }
-        .favorites {
-            margin-top: 40px;
-            text-align: left;
-            display: inline-block;
-        }
-        .favorite-item {
+            font-family: 'Noto Sans TC', sans-serif;
+            min-height: 100vh;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #FFF3E6 0%, #FFE4D6 100%);
+            padding: 20px;
         }
-        .favorite-item a {
-            text-decoration: none;
-            color: #333;
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(184, 134, 113, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 0.5s ease-out;
         }
-        .favorite-item button {
-            background-color: red;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #B86E52;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(184, 110, 82, 0.1);
+        }
+
+        .filters {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .permission-button {
+            background: #4285f4;
             color: white;
             border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            padding: 2px 6px;
-            border-radius: 3px;
+            margin-top: 15px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
         }
-        /* Responsive Design */
-        @media (max-width: 600px) {
+.permission-button:hover {
+            background: #3367d6;
+        }
+
+        .permission-message {
+            color: #666;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            text-align: left;
+        }
+
+        .filter-label {
+            font-size: 0.9rem;
+            color: #B86E52;
+            font-weight: 500;
+        }
+
+        select {
+            padding: 0.5rem;
+            border: 1px solid rgba(184, 110, 82, 0.2);
+            border-radius: 8px;
+            background: white;
+            color: #444;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        select:hover {
+            border-color: rgba(184, 110, 82, 0.4);
+        }
+
+        select:focus {
+            border-color: #B86E52;
+            box-shadow: 0 0 0 2px rgba(184, 110, 82, 0.1);
+        }
+
+        .result-container {
+            margin-bottom: 2rem;
+            padding: 0.5rem;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #FFB68E 0%, #FFD0B8 100%);
+        }
+
+        .result {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: #444;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+.result.animating {
+            transform: scale(1.02);
+            background: #f8f9fa;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #E67E51 0%, #F1945E 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(230, 126, 81, 0.2);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(230, 126, 81, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(230, 126, 81, 0.2);
+        }
+
+        .button:disabled {
+            background: linear-gradient(135deg, #FFD0B8 0%, #FFE4D6 100%);
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .favorite-button, .recipe-button, .map-button {
+            background: none;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem auto;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            
+            /* 防止文字被選取 */
+            user-select: none; /* 標準語法 */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+        }
+
+        .favorite-button {
+            color: #B86E52;
+        }
+
+        .recipe-button {
+            color: #2E7D32;
+        }
+
+        .map-button {
+            color: #4285f4;
+        }
+
+        .favorite-button:hover, .recipe-button:hover, .map-button:hover {
+            transform: scale(1.1);
+        }
+
+        .favorite-button:hover {
+            background: rgba(184, 110, 82, 0.1);
+        }
+
+        .recipe-button:hover {
+            background: rgba(46, 125, 50, 0.1);
+        }
+
+        .map-button:hover {
+            background: rgba(66, 133, 244, 0.1);
+        }
+
+        .favorite-button.active {
+            color: #FFB68E;
+        }
+
+        .remaining-choices {
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            color: #8B6153;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            border: 1px solid rgba(184, 110, 82, 0.1);
+        }
+
+        .cooldown-info {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #8B6153;
+            display: none;
+        }
+
+        .favorite-list {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(184, 110, 82, 0.2);
+        }
+
+        .favorite-list h3 {
+            color: #B86E52;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .favorite-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .favorite-item {
+            background: rgba(255, 182, 142, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: #B86E52;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+.favorite-item a {
+            color: #B86E52;
+            text-decoration: none;
+            flex: 1;
+        }
+
+.favorite-item a:hover {
+            text-decoration: underline;
+        }
+
+.favorite-item button {
+            background: none;
+            border: none;
+            color: #d93025;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* 食譜彈出視窗樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 16px;
+            position: relative;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #B86E52;
+        }
+
+        .modal-title {
+            color: #B86E52;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            text-align: left;
+        }
+
+        .recipe-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .ingredients, .steps {
+            background: rgba(255, 230, 220, 0.3);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+
+        .error-message {
+            color: #d93025;
+            padding: 1rem;
+            text-align: center;
+            background: rgba(217, 48, 37, 0.1);
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        /* 添加標題和圖標切換動畫 */
+        .food-icon, .title {
+            transition: all 0.3s ease;
+        }
+.ingredients h3, 
+        .steps h3, 
+        .ingredients h4 {
+            color: #B86E52;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            text-align: left;
+        }
+
+        .ingredients h4 {
+            font-size: 1.1rem;
+            margin-top: 1rem;
+        }
+
+        .ingredients-list {
+            margin-bottom: 1rem;
+        }
+
+        .ingredient-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+            gap: 0.5rem;
+        }
+
+        .ingredient-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #B86E52;
+            border-radius: 4px;
+            margin-top: 2px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .ingredient-checkbox:checked {
+            background-color: #B86E52;
+        }
+
+        .ingredient-checkbox:checked::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+        }
+
+        .ingredient-label {
+            flex: 1;
+            color: #444;
+            line-height: 1.5;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .ingredient-label.checked {
+            text-decoration: line-through;
+            color: #888;
+        }
+.steps ol {
+            padding-left: 1.5rem;
+            text-align: left;
+        }
+
+        .steps li {
+            margin-bottom: 0.8rem;
+            color: #444;
+            line-height: 1.5;
+        }
+
+        .food-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 1.5rem;
+            }
+            .title {
+                font-size: 1.8rem;
+            }
+            .result {
+                font-size: 1.2rem;
+            }
             .modal-content {
-                width: 95%;
+                margin: 10% 5%;
+                padding: 1.5rem;
             }
-            .filters select {
-                display: block;
-                margin: 10px auto;
-                width: 80%;
+            .button-group {
+                flex-direction: column;
+                align-items: center;
             }
-            #pickButton {
-                width: 80%;
+            .map-button {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
-</head>
-<body>
-    <h1 id="mainTitle">等下吃什麼？ <span id="categoryIcon">🍚</span></h1>
-    
-    <div class="filters">
-        <select id="countryFilter">
-            <option value="">不指定</option>
-            <option value="中式">中式</option>
-            <option value="日式">日式</option>
-            <option value="韓式">韓式</option>
-            <option value="越式">越式</option>
-            <option value="義式">義式</option>
-            <option value="美式">美式</option>
-            <option value="飲料">飲料</option>
-        </select>
-        
-        <label id="priceFilterLabel" for="priceFilter">價格區間</label>
-        <select id="priceFilter">
-            <option value="">不指定</option>
-            <option value="150以下">150元以下</option>
-            <option value="150-500">150-500元</option>
-        </select>
-    </div>
-    
-    <button id="pickButton" onclick="pickFood()">隨機選擇</button>
-    
-    <div id="result"></div>
-    
-    <div class="favorites">
-        <h2>收藏清單</h2>
-        <div id="favoriteItems">
-            <p>尚未收藏任何餐點。</p>
-        </div>
-    </div>
-    
-    <!-- Recipe Modal -->
-    <div id="recipeModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="recipeTitle"></h2>
-            <div id="ingredientsList"></div>
-            <h3>製作步驟</h3>
-            <div id="stepsList"></div>
-        </div>
-    </div>
-    
-    <!-- Map Error Modal -->
-    <div id="mapErrorModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <p id="mapErrorMessage"></p>
-        </div>
-    </div>
-    
-    <!-- Manual Map Modal -->
-    <div id="manualMapModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <p>請手動點擊以下連結以開啟地圖：</p>
-            <a href="#" id="manualMapLink" target="_blank" rel="noopener noreferrer">開啟地圖</a>
-        </div>
-    </div>
-    
-    <!-- Location Permission Modal -->
-    <div id="locationPermissionModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <p>本功能需要您的位置資訊，請允許存取您的位置。</p>
-            <button onclick="requestLocationPermission()">允許</button>
-        </div>
-    </div>
-    
+
     <script>
+        // 位置服務全域變數
+        let hasLocationPermission = false;
+        let watchId = null;
+        let lastKnownPosition = null;
+
+        // 一般功能變數
         let foodHistory = {};
         let favorites = new Set();
         let currentFood = null;
         let isAnimating = false;
-        let hasLocationPermission = false;
-        let lastKnownPosition = null;
-        let watchId = null;
-    
+
         // 餐點資料庫
         const menuItems = [
             // 中式料理
+
             // 150元以下
             { name: "雞腿便當", country: "中式", price: "150以下" },
             { name: "排骨便當", country: "中式", price: "150以下" },
@@ -212,6 +624,7 @@
             { name: "爌肉飯", country: "中式", price: "150以下" },
             { name: "雞肉飯", country: "中式", price: "150以下" },
             { name: "排骨蛋炒飯", country: "中式", price: "150以下" },
+
             // 150-500元
             { name: "紅燒牛肉麵", country: "中式", price: "150-500" },
             { name: "清燉牛肉麵", country: "中式", price: "150-500" },
@@ -233,8 +646,31 @@
             { name: "蔥燒豬肉飯", country: "中式", price: "150-500" },
             { name: "京醬肉絲飯", country: "中式", price: "150-500" },
             { name: "叉燒燒鴨飯", country: "中式", price: "150-500" },
-    
+
+            // 500-1000元
+            { name: "北京烤鴨套餐", country: "中式", price: "500-1000" },
+            { name: "油雞燒鴨拼盤", country: "中式", price: "500-1000" },
+            { name: "海鮮炒飯", country: "中式", price: "500-1000" },
+            { name: "龍蝦炒飯", country: "中式", price: "500-1000" },
+            { name: "帝王蟹炒飯", country: "中式", price: "500-1000" },
+            { name: "干貝炒飯", country: "中式", price: "500-1000" },
+            { name: "鮑魚炒飯", country: "中式", price: "500-1000" },
+            { name: "XO醬海鮮炒飯", country: "中式", price: "500-1000" },
+            { name: "黃金蝦球飯", country: "中式", price: "500-1000" },
+            { name: "清蒸魚套餐", country: "中式", price: "500-1000" },
+            { name: "炒龍蝦套餐", country: "中式", price: "500-1000" },
+            { name: "蟹黃豆腐煲", country: "中式", price: "500-1000" },
+            { name: "薑蔥龍蝦飯", country: "中式", price: "500-1000" },
+            { name: "椒鹽龍蝦飯", country: "中式", price: "500-1000" },
+            { name: "燒臘三寶飯", country: "中式", price: "500-1000" },
+            { name: "臘味煲仔飯", country: "中式", price: "500-1000" },
+            { name: "蠔皇燴飯", country: "中式", price: "500-1000" },
+            { name: "蟹肉炒飯", country: "中式", price: "500-1000" },
+            { name: "海鮮燴飯", country: "中式", price: "500-1000" },
+            { name: "貴妃雞套餐", country: "中式", price: "500-1000" },
+
             // 日式料理
+
             // 150元以下
             { name: "豬排丼", country: "日式", price: "150以下" },
             { name: "炸雞丼", country: "日式", price: "150以下" },
@@ -256,6 +692,7 @@
             { name: "蔥花豬肉飯", country: "日式", price: "150以下" },
             { name: "明太子烏龍麵", country: "日式", price: "150以下" },
             { name: "豬肉味噌湯飯", country: "日式", price: "150以下" },
+
             // 150-500元
             { name: "鰻魚飯", country: "日式", price: "150-500" },
             { name: "生魚片丼", country: "日式", price: "150-500" },
@@ -267,18 +704,41 @@
             { name: "綜合天婦羅定食", country: "日式", price: "150-500" },
             { name: "炸蝦定食", country: "日式", price: "150-500" },
             { name: "薑燒豬肉定食", country: "日式", price: "150-500" },
-            { name: "日式牛肉飯", country: "日式", price: "150-500" },
-            { name: "鮭魚親子丼", country: "日式", price: "150-500" },
-            { name: "天丼", country: "日式", price: "150-500" },
-            { name: "照燒雞腿定食", country: "日式", price: "150-500" },
-            { name: "味噌烤魚定食", country: "日式", price: "150-500" },
-            { name: "炸牡蠣定食", country: "日式", price: "150-500" },
-            { name: "壽喜燒定食", country: "日式", price: "150-500" },
-            { name: "豬排蓋飯", country: "日式", price: "150-500" },
-            { name: "和牛燒肉丼", country: "日式", price: "150-500" },
-            { name: "蒲燒鯛魚飯", country: "日式", price: "150-500" },
-    
+            { name: "牛肉豆腐鍋", country: "日式", price: "150-500" },
+            { name: "辣炒魷魚", country: "日式", price: "150-500" },
+            { name: "春川炒雞", country: "日式", price: "150-500" },
+            { name: "泡菜炒豬肉", country: "日式", price: "150-500" },
+            { name: "韓式牛小排", country: "日式", price: "150-500" },
+            { name: "辣炒豬肉", country: "日式", price: "150-500" },
+            { name: "海鮮煎餅套餐", country: "日式", price: "150-500" },
+            { name: "韓式炸雞", country: "日式", price: "150-500" },
+            { name: "起司薯條套餐", country: "日式", price: "150-500" },
+            { name: "美式牛排套餐", country: "日式", price: "150-500" },
+
+            // 500-1000元
+            { name: "特選和牛丼", country: "日式", price: "500-1000" },
+            { name: "頂級鰻魚飯", country: "日式", price: "500-1000" },
+            { name: "海鮮豪華丼", country: "日式", price: "500-1000" },
+            { name: "黑鮪魚大腹丼", country: "日式", price: "500-1000" },
+            { name: "帆立貝定食", country: "日式", price: "500-1000" },
+            { name: "和牛燒肉套餐", country: "日式", price: "500-1000" },
+            { name: "龍蝦天婦羅定食", country: "日式", price: "500-1000" },
+            { name: "A5和牛丼", country: "日式", price: "500-1000" },
+            { name: "蟹肉丼", country: "日式", price: "500-1000" },
+            { name: "生魚片豪華盛合", country: "日式", price: "500-1000" },
+            { name: "松露和牛燒肉套餐", country: "日式", price: "500-1000" },
+            { name: "海膽丼", country: "日式", price: "500-1000" },
+            { name: "魚子醬義大利麵", country: "日式", price: "500-1000" },
+            { name: "特選刺身定食", country: "日式", price: "500-1000" },
+            { name: "鮭魚卵茶漬飯", country: "日式", price: "500-1000" },
+            { name: "豪華海鮮丼", country: "日式", price: "500-1000" },
+            { name: "和牛涮涮鍋", country: "日式", price: "500-1000" },
+            { name: "特製龍蝦湯飯", country: "日式", price: "500-1000" },
+            { name: "頂級壽司套餐", country: "日式", price: "500-1000" },
+            { name: "松露和牛麵", country: "日式", price: "500-1000" },
+
             // 韓式料理
+
             // 150元以下
             { name: "部隊鍋泡飯", country: "韓式", price: "150以下" },
             { name: "泡菜炒飯", country: "韓式", price: "150以下" },
@@ -293,13 +753,14 @@
             { name: "韓式冷麵", country: "韓式", price: "150以下" },
             { name: "辣炒豬肉飯", country: "韓式", price: "150以下" },
             { name: "韓式炸雞飯", country: "韓式", price: "150以下" },
-            { name: "泡菜鍋燒意麵", country: "韓式", price: "150以下" },
-            { name: "韓式炸豬排飯", country: "韓式", price: "150以下" },
-            { name: "辣炒魷魚飯", country: "韓式", price: "150以下" },
-            { name: "泡菜炒碼麵", country: "韓式", price: "150以下" },
-            { name: "泡菜豬肉煎餅", country: "韓式", price: "150以下" },
-            { name: "辣醬豬肉飯", country: "韓式", price: "150以下" },
-            { name: "韓式炒烏龍", country: "韓式", price: "150以下" },
+            { name: "雞肉漢堡", country: "韓式", price: "150以下" },
+            { name: "玉米熱狗", country: "韓式", price: "150以下" },
+            { name: "炸魚堡", country: "韓式", price: "150以下" },
+            { name: "雙層起司堡", country: "韓式", price: "150以下" },
+            { name: "BBQ豬肉堡", country: "韓式", price: "150以下" },
+            { name: "辣雞堡", country: "韓式", price: "150以下" },
+            { name: "美式炸雞", country: "韓式", price: "150以下" },
+
             // 150-500元
             { name: "石鍋拌飯", country: "韓式", price: "150-500" },
             { name: "人蔘雞湯", country: "韓式", price: "150-500" },
@@ -321,52 +782,33 @@
             { name: "韓式牛小排", country: "韓式", price: "150-500" },
             { name: "辣炒豬肉", country: "韓式", price: "150-500" },
             { name: "海鮮煎餅套餐", country: "韓式", price: "150-500" },
-    
-            // 越式料理
-            // 150元以下
-            { name: "越式河粉", country: "越式", price: "150以下" },
-            { name: "越南春捲", country: "越式", price: "150以下" },
-            { name: "越式法國麵包", country: "越式", price: "150以下" },
-            { name: "越南肉絲米線", country: "越式", price: "150以下" },
-            { name: "越南涼拌米線", country: "越式", price: "150以下" },
-            { name: "越式炸春捲", country: "越式", price: "150以下" },
-            { name: "越式豬肉米線", country: "越式", price: "150以下" },
-            { name: "越式雞肉河粉", country: "越式", price: "150以下" },
-            { name: "越式豬肉河粉", country: "越式", price: "150以下" },
-            { name: "越南豬肉飯", country: "越式", price: "150以下" },
-            { name: "越式炸雞腿飯", country: "越式", price: "150以下" },
-            { name: "越南豬排飯", country: "越式", price: "150以下" },
-            { name: "越式炸春捲飯", country: "越式", price: "150以下" },
-            { name: "越式肉末河粉", country: "越式", price: "150以下" },
-            { name: "越式涼拌雞絲", country: "越式", price: "150以下" },
-            { name: "越南豬肉麵包", country: "越式", price: "150以下" },
-            { name: "越式炸雞翅", country: "越式", price: "150以下" },
-            { name: "越式豬肉三明治", country: "越式", price: "150以下" },
-            { name: "越南炸春捲套餐", country: "越式", price: "150以下" },
-            { name: "越式豬肉炒飯", country: "越式", price: "150以下" },
-            // 150-500元
-            { name: "越式牛肉河粉", country: "越式", price: "150-500" },
-            { name: "生牛肉河粉", country: "越式", price: "150-500" },
-            { name: "牛筋河粉", country: "越式", price: "150-500" },
-            { name: "越式海鮮河粉", country: "越式", price: "150-500" },
-            { name: "越式牛肉套餐", country: "越式", price: "150-500" },
-            { name: "越式烤肉拼盤", country: "越式", price: "150-500" },
-            { name: "越式海陸套餐", country: "越式", price: "150-500" },
-            { name: "越式咖哩雞肉飯", country: "越式", price: "150-500" },
-            { name: "越式檸檬雞腿飯", country: "越式", price: "150-500" },
-            { name: "越式椰汁咖哩雞", country: "越式", price: "150-500" },
-            { name: "越式烤雞腿套餐", country: "越式", price: "150-500" },
-            { name: "越式牛肉麵包", country: "越式", price: "150-500" },
-            { name: "越式烤肉米線", country: "越式", price: "150-500" },
-            { name: "越式牛肉炒河粉", country: "越式", price: "150-500" },
-            { name: "越式海鮮炒米線", country: "越式", price: "150-500" },
-            { name: "越式烤牛肉飯", country: "越式", price: "150-500" },
-            { name: "越式海鮮拼盤", country: "越式", price: "150-500" },
-            { name: "越式烤雞套餐", country: "越式", price: "150-500" },
-            { name: "越式鮮蝦河粉", country: "越式", price: "150-500" },
-            { name: "越式五香烤雞", country: "越式", price: "150-500" },
-    
+            { name: "起司薯條套餐", country: "韓式", price: "150-500" },
+
+            // 500-1000元
+            { name: "韓式燒烤套餐", country: "韓式", price: "500-1000" },
+            { name: "豪華人蔘雞", country: "韓式", price: "500-1000" },
+            { name: "帝王蟹泡菜鍋", country: "韓式", price: "500-1000" },
+            { name: "和牛燒肉套餐", country: "韓式", price: "500-1000" },
+            { name: "海鮮拼盤", country: "韓式", price: "500-1000" },
+            { name: "龍蝦泡菜鍋", country: "韓式", price: "500-1000" },
+            { name: "特級烤肉套餐", country: "韓式", price: "500-1000" },
+            { name: "頂級海鮮鍋", country: "韓式", price: "500-1000" },
+            { name: "特選和牛套餐", country: "韓式", price: "500-1000" },
+            { name: "帝王蟹腳套餐", country: "韓式", price: "500-1000" },
+            { name: "豪華海鮮盤", country: "韓式", price: "500-1000" },
+            { name: "和牛燒肉套餐", country: "韓式", price: "500-1000" },
+            { name: "頂級海鮮鍋", country: "韓式", price: "500-1000" },
+            { name: "特級蔘雞湯", country: "韓式", price: "500-1000" },
+            { name: "和牛石鍋拌飯", country: "韓式", price: "500-1000" },
+            { name: "松露和牛套餐", country: "韓式", price: "500-1000" },
+            { name: "海鮮火鍋", country: "韓式", price: "500-1000" },
+            { name: "龍蝦海鮮拼盤", country: "韓式", price: "500-1000" },
+            { name: "和牛烤肉拼盤", country: "韓式", price: "500-1000" },
+            { name: "特級海鮮拌飯", country: "韓式", price: "500-1000" },
+            { name: "松露和牛麵", country: "韓式", price: "500-1000" },
+
             // 義式料理
+
             // 150元以下
             { name: "白醬培根麵", country: "義式", price: "150以下" },
             { name: "番茄肉醬麵", country: "義式", price: "150以下" },
@@ -388,6 +830,7 @@
             { name: "白醬海鮮麵", country: "義式", price: "150以下" },
             { name: "義大利肉醬麵", country: "義式", price: "150以下" },
             { name: "炙燒培根麵", country: "義式", price: "150以下" },
+
             // 150-500元
             { name: "松露奶油麵", country: "義式", price: "150-500" },
             { name: "海鮮燉飯", country: "義式", price: "150-500" },
@@ -409,8 +852,31 @@
             { name: "羊肉燉飯", country: "義式", price: "150-500" },
             { name: "蛤蜊海鮮飯", country: "義式", price: "150-500" },
             { name: "蒜香蝦仁燉飯", country: "義式", price: "150-500" },
-    
+
+            // 500-1000元
+            { name: "龍蝦義大利麵", country: "義式", price: "500-1000" },
+            { name: "松露牛肉燉飯", country: "義式", price: "500-1000" },
+            { name: "海鮮拼盤燉飯", country: "義式", price: "500-1000" },
+            { name: "海膽義大利麵", country: "義式", price: "500-1000" },
+            { name: "魚子醬義大利麵", country: "義式", price: "500-1000" },
+            { name: "和牛燉飯", country: "義式", price: "500-1000" },
+            { name: "龍蝦海鮮燉飯", country: "義式", price: "500-1000" },
+            { name: "干貝燉飯", country: "義式", price: "500-1000" },
+            { name: "和牛肉醬麵", country: "義式", price: "500-1000" },
+            { name: "特選海鮮麵", country: "義式", price: "500-1000" },
+            { name: "白松露野菇飯", country: "義式", price: "500-1000" },
+            { name: "黑松露和牛飯", country: "義式", price: "500-1000" },
+            { name: "頂級海鮮拼盤", country: "義式", price: "500-1000" },
+            { name: "藍龍蝦義大利麵", country: "義式", price: "500-1000" },
+            { name: "帝王蟹肉飯", country: "義式", price: "500-1000" },
+            { name: "特製龍蝦湯飯", country: "義式", price: "500-1000" },
+            { name: "頂級壽司套餐", country: "義式", price: "500-1000" },
+            { name: "松露和牛麵", country: "義式", price: "500-1000" },
+            { name: "和牛涮涮鍋", country: "義式", price: "500-1000" },
+            { name: "特選和牛套餐", country: "義式", price: "500-1000" },
+
             // 美式料理
+
             // 150元以下
             { name: "美式漢堡套餐", country: "美式", price: "150以下" },
             { name: "起司漢堡套餐", country: "美式", price: "150以下" },
@@ -432,6 +898,7 @@
             { name: "辣雞堡", country: "美式", price: "150以下" },
             { name: "美式炸雞", country: "美式", price: "150以下" },
             { name: "墨西哥捲餅", country: "美式", price: "150以下" },
+
             // 150-500元
             { name: "牛排漢堡套餐", country: "美式", price: "150-500" },
             { name: "巨無霸漢堡", country: "美式", price: "150-500" },
@@ -453,219 +920,33 @@
             { name: "起司薯條套餐", country: "美式", price: "150-500" },
             { name: "美式牛排套餐", country: "美式", price: "150-500" },
             { name: "雞腿排套餐", country: "美式", price: "150-500" },
-    
-            // 飲料
-            // 50嵐
-            { name: "茉莉綠茶", country: "飲料", brand: "50嵐" },
-            { name: "阿薩姆紅茶", country: "飲料", brand: "50嵐" },
-            { name: "四季春青茶", country: "飲料", brand: "50嵐" },
-            { name: "黃金烏龍", country: "飲料", brand: "50嵐" },
-            { name: "檸檬綠", country: "飲料", brand: "50嵐" },
-            { name: "梅の綠", country: "飲料", brand: "50嵐" },
-            { name: "桔子綠", country: "飲料", brand: "50嵐" },
-            { name: "8冰綠", country: "飲料", brand: "50嵐" },
-            { name: "養樂多綠", country: "飲料", brand: "50嵐" },
-            { name: "冰淇淋紅茶", country: "飲料", brand: "50嵐" },
-            { name: "旺來紅", country: "飲料", brand: "50嵐" },
-            { name: "鮮柚綠", country: "飲料", brand: "50嵐" },
-            { name: "奶茶", country: "飲料", brand: "50嵐" },
-            { name: "奶綠", country: "飲料", brand: "50嵐" },
-            { name: "紅茶瑪奇朵", country: "飲料", brand: "50嵐" },
-            { name: "烏龍瑪奇朵", country: "飲料", brand: "50嵐" },
-            { name: "四季奶青", country: "飲料", brand: "50嵐" },
-            { name: "黃金烏龍奶茶", country: "飲料", brand: "50嵐" },
-            { name: "阿華田", country: "飲料", brand: "50嵐" },
-            { name: "可可芭蕾", country: "飲料", brand: "50嵐" },
-            { name: "四季春+珍波椰", country: "飲料", brand: "50嵐" },
-            { name: "波霸紅茶", country: "飲料", brand: "50嵐" },
-            { name: "波霸綠茶", country: "飲料", brand: "50嵐" },
-            { name: "波霸青茶", country: "飲料", brand: "50嵐" },
-            { name: "波霸烏龍茶", country: "飲料", brand: "50嵐" },
-            { name: "波霸奶茶", country: "飲料", brand: "50嵐" },
-            { name: "波霸奶綠", country: "飲料", brand: "50嵐" },
-            { name: "波霸烏龍奶茶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠紅茶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠綠茶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠青茶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠烏龍茶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠奶茶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠奶綠", country: "飲料", brand: "50嵐" },
-            { name: "椰果奶茶", country: "飲料", brand: "50嵐" },
-            { name: "布丁奶茶", country: "飲料", brand: "50嵐" },
-            { name: "布丁奶綠", country: "飲料", brand: "50嵐" },
-            { name: "布丁紅茶", country: "飲料", brand: "50嵐" },
-            { name: "布丁綠茶", country: "飲料", brand: "50嵐" },
-            { name: "布丁青茶", country: "飲料", brand: "50嵐" },
-            { name: "布丁烏龍茶", country: "飲料", brand: "50嵐" },
-            { name: "檸檬汁", country: "飲料", brand: "50嵐" },
-            { name: "金桔檸檬", country: "飲料", brand: "50嵐" },
-            { name: "檸檬梅汁", country: "飲料", brand: "50嵐" },
-            { name: "檸檬養樂多", country: "飲料", brand: "50嵐" },
-            { name: "8冰茶", country: "飲料", brand: "50嵐" },
-            { name: "鮮柚汁", country: "飲料", brand: "50嵐" },
-            { name: "葡萄柚多多", country: "飲料", brand: "50嵐" },
-            { name: "紅茶拿鐵", country: "飲料", brand: "50嵐" },
-            { name: "綠茶拿鐵", country: "飲料", brand: "50嵐" },
-            { name: "黃金烏龍拿鐵", country: "飲料", brand: "50嵐" },
-            { name: "阿華田拿鐵", country: "飲料", brand: "50嵐" },
-            { name: "可可芭蕾拿鐵", country: "飲料", brand: "50嵐" },
-            { name: "波霸鮮奶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠鮮奶", country: "飲料", brand: "50嵐" },
-            { name: "檸檬紅茶", country: "飲料", brand: "50嵐" },
-            { name: "檸檬梅汁綠", country: "飲料", brand: "50嵐" },
-            { name: "混珠黃金烏龍", country: "飲料", brand: "50嵐" },
-    
-            // 得正
-            { name: "焙烏龍", country: "飲料", brand: "得正" },
-            { name: "輕烏龍", country: "飲料", brand: "得正" },
-            { name: "春烏龍", country: "飲料", brand: "得正" },
-            { name: "綠茶", country: "飲料", brand: "得正" },
-            { name: "紅茶", country: "飲料", brand: "得正" },
-            { name: "烘吉奶茶", country: "飲料", brand: "得正" },
-            { name: "黃金珍珠奶綠", country: "飲料", brand: "得正" },
-            { name: "珍珠奶茶", country: "飲料", brand: "得正" },
-            { name: "焙烏龍奶茶", country: "飲料", brand: "得正" },
-            { name: "奶茶", country: "飲料", brand: "得正" },
-            { name: "雙柚金烏龍", country: "飲料", brand: "得正" },
-            { name: "百香果綠茶", country: "飲料", brand: "得正" },
-            { name: "優酪春烏龍", country: "飲料", brand: "得正" },
-            { name: "青梅春烏龍", country: "飲料", brand: "得正" },
-            { name: "甘蔗春烏龍", country: "飲料", brand: "得正" },
-            { name: "香橙春烏龍", country: "飲料", brand: "得正" },
-            { name: "檸檬春烏龍", country: "飲料", brand: "得正" },
-            { name: "烘吉鮮奶", country: "飲料", brand: "得正" },
-            { name: "焙烏龍鮮奶", country: "飲料", brand: "得正" },
-            { name: "輕烏龍鮮奶", country: "飲料", brand: "得正" },
-            { name: "紅茶鮮奶", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋阿華田", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋烘吉茶", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋焙烏龍", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋春烏龍", country: "飲料", brand: "得正" },
-    
-            // 龜記
-            { name: "極品紅茶", country: "飲料", brand: "龜記" },
-            { name: "翡翠綠茶", country: "飲料", brand: "龜記" },
-            { name: "青四季春", country: "飲料", brand: "龜記" },
-            { name: "三韻紅萱", country: "飲料", brand: "龜記" },
-            { name: "紅水烏龍", country: "飲料", brand: "龜記" },
-            { name: "三十三茶王", country: "飲料", brand: "龜記" },
-            { name: "碎銀普洱茶", country: "飲料", brand: "龜記" },
-            { name: "花沫烏龍", country: "飲料", brand: "龜記" },
-            { name: "鮮果百香紅茶", country: "飲料", brand: "龜記" },
-            { name: "鮮果百香綠茶", country: "飲料", brand: "龜記" },
-            { name: "翡翠雷夢", country: "飲料", brand: "龜記" },
-            { name: "柳丁翡翠", country: "飲料", brand: "龜記" },
-            { name: "蘋果紅萱", country: "飲料", brand: "龜記" },
-            { name: "旺梨四季春", country: "飲料", brand: "龜記" },
-            { name: "蜜桃烏龍", country: "飲料", brand: "龜記" },
-            { name: "香柚雷夢綠", country: "飲料", brand: "龜記" },
-            { name: "紅柚翡翠", country: "飲料", brand: "龜記" },
-            { name: "豆漿紅茶", country: "飲料", brand: "龜記" },
-            { name: "冬瓜茶王", country: "飲料", brand: "龜記" },
-            { name: "冬瓜雷夢", country: "飲料", brand: "龜記" },
-            { name: "阿源楊桃紅茶", country: "飲料", brand: "龜記" },
-            { name: "阿源楊桃綠茶", country: "飲料", brand: "龜記" },
-            { name: "楊桃雷夢", country: "飲料", brand: "龜記" },
-            { name: "甘蔗四季春", country: "飲料", brand: "龜記" },
-            { name: "極品奶茶", country: "飲料", brand: "龜記" },
-            { name: "翡翠奶茶", country: "飲料", brand: "龜記" },
-            { name: "茶王奶茶", country: "飲料", brand: "龜記" },
-            { name: "碎銀普洱奶茶", country: "飲料", brand: "龜記" },
-            { name: "珍珠奶茶", country: "飲料", brand: "龜記" },
-            { name: "極品鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "翡翠鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "龜記濃乳茶", country: "飲料", brand: "龜記" },
-            { name: "冬瓜鮮乳", country: "飲料", brand: "龜記" },
-            { name: "紅烏鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "巧克鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "碎銀普洱鮮乳", country: "飲料", brand: "龜記" },
-            { name: "蜂蜜綠茶", country: "飲料", brand: "龜記" },
-            { name: "蜂蜜四季春", country: "飲料", brand: "龜記" },
-            { name: "三韻奶茶", country: "飲料", brand: "龜記" },
-            { name: "蜂蜜雷夢", country: "飲料", brand: "龜記" },
-            { name: "雷夢蘆薈蜜", country: "飲料", brand: "龜記" },
-            { name: "原味薑茶", country: "飲料", brand: "龜記" },
-            { name: "薑汁奶茶", country: "飲料", brand: "龜記" },
-            { name: "薑汁雷夢", country: "飲料", brand: "龜記" },
-            { name: "薑汁桂圓", country: "飲料", brand: "龜記" },
-            { name: "桂圓紅棗茶", country: "飲料", brand: "龜記" },
-    
-            // 得正
-            { name: "焙烏龍", country: "飲料", brand: "得正" },
-            { name: "輕烏龍", country: "飲料", brand: "得正" },
-            { name: "春烏龍", country: "飲料", brand: "得正" },
-            { name: "綠茶", country: "飲料", brand: "得正" },
-            { name: "紅茶", country: "飲料", brand: "得正" },
-            { name: "烘吉奶茶", country: "飲料", brand: "得正" },
-            { name: "黃金珍珠奶綠", country: "飲料", brand: "得正" },
-            { name: "珍珠奶茶", country: "飲料", brand: "得正" },
-            { name: "焙烏龍奶茶", country: "飲料", brand: "得正" },
-            { name: "奶茶", country: "飲料", brand: "得正" },
-            { name: "雙柚金烏龍", country: "飲料", brand: "得正" },
-            { name: "百香果綠茶", country: "飲料", brand: "得正" },
-            { name: "優酪春烏龍", country: "飲料", brand: "得正" },
-            { name: "青梅春烏龍", country: "飲料", brand: "得正" },
-            { name: "甘蔗春烏龍", country: "飲料", brand: "得正" },
-            { name: "香橙春烏龍", country: "飲料", brand: "得正" },
-            { name: "檸檬春烏龍", country: "飲料", brand: "得正" },
-            { name: "烘吉鮮奶", country: "飲料", brand: "得正" },
-            { name: "焙烏龍鮮奶", country: "飲料", brand: "得正" },
-            { name: "輕烏龍鮮奶", country: "飲料", brand: "得正" },
-            { name: "紅茶鮮奶", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋阿華田", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋烘吉茶", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋焙烏龍", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋春烏龍", country: "飲料", brand: "得正" },
-    
-            // 龜記
-            { name: "極品紅茶", country: "飲料", brand: "龜記" },
-            { name: "翡翠綠茶", country: "飲料", brand: "龜記" },
-            { name: "青四季春", country: "飲料", brand: "龜記" },
-            { name: "三韻紅萱", country: "飲料", brand: "龜記" },
-            { name: "紅水烏龍", country: "飲料", brand: "龜記" },
-            { name: "三十三茶王", country: "飲料", brand: "龜記" },
-            { name: "碎銀普洱茶", country: "飲料", brand: "龜記" },
-            { name: "花沫烏龍", country: "飲料", brand: "龜記" },
-            { name: "鮮果百香紅茶", country: "飲料", brand: "龜記" },
-            { name: "鮮果百香綠茶", country: "飲料", brand: "龜記" },
-            { name: "翡翠雷夢", country: "飲料", brand: "龜記" },
-            { name: "柳丁翡翠", country: "飲料", brand: "龜記" },
-            { name: "蘋果紅萱", country: "飲料", brand: "龜記" },
-            { name: "旺梨四季春", country: "飲料", brand: "龜記" },
-            { name: "蜜桃烏龍", country: "飲料", brand: "龜記" },
-            { name: "香柚雷夢綠", country: "飲料", brand: "龜記" },
-            { name: "紅柚翡翠", country: "飲料", brand: "龜記" },
-            { name: "豆漿紅茶", country: "飲料", brand: "龜記" },
-            { name: "冬瓜茶王", country: "飲料", brand: "龜記" },
-            { name: "冬瓜雷夢", country: "飲料", brand: "龜記" },
-            { name: "阿源楊桃紅茶", country: "飲料", brand: "龜記" },
-            { name: "阿源楊桃綠茶", country: "飲料", brand: "龜記" },
-            { name: "楊桃雷夢", country: "飲料", brand: "龜記" },
-            { name: "甘蔗四季春", country: "飲料", brand: "龜記" },
-            { name: "極品奶茶", country: "飲料", brand: "龜記" },
-            { name: "翡翠奶茶", country: "飲料", brand: "龜記" },
-            { name: "茶王奶茶", country: "飲料", brand: "龜記" },
-            { name: "碎銀普洱奶茶", country: "飲料", brand: "龜記" },
-            { name: "珍珠奶茶", country: "飲料", brand: "龜記" },
-            { name: "極品鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "翡翠鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "龜記濃乳茶", country: "飲料", brand: "龜記" },
-            { name: "冬瓜鮮乳", country: "飲料", brand: "龜記" },
-            { name: "紅烏鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "巧克鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "碎銀普洱鮮乳", country: "飲料", brand: "龜記" },
-            { name: "蜂蜜綠茶", country: "飲料", brand: "龜記" },
-            { name: "蜂蜜四季春", country: "飲料", brand: "龜記" },
-            { name: "三韻奶茶", country: "飲料", brand: "龜記" },
-            { name: "蜂蜜雷夢", country: "飲料", brand: "龜記" },
-            { name: "雷夢蘆薈蜜", country: "飲料", brand: "龜記" },
-            { name: "原味薑茶", country: "飲料", brand: "龜記" },
-            { name: "薑汁奶茶", country: "飲料", brand: "龜記" },
-            { name: "薑汁雷夢", country: "飲料", brand: "龜記" },
-            { name: "薑汁桂圓", country: "飲料", brand: "龜記" },
-            { name: "桂圓紅棗茶", country: "飲料", brand: "龜記" },
+
+            // 500-1000元
+            { name: "頂級牛排套餐", country: "美式", price: "500-1000" },
+            { name: "戰斧豬排", country: "美式", price: "500-1000" },
+            { name: "肋眼牛排", country: "美式", price: "500-1000" },
+            { name: "菲力牛排", country: "美式", price: "500-1000" },
+            { name: "T骨牛排", country: "美式", price: "500-1000" },
+            { name: "紐約客牛排", country: "美式", price: "500-1000" },
+            { name: "帶骨牛小排", country: "美式", price: "500-1000" },
+            { name: "豪華BBQ拼盤", country: "美式", price: "500-1000" },
+            { name: "肋眼牛排套餐", country: "美式", price: "500-1000" },
+            { name: "菲力牛排套餐", country: "美式", price: "500-1000" },
+            { name: "美式海陸套餐", country: "美式", price: "500-1000" },
+            { name: "戰斧牛排", country: "美式", price: "500-1000" },
+            { name: "豪華肋排拼盤", country: "美式", price: "500-1000" },
+            { name: "美式大牛排", country: "美式", price: "500-1000" },
+            { name: "頂級牛小排", country: "美式", price: "500-1000" },
+            { name: "龍蝦牛排", country: "美式", price: "500-1000" },
+            { name: "美式龍蝦拼盤", country: "美式", price: "500-1000" },
+            { name: "頂級海陸套餐", country: "美式", price: "500-1000" },
+            { name: "和牛漢堡排", country: "美式", price: "500-1000" },
+            { name: "美式烤牛排拼盤", country: "美式", price: "500-1000" },
+
+            // 越式料理
+            // 目前未提供越式料理餐點，請根據需要添加
         ];
-    
+
         // 食譜資料庫
         const recipes = {
             "親子丼": {
@@ -694,9 +975,9 @@
                     "享用：可搭配味噌湯和醃漬小菜，組成豐富的一餐。"
                 ]
             }
-            // 您可以在此處繼續添加其他餐點的食譜
+            // ...（其他食譜資料可根據需要添加）
         };
-    
+
         // 初始化收藏清單
         function loadFavorites() {
             const storedFavorites = localStorage.getItem('favorites');
@@ -711,12 +992,12 @@
             }
             updateFavoritesList();
         }
-    
+
         function saveFavorites() {
             const favoritesArray = Array.from(favorites);
             localStorage.setItem('favorites', JSON.stringify(favoritesArray));
         }
-    
+
         // 處理類別變更
         function handleCategoryChange() {
             const category = document.getElementById('countryFilter').value;
@@ -724,20 +1005,20 @@
             const iconElement = document.getElementById('categoryIcon');
             const priceFilterLabel = document.getElementById('priceFilterLabel');
             const priceFilter = document.getElementById('priceFilter');
-    
+
             if (category === '飲料') {
                 titleElement.textContent = '等下喝什麼？';
                 iconElement.textContent = '🥤';
                 priceFilterLabel.textContent = '品牌';
-    
+
                 // 清空現有選項
                 priceFilter.innerHTML = '<option value="">不指定</option>';
-    
+
                 // 收集所有品牌
                 const brands = [...new Set(menuItems
                     .filter(item => item.country === '飲料')
                     .map(item => item.brand))].sort();
-    
+
                 // 添加品牌選項
                 brands.forEach(brand => {
                     const option = document.createElement('option');
@@ -745,7 +1026,7 @@
                     option.textContent = brand;
                     priceFilter.appendChild(option);
                 });
-            } else if (["中式", "日式", "韓式", "越式", "義式", "美式"].includes(category)) {
+            } else if (category === "中式" || category === "日式" || category === "韓式" || category === "義式" || category === "美式" || category === "越式") {
                 titleElement.textContent = `等下${category}料理？`;
                 switch(category) {
                     case "中式":
@@ -757,46 +1038,48 @@
                     case "韓式":
                         iconElement.textContent = '🍱';
                         break;
-                    case "越式":
-                        iconElement.textContent = '🍲';
-                        break;
                     case "義式":
                         iconElement.textContent = '🍝';
                         break;
                     case "美式":
                         iconElement.textContent = '🍔';
                         break;
+                    case "越式":
+                        iconElement.textContent = '🍲';
+                        break;
                     default:
                         iconElement.textContent = '🍽️';
                 }
                 priceFilterLabel.textContent = '價格區間';
-    
+
                 // 重設價格選項
                 priceFilter.innerHTML = `
                     <option value="">不指定</option>
                     <option value="150以下">150元以下</option>
                     <option value="150-500">150-500元</option>
+                    <option value="500-1000">500-1000元</option>
                 `;
             } else {
                 // 當選擇「不指定」
                 titleElement.textContent = '等下吃什麼？';
                 iconElement.textContent = '🍚';
                 priceFilterLabel.textContent = '價格區間';
-    
+
                 // 重設價格選項
                 priceFilter.innerHTML = `
                     <option value="">不指定</option>
                     <option value="150以下">150元以下</option>
                     <option value="150-500">150-500元</option>
+                    <option value="500-1000">500-1000元</option>
                 `;
             }
-    
+
             // 更新其他 UI
             document.getElementById('recipeButton').style.display = 'none';
             document.getElementById('mapButton').style.display = 'none';
             updateAvailableCount();
         }
-    
+
         // 位置服務相關函數
         function requestLocationPermission() {
             if (navigator.geolocation) {
@@ -819,7 +1102,7 @@
                 );
             }
         }
-    
+
         function startWatchingPosition() {
             if (navigator.geolocation && !watchId) {
                 watchId = navigator.geolocation.watchPosition(
@@ -837,32 +1120,32 @@
                 );
             }
         }
-    
+
         function stopWatchingPosition() {
             if (watchId) {
                 navigator.geolocation.clearWatch(watchId);
                 watchId = null;
             }
         }
-    
+
         function searchNearbyRestaurant() {
             if (!currentFood) return;
-    
+
             if (!hasLocationPermission) {
                 document.getElementById('locationPermissionModal').style.display = 'block';
                 return;
             }
-    
+
             if (!lastKnownPosition) {
                 showMapError('無法取得您的位置資訊');
                 return;
             }
-    
+
             const lat = lastKnownPosition.coords.latitude;
             const lng = lastKnownPosition.coords.longitude;
-    
+
             const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z`;
-    
+
             // 嘗試使用隱藏的 <a> 標籤打開
             try {
                 const a = document.createElement('a');
@@ -880,7 +1163,7 @@
                 manualModal.style.display = 'block';
             }
         }
-    
+
         function getLocationErrorMessage(error) {
             switch(error.code) {
                 case error.PERMISSION_DENIED:
@@ -893,41 +1176,41 @@
                     return '發生未知錯誤，請稍後再試。';
             }
         }
-    
+
         function showMapError(message) {
             const modal = document.getElementById('mapErrorModal');
             const messageElem = document.getElementById('mapErrorMessage');
             messageElem.textContent = message;
             modal.style.display = 'block';
-    
+
             // 自動關閉錯誤提示
             setTimeout(() => {
                 modal.style.display = 'none';
             }, 5000);
         }
-    
+
         // 收藏相關功能
         function toggleFavorite() {
             if (!currentFood) return;
-    
+
             if (favorites.has(currentFood)) {
                 favorites.delete(currentFood);
             } else {
                 favorites.add(currentFood);
             }
-    
+
             updateFavoriteButton();
             updateFavoritesList();
             saveFavorites(); // 儲存到 localStorage
         }
-    
+
         function updateFavoriteButton() {
             const button = document.getElementById('favoriteButton');
             if (!currentFood) {
                 button.style.display = 'none';
                 return;
             }
-    
+
             button.style.display = 'flex';
             if (favorites.has(currentFood)) {
                 button.classList.add('active');
@@ -937,30 +1220,30 @@
                 button.querySelector('.favorite-text').textContent = '點擊收藏';
             }
         }
-    
+
         function updateFavoritesList() {
             const container = document.getElementById('favoriteItems');
             container.innerHTML = '';
-    
+
             if (favorites.size === 0) {
                 container.innerHTML = '<p>尚未收藏任何餐點。</p>';
                 return;
             }
-    
+
             favorites.forEach(food => {
                 const item = document.createElement('div');
                 item.className = 'favorite-item';
-    
+
                 // 確保安全性，使用 encodeURIComponent
                 const encodedFood = encodeURIComponent(food);
                 let mapUrl = `https://www.google.com/maps/search/${encodedFood}/`;
-    
+
                 if (hasLocationPermission && lastKnownPosition) {
                     const lat = lastKnownPosition.coords.latitude;
                     const lng = lastKnownPosition.coords.longitude;
                     mapUrl = `https://www.google.com/maps/search/${encodedFood}/@${lat},${lng},16z`;
                 }
-    
+
                 item.innerHTML = `
                     <a href="${mapUrl}" target="_blank" rel="noopener noreferrer">${food}</a>
                     <button onclick="removeFavorite('${food.replace(/'/g, "\\'")}')">×</button>
@@ -968,7 +1251,7 @@
                 container.appendChild(item);
             });
         }
-    
+
         function removeFavorite(food) {
             favorites.delete(food);
             updateFavoritesList();
@@ -977,7 +1260,7 @@
             }
             saveFavorites(); // 更新 localStorage
         }
-    
+
         // 核心功能函數
         function getFilters() {
             return {
@@ -985,7 +1268,7 @@
                 filterValue: document.getElementById('priceFilter').value
             };
         }
-    
+
         function getFilteredItems() {
             const filters = getFilters();
             if (filters.country === '飲料') {
@@ -1009,28 +1292,28 @@
                 });
             }
         }
-    
+
         function isAvailable(food) {
             const history = getHistory();
             const lastPickTime = history[food];
             
             if (!lastPickTime) return true;
-    
+
             const filteredItems = getFilteredItems();
             const allSelected = filteredItems.every(item => {
                 const key = item.name; // 使用 item.name 作為鍵值
                 const itemLastPick = history[key];
                 return itemLastPick && new Date(itemLastPick) >= new Date(lastPickTime);
             });
-    
+
             if (allSelected) {
                 clearFilteredHistory();
                 return true;
             }
-    
+
             return false;
         }
-    
+
         function getRandomFood() {
             const filteredItems = getFilteredItems();
             // 排除已收藏的餐點
@@ -1038,7 +1321,7 @@
                 const key = item.name; // 使用 item.name 作為鍵值
                 return isAvailable(key) && !favorites.has(key);
             });
-    
+
             if (availableFoods.length === 0) {
                 // 檢查是否所有篩選後的餐點都已被收藏
                 const allFavorited = filteredItems.length > 0 && filteredItems.every(item => {
@@ -1050,18 +1333,18 @@
                 }
                 return '發生錯誤，請重試 😅';
             }
-    
+
             // 獲取上一次選中的餐點
             const lastSelectedFood = Object.entries(getHistory())
                 .sort((a, b) => new Date(b[1]) - new Date(a[1]))
                 [0]?.[0];
-    
+
             // 如果只有一個選項可用，且是上一次選的，就重置歷史
             if (availableFoods.length === 1 && availableFoods[0].name === lastSelectedFood) {
                 clearFilteredHistory();
                 return getRandomFood(); // 遞迴調用重新選擇
             }
-    
+
             // 從可用選項中排除上一次選中的餐點
             const foodsExcludeLast = availableFoods.filter(item => item.name !== lastSelectedFood);
             
@@ -1075,7 +1358,7 @@
             const randomIndex = Math.floor(Math.random() * availableFoods.length);
             return availableFoods[randomIndex].name;
         }
-    
+
         function clearFilteredHistory() {
             const history = getHistory();
             const filteredItems = getFilteredItems();
@@ -1087,31 +1370,31 @@
                     earliestTime = history[key] < earliestTime ? history[key] : earliestTime;
                 }
             });
-    
+
             filteredItems.forEach(item => {
                 const key = item.name; // 使用 item.name 作為鍵值
                 if (history[key] && history[key] >= earliestTime) {
                     delete history[key];
                 }
             });
-    
+
             saveHistory(history);
             updateAvailableCount();
         }
-    
+
         function getHistory() {
             return foodHistory;
         }
-    
+
         function saveHistory(history) {
             foodHistory = history;
         }
-    
+
         function clearHistory() {
             foodHistory = {};
             updateAvailableCount();
         }
-    
+
         function updateAvailableCount() {
             const filteredItems = getFilteredItems();
             // 排除已收藏的餐點
@@ -1122,23 +1405,23 @@
             const elem = document.getElementById('remainingChoices');
             elem.textContent = `🍚 可選擇的餐點：${availableCount}/${filteredItems.length}`;
         }
-    
+
         function showRecipe() {
             const modal = document.getElementById('recipeModal');
             const titleElem = document.getElementById('recipeTitle');
             const ingredientsListElem = document.getElementById('ingredientsList');
             const stepsListElem = document.getElementById('stepsList');
-    
+
             // 檢查是否有食譜
             const recipe = recipes[currentFood];
             if (!recipe) {
                 alert('抱歉，此料理的食譜尚未提供。');
                 return;
             }
-    
+
             // 設定標題
             titleElem.textContent = currentFood + ' 食譜';
-    
+
             // 設定食材清單，使用自定義複選框
             ingredientsListElem.innerHTML = `
                 <h4>主要食材</h4>
@@ -1160,14 +1443,14 @@
                     `).join('')}
                 </div>
             `;
-    
+
             // 設定步驟清單
             stepsListElem.innerHTML = `
                 <ol>
                     ${recipe.steps.map(step => `<li>${step}</li>`).join('')}
                 </ol>
             `;
-    
+
             // 添加複選框事件監聽器
             const checkboxes = document.querySelectorAll('.ingredient-checkbox');
             checkboxes.forEach(checkbox => {
@@ -1180,14 +1463,14 @@
                     }
                 });
             });
-    
+
             // 顯示彈出視窗
             modal.style.display = 'block';
         }
-    
+
         function pickFood() {
             if (isAnimating) return;
-    
+
             const resultElem = document.getElementById('result');
             const buttonElem = document.getElementById('pickButton');
             const recipeButton = document.getElementById('recipeButton');
@@ -1198,7 +1481,7 @@
             resultElem.classList.add('animating');
             recipeButton.style.display = 'none';
             mapButton.style.display = 'none';
-    
+
             let finalChoice = null;
             let counter = 0;
             
@@ -1253,12 +1536,12 @@
                 }
             }, 50);
         }
-    
+
         // 頁面載入初始化
         window.onload = function() {
             loadFavorites(); // 載入收藏清單
             updateAvailableCount();
-    
+
             // 檢查位置權限
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -1274,7 +1557,7 @@
                     { enableHighAccuracy: true }
                 );
             }
-    
+
             // 監聽篩選器變化
             document.getElementById('countryFilter').addEventListener('change', () => {
                 handleCategoryChange();
@@ -1284,14 +1567,14 @@
             document.getElementById('priceFilter').addEventListener('change', () => {
                 updateAvailableCount();
             });
-    
+
             // 初始化關閉按鈕事件
             const closeButtons = document.getElementsByClassName('close');
             Array.from(closeButtons).forEach(button => {
                 const modal = button.closest('.modal');
                 button.onclick = () => modal.style.display = 'none';
             });
-    
+
             // 點擊視窗外部關閉
             window.onclick = event => {
                 if (event.target.classList.contains('modal')) {
