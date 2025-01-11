@@ -13,468 +13,273 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="等下吃什麼？">
     
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <!-- 指定 favicon（如果有） -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 
+    <style>
+        /* 您的現有 CSS 可以在這裡添加或保留之前的樣式 */
         body {
-            font-family: 'Noto Sans TC', sans-serif;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #FFE4D6;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #FFF3E6 0%, #FFE4D6 100%);
-            padding: 20px;
+            height: 100vh;
+            margin: 0;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 24px;
+            background-color: #fff;
             padding: 2rem;
-            width: 90%;
-            max-width: 420px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
-            box-shadow: 0 8px 32px rgba(184, 134, 113, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            animation: fadeIn 0.5s ease-out;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .food-icon {
+            font-size: 3rem;
         }
 
         .title {
-            font-size: 2rem;
-            font-weight: 700;
+            margin: 1rem 0;
             color: #B86E52;
-            margin-bottom: 2rem;
-            text-shadow: 2px 2px 4px rgba(184, 110, 82, 0.1);
         }
 
         .filters {
             display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            background: rgba(255, 255, 255, 0.7);
-            padding: 1rem;
-            border-radius: 12px;
-        }
-
-        .permission-button {
-            background: #4285f4;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
-        .permission-button:hover {
-            background: #3367d6;
-        }
-
-        .permission-message {
-            color: #666;
-            line-height: 1.5;
-            margin: 15px 0;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            text-align: left;
+            margin: 0.5rem;
+            flex: 1;
+            min-width: 150px;
         }
 
         .filter-label {
-            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
             color: #B86E52;
-            font-weight: 500;
+            font-weight: bold;
         }
 
         select {
             padding: 0.5rem;
-            border: 1px solid rgba(184, 110, 82, 0.2);
-            border-radius: 8px;
-            background: white;
-            color: #444;
-            font-size: 0.9rem;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        select:hover {
-            border-color: rgba(184, 110, 82, 0.4);
-        }
-
-        select:focus {
-            border-color: #B86E52;
-            box-shadow: 0 0 0 2px rgba(184, 110, 82, 0.1);
+            border-radius: 5px;
+            border: 1px solid #B86E52;
+            background-color: #fff;
+            color: #B86E52;
         }
 
         .result-container {
-            margin-bottom: 2rem;
-            padding: 0.5rem;
-            border-radius: 16px;
-            background: linear-gradient(135deg, #FFB68E 0%, #FFD0B8 100%);
+            margin: 1rem 0;
         }
 
         .result {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            font-weight: 500;
-            color: #444;
+            font-size: 1.5rem;
+            color: #FF6347;
+            min-height: 2rem;
             transition: all 0.3s ease;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        .result.animating {
-            transform: scale(1.02);
-            background: #f8f9fa;
-        }
-
-        .button {
-            background: linear-gradient(135deg, #E67E51 0%, #F1945E 100%);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(230, 126, 81, 0.2);
-        }
-
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(230, 126, 81, 0.3);
-        }
-
-        .button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(230, 126, 81, 0.2);
-        }
-
-        .button:disabled {
-            background: linear-gradient(135deg, #FFD0B8 0%, #FFE4D6 100%);
-            transform: none;
-            cursor: not-allowed;
         }
 
         .button-group {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
             justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
-        .favorite-button, .recipe-button, .map-button {
-            background: none;
-            border: none;
+        .button-group button {
             padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 1rem auto;
-            transition: all 0.3s ease;
-            border-radius: 4px;
-            
-            /* 防止文字被選取 */
-            user-select: none; /* 標準語法 */
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* Internet Explorer/Edge */
+            transition: background-color 0.3s ease;
         }
 
         .favorite-button {
-            color: #B86E52;
-        }
-
-        .recipe-button {
-            color: #2E7D32;
-        }
-
-        .map-button {
-            color: #4285f4;
-        }
-
-        .favorite-button:hover, .recipe-button:hover, .map-button:hover {
-            transform: scale(1.1);
-        }
-
-        .favorite-button:hover {
-            background: rgba(184, 110, 82, 0.1);
-        }
-
-        .recipe-button:hover {
-            background: rgba(46, 125, 50, 0.1);
-        }
-
-        .map-button:hover {
-            background: rgba(66, 133, 244, 0.1);
+            background-color: #FFD700;
+            color: #fff;
         }
 
         .favorite-button.active {
-            color: #FFB68E;
+            background-color: #FFA500;
         }
 
-        .remaining-choices {
-            margin-top: 1.5rem;
+        .recipe-button {
+            background-color: #87CEEB;
+            color: #fff;
+        }
+
+        .map-button {
+            background-color: #32CD32;
+            color: #fff;
+        }
+
+        .button {
+            padding: 0.75rem 1.5rem;
+            background-color: #B86E52;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
             font-size: 1rem;
-            color: #8B6153;
-            padding: 0.8rem;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 8px;
-            border: 1px solid rgba(184, 110, 82, 0.1);
+            transition: background-color 0.3s ease;
         }
 
-        .cooldown-info {
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #8B6153;
-            display: none;
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .button:hover:not(:disabled) {
+            background-color: #A0522D;
         }
 
         .favorite-list {
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(184, 110, 82, 0.2);
+            margin-top: 1rem;
+            text-align: left;
         }
 
         .favorite-list h3 {
+            margin-bottom: 0.5rem;
             color: #B86E52;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
         }
 
         .favorite-items {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 0.5rem;
-            justify-content: center;
         }
 
         .favorite-item {
-            background: rgba(255, 182, 142, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            color: #B86E52;
-            font-size: 0.9rem;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
-        }
-        .favorite-item a {
-            color: #B86E52;
-            text-decoration: none;
-            flex: 1;
+            background-color: #FFFACD;
+            padding: 0.5rem;
+            border-radius: 5px;
         }
 
-        .favorite-item a:hover {
-            text-decoration: underline;
+        .favorite-item a {
+            color: #FF6347;
+            text-decoration: none;
+            flex: 1;
         }
 
         .favorite-item button {
             background: none;
             border: none;
-            color: #d93025;
-            font-weight: bold;
+            color: #FF6347;
+            font-size: 1.2rem;
             cursor: pointer;
-            font-size: 1rem;
+            margin-left: 0.5rem;
         }
 
-        /* 食譜彈出視窗樣式 */
+        /* Modal styles */
         .modal {
-            display: none;
-            position: fixed;
-            top: 0;
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            overflow-y: auto;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
         }
 
         .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 2rem;
-            width: 90%;
+            background-color: #fefefe;
+            margin: 10% auto; /* 10% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
             max-width: 600px;
-            border-radius: 16px;
+            border-radius: 10px;
             position: relative;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         }
 
         .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
             position: absolute;
-            right: 1rem;
-            top: 1rem;
-            font-size: 1.5rem;
+            right: 20px;
+            top: 10px;
             cursor: pointer;
-            color: #B86E52;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
         }
 
         .modal-title {
+            margin-top: 0;
             color: #B86E52;
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
-            text-align: left;
         }
 
         .recipe-content {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .ingredients, .steps {
-            background: rgba(255, 230, 220, 0.3);
-            padding: 1.5rem;
-            border-radius: 12px;
-        }
-
-        .error-message {
-            color: #d93025;
-            padding: 1rem;
-            text-align: center;
-            background: rgba(217, 48, 37, 0.1);
-            border-radius: 4px;
-            margin: 1rem 0;
-        }
-
-        /* 添加標題和圖標切換動畫 */
-        .food-icon, .title {
-            transition: all 0.3s ease;
-        }
-        .ingredients h3, 
-        .steps h3, 
-        .ingredients h4 {
-            color: #B86E52;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
             text-align: left;
         }
 
-        .ingredients h4 {
-            font-size: 1.1rem;
-            margin-top: 1rem;
-        }
-
-        .ingredients-list {
+        .ingredients, .steps {
             margin-bottom: 1rem;
         }
 
         .ingredient-item {
             display: flex;
-            align-items: flex-start;
-            margin-bottom: 0.8rem;
-            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
         }
 
         .ingredient-checkbox {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #B86E52;
-            border-radius: 4px;
-            margin-top: 2px;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .ingredient-checkbox:checked {
-            background-color: #B86E52;
-        }
-
-        .ingredient-checkbox:checked::after {
-            content: '✓';
-            color: white;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 14px;
-        }
-
-        .ingredient-label {
-            flex: 1;
-            color: #444;
-            line-height: 1.5;
-            cursor: pointer;
-            text-align: left;
+            margin-right: 0.5rem;
+            accent-color: #B86E52;
         }
 
         .ingredient-label.checked {
             text-decoration: line-through;
             color: #888;
         }
-        .steps ol {
+
+        ol {
             padding-left: 1.5rem;
-            text-align: left;
         }
 
-        .steps li {
-            margin-bottom: 0.8rem;
-            color: #444;
-            line-height: 1.5;
+        /* Loading Indicator */
+        #loadingIndicator {
+            font-size: 1rem;
+            color: #B86E52;
         }
 
-        .food-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            animation: pulse 2s infinite;
+        /* Animations */
+        .animating {
+            animation: shake 0.5s;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        @media (max-width: 480px) {
-            .card {
-                padding: 1.5rem;
-            }
-            .title {
-                font-size: 1.8rem;
-            }
-            .result {
-                font-size: 1.2rem;
-            }
-            .modal-content {
-                margin: 10% 5%;
-                padding: 1.5rem;
-            }
-            .button-group {
-                flex-direction: column;
-                align-items: center;
-            }
-            .map-button {
-                width: 100%;
-                justify-content: center;
-            }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
     </style>
 </head>
@@ -589,7 +394,35 @@
         </div>
     </div>
 
-    <script>
+    <!-- Firebase 初始化腳本 -->
+    <script type="module">
+        // 導入 Firebase 函數
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase 配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyBY-aFTAAODQ98RdEpbm6ExVT9L3s5bTc4",
+            authDomain: "dinner-picker-b1fab.firebaseapp.com",
+            projectId: "dinner-picker-b1fab",
+            storageBucket: "dinner-picker-b1fab.firebasestorage.app",
+            messagingSenderId: "250618013210",
+            appId: "1:250618013210:web:8fa4f547d862e4430613a3"
+        };
+        
+        // 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // 將 db 暴露到全局，以供主要腳本使用
+        window.db = db;
+    </script>
+
+    <!-- 主要模組腳本 -->
+    <script type="module">
+        // 導入 Firebase Firestore 函數
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
         // 位置服務全域變數
         let hasLocationPermission = false;
         let watchId = null;
@@ -1315,37 +1148,11 @@
                 }
             };
         };
-
-        // 其他函數保持不變
-        // ...
     </script>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-      // Firebase 配置
-      const firebaseConfig = {
-        // 請在此處填入您的 Firebase 配置
-        apiKey: "YOUR_API_KEY",
-        authDomain: "dinner-picker-b1fab.firebaseapp.com",
-        projectId: "dinner-picker-b1fab",
-        storageBucket: "dinner-picker-b1fab.appspot.com",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-      };
-
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-
-      // 將 db 設為全域變數以供其他程式使用
-      window.db = db;
-    </script>
-
-    <!-- Service Worker 註冊 -->
+    <!-- Service Worker 註冊 (選擇性，請確保 service-worker.js 存在) -->
     <script>
+        /*
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
@@ -1354,9 +1161,11 @@
                     })
                     .catch(error => {
                         console.error('Service Worker 註冊失敗:', error);
+                        // 如果不需要 Service Worker，可以考慮移除此段代碼
                     });
             });
         }
+        */
     </script>
 </body>
 </html>
