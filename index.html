@@ -1646,6 +1646,432 @@
       window.importBeverageItems = importBeverageItems;
       window.checkExistingData = checkExistingData;
     </script>
+<!-- 資料導入工具 -->
+    <script type="module">
+      import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+      // 一般餐點資料庫
+      const menuItems = [
+        // 中式料理 - 150元以下
+        { name: "雞腿便當", country: "中式", price: "150以下" },
+        { name: "排骨便當", country: "中式", price: "150以下" },
+        { name: "魯肉便當", country: "中式", price: "150以下" },
+        { name: "控肉便當", country: "中式", price: "150以下" },
+        { name: "豬排便當", country: "中式", price: "150以下" },
+        { name: "雞排便當", country: "中式", price: "150以下" },
+        { name: "叉燒便當", country: "中式", price: "150以下" },
+        { name: "油雞便當", country: "中式", price: "150以下" },
+        { name: "燒鴨便當", country: "中式", price: "150以下" },
+        { name: "炸雞便當", country: "中式", price: "150以下" },
+        { name: "滷雞腿飯", country: "中式", price: "150以下" },
+        { name: "三寶飯", country: "中式", price: "150以下" },
+        { name: "雞絲飯", country: "中式", price: "150以下" },
+        { name: "豬腳飯", country: "中式", price: "150以下" },
+        { name: "滷肉飯", country: "中式", price: "150以下" },
+        { name: "肉燥飯", country: "中式", price: "150以下" },
+        { name: "火雞肉飯", country: "中式", price: "150以下" },
+        { name: "爌肉飯", country: "中式", price: "150以下" },
+        { name: "雞肉飯", country: "中式", price: "150以下" },
+        { name: "排骨蛋炒飯", country: "中式", price: "150以下" },
+
+        // 中式料理 - 150-500元
+        { name: "紅燒牛肉麵", country: "中式", price: "150-500" },
+        { name: "清燉牛肉麵", country: "中式", price: "150-500" },
+        { name: "牛肉炒飯", country: "中式", price: "150-500" },
+        { name: "蝦仁炒飯", country: "中式", price: "150-500" },
+        { name: "揚州炒飯", country: "中式", price: "150-500" },
+        { name: "三杯雞飯", country: "中式", price: "150-500" },
+        { name: "宮保雞丁飯", country: "中式", price: "150-500" },
+        { name: "蔥爆牛肉飯", country: "中式", price: "150-500" },
+        { name: "左宗棠雞飯", country: "中式", price: "150-500" },
+        { name: "蒜泥白肉飯", country: "中式", price: "150-500" },
+        { name: "糖醋排骨飯", country: "中式", price: "150-500" },
+        { name: "東坡肉飯", country: "中式", price: "150-500" },
+        { name: "獅子頭飯", country: "中式", price: "150-500" },
+        { name: "黑胡椒牛肉飯", country: "中式", price: "150-500" },
+        { name: "麻婆豆腐飯", country: "中式", price: "150-500" },
+        { name: "鹹魚雞粒炒飯", country: "中式", price: "150-500" },
+        { name: "蒜蓉豬肉飯", country: "中式", price: "150-500" },
+        { name: "蔥燒豬肉飯", country: "中式", price: "150-500" },
+        { name: "京醬肉絲飯", country: "中式", price: "150-500" },
+        { name: "叉燒燒鴨飯", country: "中式", price: "150-500" },
+
+        // 日式料理 - 150元以下
+        { name: "豬排丼", country: "日式", price: "150以下" },
+        { name: "炸雞丼", country: "日式", price: "150以下" },
+        { name: "親子丼", country: "日式", price: "150以下" },
+        { name: "牛丼", country: "日式", price: "150以下" },
+        { name: "豬肉丼", country: "日式", price: "150以下" },
+        { name: "豬肉咖哩飯", country: "日式", price: "150以下" },
+        { name: "雞肉咖哩飯", country: "日式", price: "150以下" },
+        { name: "日式炒麵", country: "日式", price: "150以下" },
+        { name: "日式烏龍麵", country: "日式", price: "150以下" },
+        { name: "炸豬排烏龍麵", country: "日式", price: "150以下" },
+        { name: "鮪魚蓋飯", country: "日式", price: "150以下" },
+        { name: "滑蛋牛肉飯", country: "日式", price: "150以下" },
+        { name: "炸雞咖哩飯", country: "日式", price: "150以下" },
+        { name: "豬肉蓋飯", country: "日式", price: "150以下" },
+        { name: "唐揚雞飯", country: "日式", price: "150以下" },
+        { name: "雞排咖哩飯", country: "日式", price: "150以下" },
+        { name: "豬排咖哩飯", country: "日式", price: "150以下" },
+        { name: "蔥花豬肉飯", country: "日式", price: "150以下" },
+        { name: "明太子烏龍麵", country: "日式", price: "150以下" },
+        { name: "豬肉味噌湯飯", country: "日式", price: "150以下" },
+
+        // 日式料理 - 150-500元
+        { name: "鰻魚飯", country: "日式", price: "150-500" },
+        { name: "生魚片丼", country: "日式", price: "150-500" },
+        { name: "海鮮丼", country: "日式", price: "150-500" },
+        { name: "炸豬排定食", country: "日式", price: "150-500" },
+        { name: "炸雞定食", country: "日式", price: "150-500" },
+        { name: "鮭魚定食", country: "日式", price: "150-500" },
+        { name: "豪華壽司套餐", country: "日式", price: "150-500" },
+        { name: "綜合天婦羅定食", country: "日式", price: "150-500" },
+        { name: "炸蝦定食", country: "日式", price: "150-500" },
+        { name: "薑燒豬肉定食", country: "日式", price: "150-500" },
+        { name: "牛肉豆腐鍋", country: "日式", price: "150-500" },
+        { name: "辣炒魷魚", country: "日式", price: "150-500" },
+        { name: "春川炒雞", country: "日式", price: "150-500" },
+        { name: "泡菜炒豬肉", country: "日式", price: "150-500" },
+        { name: "韓式牛小排", country: "日式", price: "150-500" },
+        { name: "辣炒豬肉", country: "日式", price: "150-500" },
+        { name: "海鮮煎餅套餐", country: "日式", price: "150-500" },
+        { name: "韓式炸雞", country: "日式", price: "150-500" },
+        { name: "起司薯條套餐", country: "日式", price: "150-500" },
+        { name: "美式牛排套餐", country: "日式", price: "150-500" },
+
+        // 韓式料理 - 150元以下
+        { name: "部隊鍋泡飯", country: "韓式", price: "150以下" },
+        { name: "泡菜炒飯", country: "韓式", price: "150以下" },
+        { name: "韓式拌飯", country: "韓式", price: "150以下" },
+        { name: "泡菜豆腐鍋", country: "韓式", price: "150以下" },
+        { name: "韓式炸醬麵", country: "韓式", price: "150以下" },
+        { name: "辣炒年糕", country: "韓式", price: "150以下" },
+        { name: "泡菜豬肉湯飯", country: "韓式", price: "150以下" },
+        { name: "豆芽豬肉湯飯", country: "韓式", price: "150以下" },
+        { name: "海鮮煎餅", country: "韓式", price: "150以下" },
+        { name: "泡菜豬肉炒飯", country: "韓式", price: "150以下" },
+        { name: "韓式冷麵", country: "韓式", price: "150以下" },
+        { name: "辣炒豬肉飯", country: "韓式", price: "150以下" },
+        { name: "韓式炸雞飯", country: "韓式", price: "150以下" },
+        { name: "雞肉漢堡", country: "韓式", price: "150以下" },
+        { name: "玉米熱狗", country: "韓式", price: "150以下" },
+        { name: "炸魚堡", country: "韓式", price: "150以下" },
+        { name: "雙層起司堡", country: "韓式", price: "150以下" },
+        { name: "BBQ豬肉堡", country: "韓式", price: "150以下" },
+        { name: "辣雞堡", country: "韓式", price: "150以下" },
+        { name: "美式炸雞", country: "韓式", price: "150以下" },
+
+        // 韓式料理 - 150-500元
+        { name: "石鍋拌飯", country: "韓式", price: "150-500" },
+        { name: "人蔘雞湯", country: "韓式", price: "150-500" },
+        { name: "韓式烤肉飯", country: "韓式", price: "150-500" },
+        { name: "辣炒章魚", country: "韓式", price: "150-500" },
+        { name: "嫩豆腐煲", country: "韓式", price: "150-500" },
+        { name: "泡菜豬肉套餐", country: "韓式", price: "150-500" },
+        { name: "韓式炸雞", country: "韓式", price: "150-500" },
+        { name: "海鮮豆腐鍋", country: "韓式", price: "150-500" },
+        { name: "泡菜豬肉鍋", country: "韓式", price: "150-500" },
+        { name: "牛肉豆腐鍋", country: "韓式", price: "150-500" },
+        { name: "辣炒雞肉", country: "韓式", price: "150-500" },
+        { name: "韓式烤肉拌飯", country: "韓式", price: "150-500" },
+        { name: "牛肉泡菜鍋", country: "韓式", price: "150-500" },
+        { name: "海鮮泡菜鍋", country: "韓式", price: "150-500" },
+        { name: "辣炒魷魚", country: "韓式", price: "150-500" },
+        { name: "春川炒雞", country: "韓式", price: "150-500" },
+        { name: "泡菜炒豬肉", country: "韓式", price: "150-500" },
+        { name: "韓式牛小排", country: "韓式", price: "150-500" },
+        { name: "辣炒豬肉", country: "韓式", price: "150-500" },
+        { name: "海鮮煎餅套餐", country: "韓式", price: "150-500" },
+
+        // 義式料理 - 150元以下
+        { name: "白醬培根麵", country: "義式", price: "150以下" },
+        { name: "番茄肉醬麵", country: "義式", price: "150以下" },
+        { name: "青醬雞肉麵", country: "義式", price: "150以下" },
+        { name: "奶油蘑菇麵", country: "義式", price: "150以下" },
+        { name: "蒜香培根麵", country: "義式", price: "150以下" },
+        { name: "番茄海鮮麵", country: "義式", price: "150以下" },
+        { name: "番茄海鮮麵", country: "義式", price: "150以下" },
+        { name: "肉丸番茄麵", country: "義式", price: "150以下" },
+        { name: "黑胡椒豬肉麵", country: "義式", price: "150以下" },
+        { name: "茄汁雞肉麵", country: "義式", price: "150以下" },
+        { name: "奶油磨菇麵", country: "義式", price: "150以下" },
+        { name: "白醬蛤蜊麵", country: "義式", price: "150以下" },
+        { name: "青醬蛤蜊麵", country: "義式", price: "150以下" },
+        { name: "茄汁香腸麵", country: "義式", price: "150以下" },
+        { name: "奶油玉米雞麵", country: "義式", price: "150以下" },
+        { name: "蒜香蝦仁麵", country: "義式", price: "150以下" },
+        { name: "青醬培根麵", country: "義式", price: "150以下" },
+        { name: "番茄蘑菇麵", country: "義式", price: "150以下" },
+        { name: "白醬海鮮麵", country: "義式", price: "150以下" },
+        { name: "義大利肉醬麵", country: "義式", price: "150以下" },
+        { name: "炙燒培根麵", country: "義式", price: "150以下" },
+
+        // 義式料理 - 150-500元
+        { name: "松露奶油麵", country: "義式", price: "150-500" },
+        { name: "海鮮燉飯", country: "義式", price: "150-500" },
+        { name: "牛肉燉飯", country: "義式", price: "150-500" },
+        { name: "野菇燉飯", country: "義式", price: "150-500" },
+        { name: "海鮮義大利麵", country: "義式", price: "150-500" },
+        { name: "白酒蛤蜊麵", country: "義式", price: "150-500" },
+        { name: "青醬海鮮麵", country: "義式", price: "150-500" },
+        { name: "香煎鮭魚飯", country: "義式", price: "150-500" },
+        { name: "奶油龍蝦麵", country: "義式", price: "150-500" },
+        { name: "牛肉紅酒飯", country: "義式", price: "150-500" },
+        { name: "蒜香蝦仁麵", country: "義式", price: "150-500" },
+        { name: "番紅花海鮮飯", country: "義式", price: "150-500" },
+        { name: "白酒蘑菇雞飯", country: "義式", price: "150-500" },
+        { name: "青醬鮮蝦麵", country: "義式", price: "150-500" },
+        { name: "松露野菇飯", country: "義式", price: "150-500" },
+        { name: "義式臘腸麵", country: "義式", price: "150-500" },
+        { name: "墨魚麵", country: "義式", price: "150-500" },
+        { name: "羊肉燉飯", country: "義式", price: "150-500" },
+        { name: "蛤蜊海鮮飯", country: "義式", price: "150-500" },
+        { name: "蒜香蝦仁燉飯", country: "義式", price: "150-500" },
+
+        // 美式料理 - 150元以下
+        { name: "美式漢堡套餐", country: "美式", price: "150以下" },
+        { name: "起司漢堡套餐", country: "美式", price: "150以下" },
+        { name: "炸雞腿套餐", country: "美式", price: "150以下" },
+        { name: "熱狗堡套餐", country: "美式", price: "150以下" },
+        { name: "雞塊套餐", country: "美式", price: "150以下" },
+        { name: "炸魚排套餐", country: "美式", price: "150以下" },
+        { name: "薯條炸雞翅", country: "美式", price: "150以下" },
+        { name: "培根漢堡", country: "美式", price: "150以下" },
+        { name: "BBQ雞腿堡", country: "美式", price: "150以下" },
+        { name: "花生醬漢堡", country: "美式", price: "150以下" },
+        { name: "起司熱狗堡", country: "美式", price: "150以下" },
+        { name: "炸雞翅套餐", country: "美式", price: "150以下" },
+        { name: "雞肉漢堡", country: "美式", price: "150以下" },
+        { name: "玉米熱狗", country: "美式", price: "150以下" },
+        { name: "炸魚堡", country: "美式", price: "150以下" },
+        { name: "雙層起司堡", country: "美式", price: "150以下" },
+        { name: "BBQ豬肉堡", country: "美式", price: "150以下" },
+        { name: "辣雞堡", country: "美式", price: "150以下" },
+        { name: "美式炸雞", country: "美式", price: "150以下" },
+        { name: "墨西哥捲餅", country: "美式", price: "150以下" },
+
+        // 美式料理 - 150-500元
+        { name: "牛排漢堡套餐", country: "美式", price: "150-500" },
+        { name: "巨無霸漢堡", country: "美式", price: "150-500" },
+        { name: "BBQ豬肋排", country: "美式", price: "150-500" },
+        { name: "炸雞拼盤", country: "美式", price: "150-500" },
+        { name: "美式牛排", country: "美式", price: "150-500" },
+        { name: "BBQ雞腿排", country: "美式", price: "150-500" },
+        { name: "起司薯條漢堡", country: "美式", price: "150-500" },
+        { name: "美式炸雞桶", country: "美式", price: "150-500" },
+        { name: "豪華漢堡套餐", country: "美式", price: "150-500" },
+        { name: "牛肉起司堡", country: "美式", price: "150-500" },
+        { name: "炸雞翅拼盤", country: "美式", price: "150-500" },
+        { name: "BBQ肋排套餐", country: "美式", price: "150-500" },
+        { name: "牛排三明治", country: "美式", price: "150-500" },
+        { name: "美式炸雞套餐", country: "美式", price: "150-500" },
+        { name: "辣味炸雞拼盤", country: "美式", price: "150-500" },
+        { name: "牛肉漢堡套餐", country: "美式", price: "150-500" },
+        { name: "BBQ雞翅拼盤", country: "美式", price: "150-500" },
+        { name: "起司薯條套餐", country: "美式", price: "150-500" },
+        { name: "美式牛排套餐", country: "美式", price: "150-500" },
+        { name: "雞腿排套餐", country: "美式", price: "150-500" }
+      ];
+
+      // 飲料資料庫
+      const beverageItems = [
+        // 50嵐
+        { name: "茉莉綠茶", country: "飲料", brand: "50嵐" },
+        { name: "阿薩姆紅茶", country: "飲料", brand: "50嵐" },
+        { name: "四季春青茶", country: "飲料", brand: "50嵐" },
+        { name: "黃金烏龍", country: "飲料", brand: "50嵐" },
+        { name: "檸檬綠", country: "飲料", brand: "50嵐" },
+        { name: "梅の綠", country: "飲料", brand: "50嵐" },
+        { name: "桔子綠", country: "飲料", brand: "50嵐" },
+        { name: "8冰綠", country: "飲料", brand: "50嵐" },
+        { name: "養樂多綠", country: "飲料", brand: "50嵐" },
+        { name: "冰淇淋紅茶", country: "飲料", brand: "50嵐" },
+        { name: "旺來紅", country: "飲料", brand: "50嵐" },
+        { name: "鮮柚綠", country: "飲料", brand: "50嵐" },
+        { name: "奶茶", country: "飲料", brand: "50嵐" },
+        { name: "奶綠", country: "飲料", brand: "50嵐" },
+        { name: "紅茶瑪奇朵", country: "飲料", brand: "50嵐" },
+        { name: "烏龍瑪奇朵", country: "飲料", brand: "50嵐" },
+        { name: "四季奶青", country: "飲料", brand: "50嵐" },
+        { name: "黃金烏龍奶茶", country: "飲料", brand: "50嵐" },
+        { name: "阿華田", country: "飲料", brand: "50嵐" },
+        { name: "可可芭蕾", country: "飲料", brand: "50嵐" },
+        { name: "四季春+珍波椰", country: "飲料", brand: "50嵐" },
+        { name: "波霸紅茶", country: "飲料", brand: "50嵐" },
+        { name: "波霸綠茶", country: "飲料", brand: "50嵐" },
+        { name: "波霸青茶", country: "飲料", brand: "50嵐" },
+        { name: "波霸烏龍茶", country: "飲料", brand: "50嵐" },
+        { name: "波霸奶茶", country: "飲料", brand: "50嵐" },
+        { name: "波霸奶綠", country: "飲料", brand: "50嵐" },
+        { name: "波霸烏龍奶茶", country: "飲料", brand: "50嵐" },
+        { name: "珍珠紅茶", country: "飲料", brand: "50嵐" },
+        { name: "珍珠綠茶", country: "飲料", brand: "50嵐" },
+        { name: "珍珠青茶", country: "飲料", brand: "50嵐" },
+        { name: "珍珠烏龍茶", country: "飲料", brand: "50嵐" },
+        { name: "珍珠奶茶", country: "飲料", brand: "50嵐" },
+        { name: "珍珠奶綠", country: "飲料", brand: "50嵐" },
+        { name: "椰果奶茶", country: "飲料", brand: "50嵐" },
+        { name: "布丁奶茶", country: "飲料", brand: "50嵐" },
+        { name: "布丁奶綠", country: "飲料", brand: "50嵐" },
+        { name: "布丁紅茶", country: "飲料", brand: "50嵐" },
+        { name: "布丁綠茶", country: "飲料", brand: "50嵐" },
+        { name: "布丁青茶", country: "飲料", brand: "50嵐" },
+        { name: "布丁烏龍茶", country: "飲料", brand: "50嵐" },
+        { name: "檸檬汁", country: "飲料", brand: "50嵐" },
+        { name: "金桔檸檬", country: "飲料", brand: "50嵐" },
+        { name: "檸檬梅汁", country: "飲料", brand: "50嵐" },
+        { name: "檸檬養樂多", country: "飲料", brand: "50嵐" },
+        { name: "8冰茶", country: "飲料", brand: "50嵐" },
+        { name: "鮮柚汁", country: "飲料", brand: "50嵐" },
+        { name: "葡萄柚多多", country: "飲料", brand: "50嵐" },
+        { name: "紅茶拿鐵", country: "飲料", brand: "50嵐" },
+        { name: "綠茶拿鐵", country: "飲料", brand: "50嵐" },
+        { name: "黃金烏龍拿鐵", country: "飲料", brand: "50嵐" },
+        { name: "阿華田拿鐵", country: "飲料", brand: "50嵐" },
+        { name: "可可芭蕾拿鐵", country: "飲料", brand: "50嵐" },
+        { name: "波霸鮮奶", country: "飲料", brand: "50嵐" },
+        { name: "珍珠鮮奶", country: "飲料", brand: "50嵐" },
+        { name: "檸檬紅茶", country: "飲料", brand: "50嵐" },
+        { name: "檸檬梅汁綠", country: "飲料", brand: "50嵐" },
+        { name: "混珠黃金烏龍", country: "飲料", brand: "50嵐" },
+
+        // 得正
+        { name: "焙烏龍", country: "飲料", brand: "得正" },
+        { name: "輕烏龍", country: "飲料", brand: "得正" },
+        { name: "春烏龍", country: "飲料", brand: "得正" },
+        { name: "綠茶", country: "飲料", brand: "得正" },
+        { name: "紅茶", country: "飲料", brand: "得正" },
+        { name: "烘吉奶茶", country: "飲料", brand: "得正" },
+        { name: "黃金珍珠奶綠", country: "飲料", brand: "得正" },
+        { name: "珍珠奶茶", country: "飲料", brand: "得正" },
+        { name: "焙烏龍奶茶", country: "飲料", brand: "得正" },
+        { name: "奶茶", country: "飲料", brand: "得正" },
+        { name: "雙柚金烏龍", country: "飲料", brand: "得正" },
+        { name: "百香果綠茶", country: "飲料", brand: "得正" },
+        { name: "優酪春烏龍", country: "飲料", brand: "得正" },
+        { name: "青梅春烏龍", country: "飲料", brand: "得正" },
+        { name: "甘蔗春烏龍", country: "飲料", brand: "得正" },
+        { name: "香橙春烏龍", country: "飲料", brand: "得正" },
+        { name: "檸檬春烏龍", country: "飲料", brand: "得正" },
+        { name: "烘吉鮮奶", country: "飲料", brand: "得正" },
+        { name: "焙烏龍鮮奶", country: "飲料", brand: "得正" },
+        { name: "輕烏龍鮮奶", country: "飲料", brand: "得正" },
+        { name: "紅茶鮮奶", country: "飲料", brand: "得正" },
+        { name: "芝士奶蓋阿華田", country: "飲料", brand: "得正" },
+        { name: "芝士奶蓋烘吉茶", country: "飲料", brand: "得正" },
+        { name: "芝士奶蓋焙烏龍", country: "飲料", brand: "得正" },
+        { name: "芝士奶蓋春烏龍", country: "飲料", brand: "得正" },
+
+        // 龜記
+        { name: "極品紅茶", country: "飲料", brand: "龜記" },
+        { name: "翡翠綠茶", country: "飲料", brand: "龜記" },
+        { name: "青四季春", country: "飲料", brand: "龜記" },
+        { name: "三韻紅萱", country: "飲料", brand: "龜記" },
+        { name: "紅水烏龍", country: "飲料", brand: "龜記" },
+        { name: "三十三茶王", country: "飲料", brand: "龜記" },
+        { name: "碎銀普洱茶", country: "飲料", brand: "龜記" },
+        { name: "花沫烏龍", country: "飲料", brand: "龜記" },
+        { name: "鮮果百香紅茶", country: "飲料", brand: "龜記" },
+        { name: "鮮果百香綠茶", country: "飲料", brand: "龜記" },
+        { name: "翡翠雷夢", country: "飲料", brand: "龜記" },
+        { name: "柳丁翡翠", country: "飲料", brand: "龜記" },
+        { name: "蘋果紅萱", country: "飲料", brand: "龜記" },
+        { name: "旺梨四季春", country: "飲料", brand: "龜記" },
+        { name: "蜜桃烏龍", country: "飲料", brand: "龜記" },
+        { name: "香柚雷夢綠", country: "飲料", brand: "龜記" },
+        { name: "紅柚翡翠", country: "飲料", brand: "龜記" },
+        { name: "豆漿紅茶", country: "飲料", brand: "龜記" },
+        { name: "冬瓜茶王", country: "飲料", brand: "龜記" },
+        { name: "冬瓜雷夢", country: "飲料", brand: "龜記" },
+        { name: "阿源楊桃紅茶", country: "飲料", brand: "龜記" },
+        { name: "阿源楊桃綠茶", country: "飲料", brand: "龜記" },
+        { name: "楊桃雷夢", country: "飲料", brand: "龜記" },
+        { name: "甘蔗四季春", country: "飲料", brand: "龜記" },
+        { name: "極品奶茶", country: "飲料", brand: "龜記" },
+        { name: "翡翠奶茶", country: "飲料", brand: "龜記" },
+        { name: "茶王奶茶", country: "飲料", brand: "龜記" },
+        { name: "碎銀普洱奶茶", country: "飲料", brand: "龜記" },
+        { name: "珍珠奶茶", country: "飲料", brand: "龜記" },
+        { name: "極品鮮乳茶", country: "飲料", brand: "龜記" },
+        { name: "翡翠鮮乳茶", country: "飲料", brand: "龜記" },
+        { name: "龜記濃乳茶", country: "飲料", brand: "龜記" },
+        { name: "冬瓜鮮乳", country: "飲料", brand: "龜記" },
+        { name: "紅烏鮮乳茶", country: "飲料", brand: "龜記" },
+        { name: "巧克鮮乳茶", country: "飲料", brand: "龜記" },
+        { name: "碎銀普洱鮮乳", country: "飲料", brand: "龜記" },
+        { name: "蜂蜜綠茶", country: "飲料", brand: "龜記" },
+        { name: "蜂蜜四季春", country: "飲料", brand: "龜記" },
+        { name: "三韻奶茶", country: "飲料", brand: "龜記" },
+        { name: "蜂蜜雷夢", country: "飲料", brand: "龜記" },
+        { name: "雷夢蘆薈蜜", country: "飲料", brand: "龜記" },
+        { name: "原味薑茶", country: "飲料", brand: "龜記" },
+        { name: "薑汁奶茶", country: "飲料", brand: "龜記" },
+        { name: "薑汁雷夢", country: "飲料", brand: "龜記" },
+        { name: "薑汁桂圓", country: "飲料", brand: "龜記" },
+        { name: "桂圓紅棗茶", country: "飲料", brand: "龜記" }
+      ];
+
+      // 餐點資料檢查功能
+      async function checkExistingData() {
+        const menuSnapshot = await getDocs(collection(db, 'menu-items'));
+        const beverageSnapshot = await getDocs(collection(db, 'beverage-items'));
+        console.log(`現有餐點數量: ${menuSnapshot.size}`);
+        console.log(`現有飲料數量: ${beverageSnapshot.size}`);
+        return {
+          menuCount: menuSnapshot.size,
+          beverageCount: beverageSnapshot.size
+        };
+      }
+
+      // 一般餐點資料導入
+      async function importMenuItems() {
+        try {
+          const existingData = await checkExistingData();
+          if (existingData.menuCount > 0) {
+            if (!confirm('資料庫中已有餐點資料！確定要重新導入嗎？')) {
+              return;
+            }
+          }
+
+          let importCount = 0;
+          for (const item of menuItems) {
+            await addDoc(collection(db, 'menu-items'), item);
+            importCount++;
+          }
+          
+          console.log(`成功導入 ${importCount} 筆餐點資料！`);
+        } catch (error) {
+          console.error('資料導入錯誤：', error);
+        }
+      }
+
+      // 飲料資料導入
+      async function importBeverageItems() {
+        try {
+          const existingData = await checkExistingData();
+          if (existingData.beverageCount > 0) {
+            if (!confirm('資料庫中已有飲料資料！確定要重新導入嗎？')) {
+              return;
+            }
+          }
+
+          let importCount = 0;
+          for (const item of beverageItems) {
+            await addDoc(collection(db, 'beverage-items'), item);
+            importCount++;
+          }
+          
+          console.log(`成功導入 ${importCount} 筆飲料資料！`);
+        } catch (error) {
+          console.error('飲料資料導入錯誤：', error);
+        }
+      }
+
+      // 將函數綁定到全域變數
+      window.importMenuItems = importMenuItems;
+      window.importBeverageItems = importBeverageItems;
+      window.checkExistingData = checkExistingData;
+    </script>
 </body>
 </html>
