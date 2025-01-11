@@ -12,117 +12,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="等下吃什麼？">
-</head>
-<body>
-    <div class="card">
-        <div id="categoryIcon" class="food-icon">🍚</div>
-        <h1 id="mainTitle" class="title">等下吃什麼？</h1>
-
-        <!-- 篩選器 -->
-        <div class="filters">
-            <div class="filter-group">
-                <label class="filter-label">料理形式</label>
-                <select id="countryFilter" onchange="handleCategoryChange()">
-                    <option value="">不指定</option>
-                    <option value="中式">中式</option>
-                    <option value="日式">日式</option>
-                    <option value="韓式">韓式</option>
-                    <option value="義式">義式</option>
-                    <option value="美式">美式</option>
-                    <option value="越式">越式</option>
-                    <option value="飲料">🥤 飲料</option> <!-- 保留飲料分類 -->
-                </select>
-            </div>
-            <div class="filter-group">
-                <label id="priceFilterLabel" class="filter-label">價格區間</label>
-                <select id="priceFilter" onchange="updateAvailableCount()">
-                    <option value="">不指定</option>
-                    <option value="150以下">150元以下</option>
-                    <option value="150-500">150-500元</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="result-container">
-            <div id="result" class="result">點擊按鈕選擇餐點</div>
-            <div class="button-group">
-                <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
-                    <span class="favorite-icon">⭐</span>
-                    <span class="favorite-text">點擊收藏</span>
-                </button>
-                <button id="recipeButton" class="recipe-button" onclick="showRecipe()" style="display: none">
-                    <span class="recipe-icon">📖</span>
-                    <span class="recipe-text">點擊看食譜</span>
-                </button>
-                <button id="mapButton" class="map-button" onclick="searchNearbyRestaurant()" style="display: none">
-                    <span class="map-icon">🗺️</span>
-                    <span class="map-text">搜尋附近店家</span>
-                </button>
-            </div>
-        </div>
-
-        <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
-        <div id="remainingChoices" class="remaining-choices"></div>
-        <div id="cooldownInfo" class="cooldown-info"></div>
-        <div id="favoriteList" class="favorite-list">
-            <h3>收藏清單</h3>
-            <div id="favoriteItems" class="favorite-items"></div>
-        </div>
-
-        <!-- 食譜彈出視窗 -->
-        <div id="recipeModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2 id="recipeTitle" class="modal-title"></h2>
-                <div id="recipeContent" class="recipe-content">
-                    <div class="ingredients">
-                        <h3>食材準備</h3>
-                        <div id="ingredientsList"></div>
-                    </div>
-                    <div class="steps">
-                        <h3>製作步驟</h3>
-                        <div id="stepsList"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 地圖搜尋錯誤提示框 -->
-        <div id="mapErrorModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2 class="modal-title">提示</h2>
-                <p id="mapErrorMessage" class="error-message"></p>
-            </div>
-        </div>
-
-        <!-- 位置權限提示框 -->
-        <div id="locationPermissionModal" class="modal">
-            <div class="modal-content">
-                <h2 class="modal-title">位置權限請求</h2>
-                <p class="permission-message">
-                    為了能夠幫您搜尋附近的店家，我們需要存取您的位置資訊。
-                    請在接下來的提示中選擇「允許」。
-                </p>
-                <button onclick="requestLocationPermission()" class="permission-button">
-                    好的，我明白了
-                </button>
-            </div>
-        </div>
-
-        <!-- 手動打開地圖的提示框 -->
-        <div id="manualMapModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2 class="modal-title">手動打開地圖</h2>
-                <p>請點擊以下鏈接以在地圖中查看附近的店家：</p>
-                <a id="manualMapLink" href="#" target="_blank" rel="noopener noreferrer">在地圖中查看</a>
-            </div>
-        </div>
-    </div>
-
+    
     <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
         * {
             margin: 0;
             padding: 0;
@@ -186,7 +78,7 @@
             font-size: 1rem;
             transition: background-color 0.3s ease;
         }
-.permission-button:hover {
+        .permission-button:hover {
             background: #3367d6;
         }
 
@@ -251,7 +143,7 @@
             transition: all 0.3s ease;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-.result.animating {
+        .result.animating {
             transform: scale(1.02);
             background: #f8f9fa;
         }
@@ -390,17 +282,17 @@
             align-items: center;
             gap: 0.5rem;
         }
-.favorite-item a {
+        .favorite-item a {
             color: #B86E52;
             text-decoration: none;
             flex: 1;
         }
 
-.favorite-item a:hover {
+        .favorite-item a:hover {
             text-decoration: underline;
         }
 
-.favorite-item button {
+        .favorite-item button {
             background: none;
             border: none;
             color: #d93025;
@@ -474,7 +366,7 @@
         .food-icon, .title {
             transition: all 0.3s ease;
         }
-.ingredients h3, 
+        .ingredients h3, 
         .steps h3, 
         .ingredients h4 {
             color: #B86E52;
@@ -538,7 +430,7 @@
             text-decoration: line-through;
             color: #888;
         }
-.steps ol {
+        .steps ol {
             padding-left: 1.5rem;
             text-align: left;
         }
@@ -585,6 +477,114 @@
             }
         }
     </style>
+</head>
+<body>
+    <div class="card">
+        <div id="categoryIcon" class="food-icon">🍚</div>
+        <h1 id="mainTitle" class="title">等下吃什麼？</h1>
+
+        <!-- 篩選器 -->
+        <div class="filters">
+            <div class="filter-group">
+                <label class="filter-label">料理形式</label>
+                <select id="countryFilter" onchange="handleCategoryChange()">
+                    <option value="">不指定</option>
+                    <option value="中式">中式</option>
+                    <option value="日式">日式</option>
+                    <option value="韓式">韓式</option>
+                    <option value="義式">義式</option>
+                    <option value="美式">美式</option>
+                    <option value="越式">越式</option>
+                    <option value="飲料">🥤 飲料</option> <!-- 保留飲料分類 -->
+                </select>
+            </div>
+            <div class="filter-group">
+                <label id="priceFilterLabel" class="filter-label">價格區間</label>
+                <select id="priceFilter" onchange="updateAvailableCount()">
+                    <option value="">不指定</option>
+                    <option value="150以下">150元以下</option>
+                    <option value="150-500">150-500元</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="result-container">
+            <div id="result" class="result">點擊按鈕選擇餐點</div>
+            <div class="button-group">
+                <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
+                    <span class="favorite-icon">⭐</span>
+                    <span class="favorite-text">點擊收藏</span>
+                </button>
+                <button id="recipeButton" class="recipe-button" onclick="showRecipe()" style="display: none">
+                    <span class="recipe-icon">📖</span>
+                    <span class="recipe-text">點擊看食譜</span>
+                </button>
+                <button id="mapButton" class="map-button" onclick="searchNearbyRestaurant()" style="display: none">
+                    <span class="map-icon">🗺️</span>
+                    <span class="map-text">搜尋附近店家</span>
+                </button>
+            </div>
+        </div>
+
+        <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
+        <div id="remainingChoices" class="remaining-choices"></div>
+        <div id="cooldownInfo" class="cooldown-info"></div>
+        <div id="favoriteList" class="favorite-list">
+            <h3>收藏清單</h3>
+            <div id="favoriteItems" class="favorite-items"></div>
+        </div>
+
+        <!-- 食譜彈出視窗 -->
+        <div id="recipeModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="recipeTitle" class="modal-title"></h2>
+                <div id="recipeContent" class="recipe-content">
+                    <div class="ingredients">
+                        <h3>食材準備</h3>
+                        <div id="ingredientsList"></div>
+                    </div>
+                    <div class="steps">
+                        <h3>製作步驟</h3>
+                        <div id="stepsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 地圖搜尋錯誤提示框 -->
+        <div id="mapErrorModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="modal-title">提示</h2>
+                <p id="mapErrorMessage" class="error-message"></p>
+            </div>
+        </div>
+
+        <!-- 位置權限提示框 -->
+        <div id="locationPermissionModal" class="modal">
+            <div class="modal-content">
+                <h2 class="modal-title">位置權限請求</h2>
+                <p class="permission-message">
+                    為了能夠幫您搜尋附近的店家，我們需要存取您的位置資訊。
+                    請在接下來的提示中選擇「允許」。
+                </p>
+                <button onclick="requestLocationPermission()" class="permission-button">
+                    好的，我明白了
+                </button>
+            </div>
+        </div>
+
+        <!-- 手動打開地圖的提示框 -->
+        <div id="manualMapModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="modal-title">手動打開地圖</h2>
+                <p>請點擊以下鏈接以在地圖中查看附近的店家：</p>
+                <a id="manualMapLink" href="#" target="_blank" rel="noopener noreferrer">在地圖中查看</a>
+            </div>
+        </div>
+    </div>
 
     <script>
         // 位置服務全域變數
@@ -742,7 +742,7 @@
 
         // 飲料資料庫
         const beverageItems = [
-            // 飲料 - 50嵐
+            // 50嵐
             { name: "茉莉綠茶", country: "飲料", brand: "50嵐" },
             { name: "阿薩姆紅茶", country: "飲料", brand: "50嵐" },
             { name: "四季春青茶", country: "飲料", brand: "50嵐" },
@@ -802,7 +802,7 @@
             { name: "檸檬梅汁綠", country: "飲料", brand: "50嵐" },
             { name: "混珠黃金烏龍", country: "飲料", brand: "50嵐" },
 
-            // 飲料 - 得正
+            // 得正
             { name: "焙烏龍", country: "飲料", brand: "得正" },
             { name: "輕烏龍", country: "飲料", brand: "得正" },
             { name: "春烏龍", country: "飲料", brand: "得正" },
@@ -829,7 +829,7 @@
             { name: "芝士奶蓋焙烏龍", country: "飲料", brand: "得正" },
             { name: "芝士奶蓋春烏龍", country: "飲料", brand: "得正" },
 
-            // 飲料 - 龜記
+            // 龜記
             { name: "極品紅茶", country: "飲料", brand: "龜記" },
             { name: "翡翠綠茶", country: "飲料", brand: "龜記" },
             { name: "青四季春", country: "飲料", brand: "龜記" },
@@ -960,7 +960,7 @@
                     option.textContent = brand;
                     priceFilter.appendChild(option);
                 });
-            } else if (category === "中式" || category === "日式" || category === "韓式" || category === "義式" || category === "美式" || category === "越式") {
+            } else if (["中式", "日式", "韓式", "義式", "美式", "越式"].includes(category)) {
                 titleElement.textContent = `等下${category}料理？`;
                 switch(category) {
                     case "中式":
@@ -1225,16 +1225,16 @@
             }
         }
 
-        function isAvailable(food) {
+        function isAvailable(key) {
             const history = getHistory();
-            const lastPickTime = history[food];
+            const lastPickTime = history[key];
             
             if (!lastPickTime) return true;
 
             const filteredItems = getFilteredItems();
             const allSelected = filteredItems.every(item => {
-                const key = getUniqueKey(item); // 使用唯一鍵值
-                const itemLastPick = history[key];
+                const itemKey = getUniqueKey(item);
+                const itemLastPick = history[itemKey];
                 return itemLastPick && new Date(itemLastPick) >= new Date(lastPickTime);
             });
 
@@ -1250,14 +1250,14 @@
             const filteredItems = getFilteredItems();
             // 排除已收藏的餐點
             const availableFoods = filteredItems.filter(item => {
-                const key = getUniqueKey(item); // 使用唯一鍵值
+                const key = getUniqueKey(item);
                 return isAvailable(key) && !favorites.has(key);
             });
 
             if (availableFoods.length === 0) {
                 // 檢查是否所有篩選後的餐點都已被收藏
                 const allFavorited = filteredItems.length > 0 && filteredItems.every(item => {
-                    const key = getUniqueKey(item); // 使用唯一鍵值
+                    const key = getUniqueKey(item);
                     return favorites.has(key);
                 });
                 if (allFavorited) {
@@ -1299,14 +1299,14 @@
             
             let earliestTime = new Date().toISOString();
             filteredItems.forEach(item => {
-                const key = getUniqueKey(item); // 使用唯一鍵值
+                const key = getUniqueKey(item);
                 if (history[key]) {
                     earliestTime = history[key] < earliestTime ? history[key] : earliestTime;
                 }
             });
 
             filteredItems.forEach(item => {
-                const key = getUniqueKey(item); // 使用唯一鍵值
+                const key = getUniqueKey(item);
                 if (history[key] && history[key] >= earliestTime) {
                     delete history[key];
                 }
@@ -1333,7 +1333,7 @@
             const filteredItems = getFilteredItems();
             // 排除已收藏的餐點
             const availableCount = filteredItems.filter(item => {
-                const key = getUniqueKey(item); // 使用唯一鍵值
+                const key = getUniqueKey(item);
                 return isAvailable(key) && !favorites.has(key);
             }).length;
             const elem = document.getElementById('remainingChoices');
@@ -1434,7 +1434,7 @@
                         return;
                     }
                     const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
-                    const key = getUniqueKey(randomItem); // 使用唯一鍵值
+                    const key = getUniqueKey(randomItem);
                     resultElem.textContent = getDisplayName(randomItem);
                 } else {
                     resultElem.textContent = finalChoice;
@@ -1450,7 +1450,7 @@
                     if (finalChoice === '餐點都被收藏了喔!') {
                         // 不進行後續操作，僅顯示訊息
                         // 可選擇在此處添加額外提示或 UI 變更
-                    } else if (!finalChoice.includes('錯誤')) {
+                    } else if (!finalChoice.includes('錯誤') && !finalChoice.includes('發生')) {
                         const history = getHistory();
                         history[finalChoice] = new Date().toISOString();
                         saveHistory(history);
@@ -1501,12 +1501,6 @@
 
         // 頁面載入初始化
         window.onload = function() {
-            <script>
-        // 頁面載入初始化
-        window.onload = function() {
-            <script>
-        // 頁面載入初始化
-        window.onload = function() {
             loadFavorites(); // 載入收藏清單
             updateAvailableCount();
 
@@ -1552,17 +1546,20 @@
         };
     </script>
 
-   <!-- Firebase SDK -->
+    <!-- Firebase SDK -->
     <script type="module">
-      // Import the functions you need from the SDKs you need
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
       import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
       // Firebase 配置
       const firebaseConfig = {
-        // 暫時移除敏感資訊
+        // 請在此處填入您的 Firebase 配置
+        apiKey: "YOUR_API_KEY",
+        authDomain: "dinner-picker-b1fab.firebaseapp.com",
         projectId: "dinner-picker-b1fab",
-        storageBucket: "dinner-picker-b1fab.firebaseapp.com"
+        storageBucket: "dinner-picker-b1fab.appspot.com",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
       };
 
       // Initialize Firebase
@@ -1577,81 +1574,8 @@
     <script type="module">
       import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-      // 餐點資料檢查功能
-      async function checkExistingData() {
-        const menuSnapshot = await getDocs(collection(db, 'menu-items'));
-        const beverageSnapshot = await getDocs(collection(db, 'beverage-items'));
-        console.log(`現有餐點數量: ${menuSnapshot.size}`);
-        console.log(`現有飲料數量: ${beverageSnapshot.size}`);
-        return {
-          menuCount: menuSnapshot.size,
-          beverageCount: beverageSnapshot.size
-        };
-      }
-
-      // 一般餐點資料導入
-      async function importMenuItems() {
-        try {
-          const existingData = await checkExistingData();
-          if (existingData.menuCount > 0) {
-            console.log('警告：資料庫中已有餐點資料！');
-            return;
-          }
-
-          // 確認是否要開始導入
-          if (!confirm('確定要導入餐點資料嗎？')) {
-            return;
-          }
-
-          // 開始導入資料
-          let importCount = 0;
-          
-          // 這裡會包含所有餐點資料的導入
-          // 我等下會提供完整的資料陣列
-          
-          console.log(`成功導入 ${importCount} 筆餐點資料！`);
-        } catch (error) {
-          console.error('資料導入錯誤：', error);
-        }
-      }
-
-      // 飲料資料導入
-      async function importBeverageItems() {
-        try {
-          const existingData = await checkExistingData();
-          if (existingData.beverageCount > 0) {
-            console.log('警告：資料庫中已有飲料資料！');
-            return;
-          }
-
-          // 確認是否要開始導入
-          if (!confirm('確定要導入飲料資料嗎？')) {
-            return;
-          }
-
-          // 開始導入資料
-          let importCount = 0;
-          
-          // 這裡會包含所有飲料資料的導入
-          // 我等下會提供完整的資料陣列
-          
-          console.log(`成功導入 ${importCount} 筆飲料資料！`);
-        } catch (error) {
-          console.error('飲料資料導入錯誤：', error);
-        }
-      }
-
-      // 將函數綁定到全域變數
-      window.importMenuItems = importMenuItems;
-      window.importBeverageItems = importBeverageItems;
-      window.checkExistingData = checkExistingData;
-    </script>
-<!-- 資料導入工具 -->
-    <script type="module">
-      import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-      // 一般餐點資料庫
-      const menuItems = [
+      // 餐點資料庫
+      const importMenuItemsData = [
         // 中式料理 - 150元以下
         { name: "雞腿便當", country: "中式", price: "150以下" },
         { name: "排骨便當", country: "中式", price: "150以下" },
@@ -1783,295 +1707,222 @@
         { name: "韓式牛小排", country: "韓式", price: "150-500" },
         { name: "辣炒豬肉", country: "韓式", price: "150-500" },
         { name: "海鮮煎餅套餐", country: "韓式", price: "150-500" },
+        { name: "起司薯條套餐", country: "韓式", price: "150-500" },
+    ];
 
-        // 義式料理 - 150元以下
-        { name: "白醬培根麵", country: "義式", price: "150以下" },
-        { name: "番茄肉醬麵", country: "義式", price: "150以下" },
-        { name: "青醬雞肉麵", country: "義式", price: "150以下" },
-        { name: "奶油蘑菇麵", country: "義式", price: "150以下" },
-        { name: "蒜香培根麵", country: "義式", price: "150以下" },
-        { name: "番茄海鮮麵", country: "義式", price: "150以下" },
-        { name: "番茄海鮮麵", country: "義式", price: "150以下" },
-        { name: "肉丸番茄麵", country: "義式", price: "150以下" },
-        { name: "黑胡椒豬肉麵", country: "義式", price: "150以下" },
-        { name: "茄汁雞肉麵", country: "義式", price: "150以下" },
-        { name: "奶油磨菇麵", country: "義式", price: "150以下" },
-        { name: "白醬蛤蜊麵", country: "義式", price: "150以下" },
-        { name: "青醬蛤蜊麵", country: "義式", price: "150以下" },
-        { name: "茄汁香腸麵", country: "義式", price: "150以下" },
-        { name: "奶油玉米雞麵", country: "義式", price: "150以下" },
-        { name: "蒜香蝦仁麵", country: "義式", price: "150以下" },
-        { name: "青醬培根麵", country: "義式", price: "150以下" },
-        { name: "番茄蘑菇麵", country: "義式", price: "150以下" },
-        { name: "白醬海鮮麵", country: "義式", price: "150以下" },
-        { name: "義大利肉醬麵", country: "義式", price: "150以下" },
-        { name: "炙燒培根麵", country: "義式", price: "150以下" },
+        // 飲料資料庫
+        const beverageItemsImport = [
+            // 50嵐
+            { name: "茉莉綠茶", country: "飲料", brand: "50嵐" },
+            { name: "阿薩姆紅茶", country: "飲料", brand: "50嵐" },
+            { name: "四季春青茶", country: "飲料", brand: "50嵐" },
+            { name: "黃金烏龍", country: "飲料", brand: "50嵐" },
+            { name: "檸檬綠", country: "飲料", brand: "50嵐" },
+            { name: "梅の綠", country: "飲料", brand: "50嵐" },
+            { name: "桔子綠", country: "飲料", brand: "50嵐" },
+            { name: "8冰綠", country: "飲料", brand: "50嵐" },
+            { name: "養樂多綠", country: "飲料", brand: "50嵐" },
+            { name: "冰淇淋紅茶", country: "飲料", brand: "50嵐" },
+            { name: "旺來紅", country: "飲料", brand: "50嵐" },
+            { name: "鮮柚綠", country: "飲料", brand: "50嵐" },
+            { name: "奶茶", country: "飲料", brand: "50嵐" },
+            { name: "奶綠", country: "飲料", brand: "50嵐" },
+            { name: "紅茶瑪奇朵", country: "飲料", brand: "50嵐" },
+            { name: "烏龍瑪奇朵", country: "飲料", brand: "50嵐" },
+            { name: "四季奶青", country: "飲料", brand: "50嵐" },
+            { name: "黃金烏龍奶茶", country: "飲料", brand: "50嵐" },
+            { name: "阿華田", country: "飲料", brand: "50嵐" },
+            { name: "可可芭蕾", country: "飲料", brand: "50嵐" },
+            { name: "四季春+珍波椰", country: "飲料", brand: "50嵐" },
+            { name: "波霸紅茶", country: "飲料", brand: "50嵐" },
+            { name: "波霸綠茶", country: "飲料", brand: "50嵐" },
+            { name: "波霸青茶", country: "飲料", brand: "50嵐" },
+            { name: "波霸烏龍茶", country: "飲料", brand: "50嵐" },
+            { name: "波霸奶茶", country: "飲料", brand: "50嵐" },
+            { name: "波霸奶綠", country: "飲料", brand: "50嵐" },
+            { name: "波霸烏龍奶茶", country: "飲料", brand: "50嵐" },
+            { name: "珍珠紅茶", country: "飲料", brand: "50嵐" },
+            { name: "珍珠綠茶", country: "飲料", brand: "50嵐" },
+            { name: "珍珠青茶", country: "飲料", brand: "50嵐" },
+            { name: "珍珠烏龍茶", country: "飲料", brand: "50嵐" },
+            { name: "珍珠奶茶", country: "飲料", brand: "50嵐" },
+            { name: "珍珠奶綠", country: "飲料", brand: "50嵐" },
+            { name: "椰果奶茶", country: "飲料", brand: "50嵐" },
+            { name: "布丁奶茶", country: "飲料", brand: "50嵐" },
+            { name: "布丁奶綠", country: "飲料", brand: "50嵐" },
+            { name: "布丁紅茶", country: "飲料", brand: "50嵐" },
+            { name: "布丁綠茶", country: "飲料", brand: "50嵐" },
+            { name: "布丁青茶", country: "飲料", brand: "50嵐" },
+            { name: "布丁烏龍茶", country: "飲料", brand: "50嵐" },
+            { name: "檸檬汁", country: "飲料", brand: "50嵐" },
+            { name: "金桔檸檬", country: "飲料", brand: "50嵐" },
+            { name: "檸檬梅汁", country: "飲料", brand: "50嵐" },
+            { name: "檸檬養樂多", country: "飲料", brand: "50嵐" },
+            { name: "8冰茶", country: "飲料", brand: "50嵐" },
+            { name: "鮮柚汁", country: "飲料", brand: "50嵐" },
+            { name: "葡萄柚多多", country: "飲料", brand: "50嵐" },
+            { name: "紅茶拿鐵", country: "飲料", brand: "50嵐" },
+            { name: "綠茶拿鐵", country: "飲料", brand: "50嵐" },
+            { name: "黃金烏龍拿鐵", country: "飲料", brand: "50嵐" },
+            { name: "阿華田拿鐵", country: "飲料", brand: "50嵐" },
+            { name: "可可芭蕾拿鐵", country: "飲料", brand: "50嵐" },
+            { name: "波霸鮮奶", country: "飲料", brand: "50嵐" },
+            { name: "珍珠鮮奶", country: "飲料", brand: "50嵐" },
+            { name: "檸檬紅茶", country: "飲料", brand: "50嵐" },
+            { name: "檸檬梅汁綠", country: "飲料", brand: "50嵐" },
+            { name: "混珠黃金烏龍", country: "飲料", brand: "50嵐" },
 
-        // 義式料理 - 150-500元
-        { name: "松露奶油麵", country: "義式", price: "150-500" },
-        { name: "海鮮燉飯", country: "義式", price: "150-500" },
-        { name: "牛肉燉飯", country: "義式", price: "150-500" },
-        { name: "野菇燉飯", country: "義式", price: "150-500" },
-        { name: "海鮮義大利麵", country: "義式", price: "150-500" },
-        { name: "白酒蛤蜊麵", country: "義式", price: "150-500" },
-        { name: "青醬海鮮麵", country: "義式", price: "150-500" },
-        { name: "香煎鮭魚飯", country: "義式", price: "150-500" },
-        { name: "奶油龍蝦麵", country: "義式", price: "150-500" },
-        { name: "牛肉紅酒飯", country: "義式", price: "150-500" },
-        { name: "蒜香蝦仁麵", country: "義式", price: "150-500" },
-        { name: "番紅花海鮮飯", country: "義式", price: "150-500" },
-        { name: "白酒蘑菇雞飯", country: "義式", price: "150-500" },
-        { name: "青醬鮮蝦麵", country: "義式", price: "150-500" },
-        { name: "松露野菇飯", country: "義式", price: "150-500" },
-        { name: "義式臘腸麵", country: "義式", price: "150-500" },
-        { name: "墨魚麵", country: "義式", price: "150-500" },
-        { name: "羊肉燉飯", country: "義式", price: "150-500" },
-        { name: "蛤蜊海鮮飯", country: "義式", price: "150-500" },
-        { name: "蒜香蝦仁燉飯", country: "義式", price: "150-500" },
+            // 得正
+            { name: "焙烏龍", country: "飲料", brand: "得正" },
+            { name: "輕烏龍", country: "飲料", brand: "得正" },
+            { name: "春烏龍", country: "飲料", brand: "得正" },
+            { name: "綠茶", country: "飲料", brand: "得正" },
+            { name: "紅茶", country: "飲料", brand: "得正" },
+            { name: "烘吉奶茶", country: "飲料", brand: "得正" },
+            { name: "黃金珍珠奶綠", country: "飲料", brand: "得正" },
+            { name: "珍珠奶茶", country: "飲料", brand: "得正" },
+            { name: "焙烏龍奶茶", country: "飲料", brand: "得正" },
+            { name: "奶茶", country: "飲料", brand: "得正" },
+            { name: "雙柚金烏龍", country: "飲料", brand: "得正" },
+            { name: "百香果綠茶", country: "飲料", brand: "得正" },
+            { name: "優酪春烏龍", country: "飲料", brand: "得正" },
+            { name: "青梅春烏龍", country: "飲料", brand: "得正" },
+            { name: "甘蔗春烏龍", country: "飲料", brand: "得正" },
+            { name: "香橙春烏龍", country: "飲料", brand: "得正" },
+            { name: "檸檬春烏龍", country: "飲料", brand: "得正" },
+            { name: "烘吉鮮奶", country: "飲料", brand: "得正" },
+            { name: "焙烏龍鮮奶", country: "飲料", brand: "得正" },
+            { name: "輕烏龍鮮奶", country: "飲料", brand: "得正" },
+            { name: "紅茶鮮奶", country: "飲料", brand: "得正" },
+            { name: "芝士奶蓋阿華田", country: "飲料", brand: "得正" },
+            { name: "芝士奶蓋烘吉茶", country: "飲料", brand: "得正" },
+            { name: "芝士奶蓋焙烏龍", country: "飲料", brand: "得正" },
+            { name: "芝士奶蓋春烏龍", country: "飲料", brand: "得正" },
 
-        // 美式料理 - 150元以下
-        { name: "美式漢堡套餐", country: "美式", price: "150以下" },
-        { name: "起司漢堡套餐", country: "美式", price: "150以下" },
-        { name: "炸雞腿套餐", country: "美式", price: "150以下" },
-        { name: "熱狗堡套餐", country: "美式", price: "150以下" },
-        { name: "雞塊套餐", country: "美式", price: "150以下" },
-        { name: "炸魚排套餐", country: "美式", price: "150以下" },
-        { name: "薯條炸雞翅", country: "美式", price: "150以下" },
-        { name: "培根漢堡", country: "美式", price: "150以下" },
-        { name: "BBQ雞腿堡", country: "美式", price: "150以下" },
-        { name: "花生醬漢堡", country: "美式", price: "150以下" },
-        { name: "起司熱狗堡", country: "美式", price: "150以下" },
-        { name: "炸雞翅套餐", country: "美式", price: "150以下" },
-        { name: "雞肉漢堡", country: "美式", price: "150以下" },
-        { name: "玉米熱狗", country: "美式", price: "150以下" },
-        { name: "炸魚堡", country: "美式", price: "150以下" },
-        { name: "雙層起司堡", country: "美式", price: "150以下" },
-        { name: "BBQ豬肉堡", country: "美式", price: "150以下" },
-        { name: "辣雞堡", country: "美式", price: "150以下" },
-        { name: "美式炸雞", country: "美式", price: "150以下" },
-        { name: "墨西哥捲餅", country: "美式", price: "150以下" },
+            // 龜記
+            { name: "極品紅茶", country: "飲料", brand: "龜記" },
+            { name: "翡翠綠茶", country: "飲料", brand: "龜記" },
+            { name: "青四季春", country: "飲料", brand: "龜記" },
+            { name: "三韻紅萱", country: "飲料", brand: "龜記" },
+            { name: "紅水烏龍", country: "飲料", brand: "龜記" },
+            { name: "三十三茶王", country: "飲料", brand: "龜記" },
+            { name: "碎銀普洱茶", country: "飲料", brand: "龜記" },
+            { name: "花沫烏龍", country: "飲料", brand: "龜記" },
+            { name: "鮮果百香紅茶", country: "飲料", brand: "龜記" },
+            { name: "鮮果百香綠茶", country: "飲料", brand: "龜記" },
+            { name: "翡翠雷夢", country: "飲料", brand: "龜記" },
+            { name: "柳丁翡翠", country: "飲料", brand: "龜記" },
+            { name: "蘋果紅萱", country: "飲料", brand: "龜記" },
+            { name: "旺梨四季春", country: "飲料", brand: "龜記" },
+            { name: "蜜桃烏龍", country: "飲料", brand: "龜記" },
+            { name: "香柚雷夢綠", country: "飲料", brand: "龜記" },
+            { name: "紅柚翡翠", country: "飲料", brand: "龜記" },
+            { name: "豆漿紅茶", country: "飲料", brand: "龜記" },
+            { name: "冬瓜茶王", country: "飲料", brand: "龜記" },
+            { name: "冬瓜雷夢", country: "飲料", brand: "龜記" },
+            { name: "阿源楊桃紅茶", country: "飲料", brand: "龜記" },
+            { name: "阿源楊桃綠茶", country: "飲料", brand: "龜記" },
+            { name: "楊桃雷夢", country: "飲料", brand: "龜記" },
+            { name: "甘蔗四季春", country: "飲料", brand: "龜記" },
+            { name: "極品奶茶", country: "飲料", brand: "龜記" },
+            { name: "翡翠奶茶", country: "飲料", brand: "龜記" },
+            { name: "茶王奶茶", country: "飲料", brand: "龜記" },
+            { name: "碎銀普洱奶茶", country: "飲料", brand: "龜記" },
+            { name: "珍珠奶茶", country: "飲料", brand: "龜記" },
+            { name: "極品鮮乳茶", country: "飲料", brand: "龜記" },
+            { name: "翡翠鮮乳茶", country: "飲料", brand: "龜記" },
+            { name: "龜記濃乳茶", country: "飲料", brand: "龜記" },
+            { name: "冬瓜鮮乳", country: "飲料", brand: "龜記" },
+            { name: "紅烏鮮乳茶", country: "飲料", brand: "龜記" },
+            { name: "巧克鮮乳茶", country: "飲料", brand: "龜記" },
+            { name: "碎銀普洱鮮乳", country: "飲料", brand: "龜記" },
+            { name: "蜂蜜綠茶", country: "飲料", brand: "龜記" },
+            { name: "蜂蜜四季春", country: "飲料", brand: "龜記" },
+            { name: "三韻奶茶", country: "飲料", brand: "龜記" },
+            { name: "蜂蜜雷夢", country: "飲料", brand: "龜記" },
+            { name: "雷夢蘆薈蜜", country: "飲料", brand: "龜記" },
+            { name: "原味薑茶", country: "飲料", brand: "龜記" },
+            { name: "薑汁奶茶", country: "飲料", brand: "龜記" },
+            { name: "薑汁雷夢", country: "飲料", brand: "龜記" },
+            { name: "薑汁桂圓", country: "飲料", brand: "龜記" },
+            { name: "桂圓紅棗茶", country: "飲料", brand: "龜記" },
+        ];
 
-        // 美式料理 - 150-500元
-        { name: "牛排漢堡套餐", country: "美式", price: "150-500" },
-        { name: "巨無霸漢堡", country: "美式", price: "150-500" },
-        { name: "BBQ豬肋排", country: "美式", price: "150-500" },
-        { name: "炸雞拼盤", country: "美式", price: "150-500" },
-        { name: "美式牛排", country: "美式", price: "150-500" },
-        { name: "BBQ雞腿排", country: "美式", price: "150-500" },
-        { name: "起司薯條漢堡", country: "美式", price: "150-500" },
-        { name: "美式炸雞桶", country: "美式", price: "150-500" },
-        { name: "豪華漢堡套餐", country: "美式", price: "150-500" },
-        { name: "牛肉起司堡", country: "美式", price: "150-500" },
-        { name: "炸雞翅拼盤", country: "美式", price: "150-500" },
-        { name: "BBQ肋排套餐", country: "美式", price: "150-500" },
-        { name: "牛排三明治", country: "美式", price: "150-500" },
-        { name: "美式炸雞套餐", country: "美式", price: "150-500" },
-        { name: "辣味炸雞拼盤", country: "美式", price: "150-500" },
-        { name: "牛肉漢堡套餐", country: "美式", price: "150-500" },
-        { name: "BBQ雞翅拼盤", country: "美式", price: "150-500" },
-        { name: "起司薯條套餐", country: "美式", price: "150-500" },
-        { name: "美式牛排套餐", country: "美式", price: "150-500" },
-        { name: "雞腿排套餐", country: "美式", price: "150-500" }
-      ];
-
-      // 飲料資料庫
-      const beverageItems = [
-        // 50嵐
-        { name: "茉莉綠茶", country: "飲料", brand: "50嵐" },
-        { name: "阿薩姆紅茶", country: "飲料", brand: "50嵐" },
-        { name: "四季春青茶", country: "飲料", brand: "50嵐" },
-        { name: "黃金烏龍", country: "飲料", brand: "50嵐" },
-        { name: "檸檬綠", country: "飲料", brand: "50嵐" },
-        { name: "梅の綠", country: "飲料", brand: "50嵐" },
-        { name: "桔子綠", country: "飲料", brand: "50嵐" },
-        { name: "8冰綠", country: "飲料", brand: "50嵐" },
-        { name: "養樂多綠", country: "飲料", brand: "50嵐" },
-        { name: "冰淇淋紅茶", country: "飲料", brand: "50嵐" },
-        { name: "旺來紅", country: "飲料", brand: "50嵐" },
-        { name: "鮮柚綠", country: "飲料", brand: "50嵐" },
-        { name: "奶茶", country: "飲料", brand: "50嵐" },
-        { name: "奶綠", country: "飲料", brand: "50嵐" },
-        { name: "紅茶瑪奇朵", country: "飲料", brand: "50嵐" },
-        { name: "烏龍瑪奇朵", country: "飲料", brand: "50嵐" },
-        { name: "四季奶青", country: "飲料", brand: "50嵐" },
-        { name: "黃金烏龍奶茶", country: "飲料", brand: "50嵐" },
-        { name: "阿華田", country: "飲料", brand: "50嵐" },
-        { name: "可可芭蕾", country: "飲料", brand: "50嵐" },
-        { name: "四季春+珍波椰", country: "飲料", brand: "50嵐" },
-        { name: "波霸紅茶", country: "飲料", brand: "50嵐" },
-        { name: "波霸綠茶", country: "飲料", brand: "50嵐" },
-        { name: "波霸青茶", country: "飲料", brand: "50嵐" },
-        { name: "波霸烏龍茶", country: "飲料", brand: "50嵐" },
-        { name: "波霸奶茶", country: "飲料", brand: "50嵐" },
-        { name: "波霸奶綠", country: "飲料", brand: "50嵐" },
-        { name: "波霸烏龍奶茶", country: "飲料", brand: "50嵐" },
-        { name: "珍珠紅茶", country: "飲料", brand: "50嵐" },
-        { name: "珍珠綠茶", country: "飲料", brand: "50嵐" },
-        { name: "珍珠青茶", country: "飲料", brand: "50嵐" },
-        { name: "珍珠烏龍茶", country: "飲料", brand: "50嵐" },
-        { name: "珍珠奶茶", country: "飲料", brand: "50嵐" },
-        { name: "珍珠奶綠", country: "飲料", brand: "50嵐" },
-        { name: "椰果奶茶", country: "飲料", brand: "50嵐" },
-        { name: "布丁奶茶", country: "飲料", brand: "50嵐" },
-        { name: "布丁奶綠", country: "飲料", brand: "50嵐" },
-        { name: "布丁紅茶", country: "飲料", brand: "50嵐" },
-        { name: "布丁綠茶", country: "飲料", brand: "50嵐" },
-        { name: "布丁青茶", country: "飲料", brand: "50嵐" },
-        { name: "布丁烏龍茶", country: "飲料", brand: "50嵐" },
-        { name: "檸檬汁", country: "飲料", brand: "50嵐" },
-        { name: "金桔檸檬", country: "飲料", brand: "50嵐" },
-        { name: "檸檬梅汁", country: "飲料", brand: "50嵐" },
-        { name: "檸檬養樂多", country: "飲料", brand: "50嵐" },
-        { name: "8冰茶", country: "飲料", brand: "50嵐" },
-        { name: "鮮柚汁", country: "飲料", brand: "50嵐" },
-        { name: "葡萄柚多多", country: "飲料", brand: "50嵐" },
-        { name: "紅茶拿鐵", country: "飲料", brand: "50嵐" },
-        { name: "綠茶拿鐵", country: "飲料", brand: "50嵐" },
-        { name: "黃金烏龍拿鐵", country: "飲料", brand: "50嵐" },
-        { name: "阿華田拿鐵", country: "飲料", brand: "50嵐" },
-        { name: "可可芭蕾拿鐵", country: "飲料", brand: "50嵐" },
-        { name: "波霸鮮奶", country: "飲料", brand: "50嵐" },
-        { name: "珍珠鮮奶", country: "飲料", brand: "50嵐" },
-        { name: "檸檬紅茶", country: "飲料", brand: "50嵐" },
-        { name: "檸檬梅汁綠", country: "飲料", brand: "50嵐" },
-        { name: "混珠黃金烏龍", country: "飲料", brand: "50嵐" },
-
-        // 得正
-        { name: "焙烏龍", country: "飲料", brand: "得正" },
-        { name: "輕烏龍", country: "飲料", brand: "得正" },
-        { name: "春烏龍", country: "飲料", brand: "得正" },
-        { name: "綠茶", country: "飲料", brand: "得正" },
-        { name: "紅茶", country: "飲料", brand: "得正" },
-        { name: "烘吉奶茶", country: "飲料", brand: "得正" },
-        { name: "黃金珍珠奶綠", country: "飲料", brand: "得正" },
-        { name: "珍珠奶茶", country: "飲料", brand: "得正" },
-        { name: "焙烏龍奶茶", country: "飲料", brand: "得正" },
-        { name: "奶茶", country: "飲料", brand: "得正" },
-        { name: "雙柚金烏龍", country: "飲料", brand: "得正" },
-        { name: "百香果綠茶", country: "飲料", brand: "得正" },
-        { name: "優酪春烏龍", country: "飲料", brand: "得正" },
-        { name: "青梅春烏龍", country: "飲料", brand: "得正" },
-        { name: "甘蔗春烏龍", country: "飲料", brand: "得正" },
-        { name: "香橙春烏龍", country: "飲料", brand: "得正" },
-        { name: "檸檬春烏龍", country: "飲料", brand: "得正" },
-        { name: "烘吉鮮奶", country: "飲料", brand: "得正" },
-        { name: "焙烏龍鮮奶", country: "飲料", brand: "得正" },
-        { name: "輕烏龍鮮奶", country: "飲料", brand: "得正" },
-        { name: "紅茶鮮奶", country: "飲料", brand: "得正" },
-        { name: "芝士奶蓋阿華田", country: "飲料", brand: "得正" },
-        { name: "芝士奶蓋烘吉茶", country: "飲料", brand: "得正" },
-        { name: "芝士奶蓋焙烏龍", country: "飲料", brand: "得正" },
-        { name: "芝士奶蓋春烏龍", country: "飲料", brand: "得正" },
-
-        // 龜記
-        { name: "極品紅茶", country: "飲料", brand: "龜記" },
-        { name: "翡翠綠茶", country: "飲料", brand: "龜記" },
-        { name: "青四季春", country: "飲料", brand: "龜記" },
-        { name: "三韻紅萱", country: "飲料", brand: "龜記" },
-        { name: "紅水烏龍", country: "飲料", brand: "龜記" },
-        { name: "三十三茶王", country: "飲料", brand: "龜記" },
-        { name: "碎銀普洱茶", country: "飲料", brand: "龜記" },
-        { name: "花沫烏龍", country: "飲料", brand: "龜記" },
-        { name: "鮮果百香紅茶", country: "飲料", brand: "龜記" },
-        { name: "鮮果百香綠茶", country: "飲料", brand: "龜記" },
-        { name: "翡翠雷夢", country: "飲料", brand: "龜記" },
-        { name: "柳丁翡翠", country: "飲料", brand: "龜記" },
-        { name: "蘋果紅萱", country: "飲料", brand: "龜記" },
-        { name: "旺梨四季春", country: "飲料", brand: "龜記" },
-        { name: "蜜桃烏龍", country: "飲料", brand: "龜記" },
-        { name: "香柚雷夢綠", country: "飲料", brand: "龜記" },
-        { name: "紅柚翡翠", country: "飲料", brand: "龜記" },
-        { name: "豆漿紅茶", country: "飲料", brand: "龜記" },
-        { name: "冬瓜茶王", country: "飲料", brand: "龜記" },
-        { name: "冬瓜雷夢", country: "飲料", brand: "龜記" },
-        { name: "阿源楊桃紅茶", country: "飲料", brand: "龜記" },
-        { name: "阿源楊桃綠茶", country: "飲料", brand: "龜記" },
-        { name: "楊桃雷夢", country: "飲料", brand: "龜記" },
-        { name: "甘蔗四季春", country: "飲料", brand: "龜記" },
-        { name: "極品奶茶", country: "飲料", brand: "龜記" },
-        { name: "翡翠奶茶", country: "飲料", brand: "龜記" },
-        { name: "茶王奶茶", country: "飲料", brand: "龜記" },
-        { name: "碎銀普洱奶茶", country: "飲料", brand: "龜記" },
-        { name: "珍珠奶茶", country: "飲料", brand: "龜記" },
-        { name: "極品鮮乳茶", country: "飲料", brand: "龜記" },
-        { name: "翡翠鮮乳茶", country: "飲料", brand: "龜記" },
-        { name: "龜記濃乳茶", country: "飲料", brand: "龜記" },
-        { name: "冬瓜鮮乳", country: "飲料", brand: "龜記" },
-        { name: "紅烏鮮乳茶", country: "飲料", brand: "龜記" },
-        { name: "巧克鮮乳茶", country: "飲料", brand: "龜記" },
-        { name: "碎銀普洱鮮乳", country: "飲料", brand: "龜記" },
-        { name: "蜂蜜綠茶", country: "飲料", brand: "龜記" },
-        { name: "蜂蜜四季春", country: "飲料", brand: "龜記" },
-        { name: "三韻奶茶", country: "飲料", brand: "龜記" },
-        { name: "蜂蜜雷夢", country: "飲料", brand: "龜記" },
-        { name: "雷夢蘆薈蜜", country: "飲料", brand: "龜記" },
-        { name: "原味薑茶", country: "飲料", brand: "龜記" },
-        { name: "薑汁奶茶", country: "飲料", brand: "龜記" },
-        { name: "薑汁雷夢", country: "飲料", brand: "龜記" },
-        { name: "薑汁桂圓", country: "飲料", brand: "龜記" },
-        { name: "桂圓紅棗茶", country: "飲料", brand: "龜記" }
-      ];
-
-      // 餐點資料檢查功能
-      async function checkExistingData() {
-        const menuSnapshot = await getDocs(collection(db, 'menu-items'));
-        const beverageSnapshot = await getDocs(collection(db, 'beverage-items'));
-        console.log(`現有餐點數量: ${menuSnapshot.size}`);
-        console.log(`現有飲料數量: ${beverageSnapshot.size}`);
-        return {
-          menuCount: menuSnapshot.size,
-          beverageCount: beverageSnapshot.size
-        };
-      }
-
-      // 一般餐點資料導入
-      async function importMenuItems() {
-        try {
-          const existingData = await checkExistingData();
-          if (existingData.menuCount > 0) {
-            if (!confirm('資料庫中已有餐點資料！確定要重新導入嗎？')) {
-              return;
-            }
-          }
-
-          let importCount = 0;
-          for (const item of menuItems) {
-            await addDoc(collection(db, 'menu-items'), item);
-            importCount++;
-          }
-          
-          console.log(`成功導入 ${importCount} 筆餐點資料！`);
-        } catch (error) {
-          console.error('資料導入錯誤：', error);
+        // 餐點資料檢查功能
+        async function checkExistingData() {
+            const menuSnapshot = await getDocs(collection(window.db, 'menu-items'));
+            const beverageSnapshot = await getDocs(collection(window.db, 'beverage-items'));
+            console.log(`現有餐點數量: ${menuSnapshot.size}`);
+            console.log(`現有飲料數量: ${beverageSnapshot.size}`);
+            return {
+                menuCount: menuSnapshot.size,
+                beverageCount: beverageSnapshot.size
+            };
         }
-      }
 
-      // 飲料資料導入
-      async function importBeverageItems() {
-        try {
-          const existingData = await checkExistingData();
-          if (existingData.beverageCount > 0) {
-            if (!confirm('資料庫中已有飲料資料！確定要重新導入嗎？')) {
-              return;
+        // 一般餐點資料導入
+        async function importMenuItems() {
+            try {
+                const existingData = await checkExistingData();
+                if (existingData.menuCount > 0) {
+                    if (!confirm('資料庫中已有餐點資料！確定要重新導入嗎？')) {
+                        return;
+                    }
+                }
+
+                let importCount = 0;
+                for (const item of importMenuItemsData) {
+                    await addDoc(collection(window.db, 'menu-items'), item);
+                    importCount++;
+                }
+                
+                console.log(`成功導入 ${importCount} 筆餐點資料！`);
+            } catch (error) {
+                console.error('資料導入錯誤：', error);
             }
-          }
-
-          let importCount = 0;
-          for (const item of beverageItems) {
-            await addDoc(collection(db, 'beverage-items'), item);
-            importCount++;
-          }
-          
-          console.log(`成功導入 ${importCount} 筆飲料資料！`);
-        } catch (error) {
-          console.error('飲料資料導入錯誤：', error);
         }
-      }
 
-      // 將函數綁定到全域變數
-      window.importMenuItems = importMenuItems;
-      window.importBeverageItems = importBeverageItems;
-      window.checkExistingData = checkExistingData;
+        // 飲料資料導入
+        async function importBeverageItems() {
+            try {
+                const existingData = await checkExistingData();
+                if (existingData.beverageCount > 0) {
+                    if (!confirm('資料庫中已有飲料資料！確定要重新導入嗎？')) {
+                        return;
+                    }
+                }
+
+                let importCount = 0;
+                for (const item of beverageItemsImport) {
+                    await addDoc(collection(window.db, 'beverage-items'), item);
+                    importCount++;
+                }
+                
+                console.log(`成功導入 ${importCount} 筆飲料資料！`);
+            } catch (error) {
+                console.error('飲料資料導入錯誤：', error);
+            }
+        }
+
+        // 將函數綁定到全域變數
+        window.importMenuItems = importMenuItems;
+        window.importBeverageItems = importBeverageItems;
+        window.checkExistingData = checkExistingData;
+    </script>
+
+    <!-- Service Worker 註冊 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker 註冊成功:', registration);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker 註冊失敗:', error);
+                    });
+            });
+        }
     </script>
 </body>
 </html>
