@@ -1501,12 +1501,6 @@
 
         // 頁面載入初始化
         window.onload = function() {
-            <script>
-        // 頁面載入初始化
-        window.onload = function() {
-            <script>
-        // 頁面載入初始化
-        window.onload = function() {
             loadFavorites(); // 載入收藏清單
             updateAvailableCount();
 
@@ -1551,101 +1545,5 @@
             };
         };
     </script>
-
-   <!-- Firebase SDK -->
-    <script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-      // Firebase 配置
-      const firebaseConfig = {
-        // 暫時移除敏感資訊
-        projectId: "dinner-picker-b1fab",
-        storageBucket: "dinner-picker-b1fab.firebaseapp.com"
-      };
-
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-
-      // 將 db 設為全域變數以供其他程式使用
-      window.db = db;
-    </script>
-
-    <!-- 資料導入工具 -->
-    <script type="module">
-      import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-      // 餐點資料檢查功能
-      async function checkExistingData() {
-        const menuSnapshot = await getDocs(collection(db, 'menu-items'));
-        const beverageSnapshot = await getDocs(collection(db, 'beverage-items'));
-        console.log(`現有餐點數量: ${menuSnapshot.size}`);
-        console.log(`現有飲料數量: ${beverageSnapshot.size}`);
-        return {
-          menuCount: menuSnapshot.size,
-          beverageCount: beverageSnapshot.size
-        };
-      }
-
-      // 一般餐點資料導入
-      async function importMenuItems() {
-        try {
-          const existingData = await checkExistingData();
-          if (existingData.menuCount > 0) {
-            console.log('警告：資料庫中已有餐點資料！');
-            return;
-          }
-
-          // 確認是否要開始導入
-          if (!confirm('確定要導入餐點資料嗎？')) {
-            return;
-          }
-
-          // 開始導入資料
-          let importCount = 0;
-          
-          // 這裡會包含所有餐點資料的導入
-          // 我等下會提供完整的資料陣列
-          
-          console.log(`成功導入 ${importCount} 筆餐點資料！`);
-        } catch (error) {
-          console.error('資料導入錯誤：', error);
-        }
-      }
-
-      // 飲料資料導入
-      async function importBeverageItems() {
-        try {
-          const existingData = await checkExistingData();
-          if (existingData.beverageCount > 0) {
-            console.log('警告：資料庫中已有飲料資料！');
-            return;
-          }
-
-          // 確認是否要開始導入
-          if (!confirm('確定要導入飲料資料嗎？')) {
-            return;
-          }
-
-          // 開始導入資料
-          let importCount = 0;
-          
-          // 這裡會包含所有飲料資料的導入
-          // 我等下會提供完整的資料陣列
-          
-          console.log(`成功導入 ${importCount} 筆飲料資料！`);
-        } catch (error) {
-          console.error('飲料資料導入錯誤：', error);
-        }
-      }
-
-      // 將函數綁定到全域變數
-      window.importMenuItems = importMenuItems;
-      window.importBeverageItems = importBeverageItems;
-      window.checkExistingData = checkExistingData;
-    </script>
-
 </body>
 </html>
