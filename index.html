@@ -111,7 +111,7 @@
             position: relative; /* 為箭頭按鈕定位 */
         }
 
-        /* 添加前進後退按鈕 */
+        /* 前進後退按鈕樣式 */
         .nav-button {
             position: absolute;
             top: 50%;
@@ -630,7 +630,7 @@
         </div>
 
         <div class="result-container">
-            <!-- 添加前進後退按鈕 -->
+            <!-- 前進後退按鈕 -->
             <button id="prevButton" class="nav-button prev-button" onclick="showPreviousFood()" style="display: none">
                 ←
             </button>
@@ -1192,9 +1192,11 @@
 
         // 顯示上一個餐點
         function showPreviousFood() {
-            if (currentHistoryIndex + 1 >= foodHistory.length) return;
+            if (currentHistoryIndex + 1 >= foodHistory.length) {
+                return; // 已經到達歷史紀錄底部
+            }
 
-            currentHistoryIndex++;
+            currentHistoryIndex++;  // 向後移動索引
             const previousFood = foodHistory[currentHistoryIndex];
             
             if (previousFood) {
@@ -1205,9 +1207,6 @@
                 // 更新相關按鈕
                 updateFavoriteButton();
                 updateRelatedButtons(previousFood);
-                
-                // 保存當前狀態
-                localStorage.setItem('foodHistory', JSON.stringify(foodHistory));
             }
 
             // 更新導航按鈕狀態
@@ -1219,7 +1218,9 @@
 
         // 顯示下一個餐點
         function showNextFood() {
-            if (currentHistoryIndex <= 0) return;
+            if (currentHistoryIndex <= 0) {
+                return; // 已經在最新紀錄
+            }
 
             currentHistoryIndex--;
             const nextFood = foodHistory[currentHistoryIndex];
@@ -1232,9 +1233,6 @@
                 // 更新相關按鈕
                 updateFavoriteButton();
                 updateRelatedButtons(nextFood);
-                
-                // 保存當前狀態
-                localStorage.setItem('foodHistory', JSON.stringify(foodHistory));
             }
 
             // 更新導航按鈕狀態
@@ -1249,11 +1247,11 @@
             const prevButton = document.getElementById('prevButton');
             const nextButton = document.getElementById('nextButton');
             
-            // 更新前進後退按鈕狀態
+            // 根據目前位置更新按鈕顯示狀態
             prevButton.style.display = 
-                foodHistory.length > currentHistoryIndex + 1 ? 'block' : 'none';
+                (currentHistoryIndex + 1 < foodHistory.length) ? 'block' : 'none';
             nextButton.style.display = 
-                currentHistoryIndex > 0 ? 'block' : 'none';
+                (currentHistoryIndex > 0) ? 'block' : 'none';
         }
 
         // 更新相關按鈕顯示
@@ -1261,6 +1259,7 @@
             // 更新食譜按鈕
             document.getElementById('recipeButton').style.display = 
                 recipes[getBaseName(food)] ? 'flex' : 'none';
+                
             // 更新地圖按鈕
             const mapButton = document.getElementById('mapButton');
             mapButton.href = `https://www.google.com/maps/search/${encodeURIComponent(food)}`;
