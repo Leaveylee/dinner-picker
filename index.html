@@ -846,8 +846,8 @@
             { name: "香橙春烏龍", country: "飲料", brand: "得正" },
             { name: "檸檬春烏龍", country: "飲料", brand: "得正" },
             { name: "烘吉鮮奶", country: "飲料", brand: "得正" },
-            { name: "焙烏龍鮮奶", country: "飲料", brand: "得正" },
-            { name: "輕烏龍鮮奶", country: "飲料", brand: "得正" },
+            { name: "焙烏龍鮮奶茶", country: "飲料", brand: "得正" },
+            { name: "輕烏龍鮮奶茶", country: "飲料", brand: "得正" },
             { name: "紅茶鮮奶", country: "飲料", brand: "得正" },
             { name: "芝士奶蓋阿華田", country: "飲料", brand: "得正" },
             { name: "芝士奶蓋烘吉茶", country: "飲料", brand: "得正" },
@@ -1444,7 +1444,7 @@
             return item.name;
         }
 
-        // 位置服務相關函數（保留，供未來使用）
+        // 位置服務相關函數
         async function checkLocationPermission() {
             if (!navigator.permissions) {
                 // 瀏覽器不支援 Permissions API
@@ -1455,8 +1455,11 @@
                 if (result.state === 'denied') {
                     // 提示用戶在瀏覽器設定中啟用定位權限
                     showLocationSettings();
+                } else if (result.state === 'granted') {
+                    // 已經獲得位置權限
+                    getCurrentLocation();
                 }
-                // 您可以根據需要處理 'granted' 和 'prompt' 狀態
+                // 若為 'prompt'，用戶尚未決定，待用戶操作
             } catch (error) {
                 console.error('Permission check failed:', error);
             }
@@ -1469,7 +1472,7 @@
             modal.style.display = 'block';
         }
 
-        function requestLocationPermission() {
+        function getCurrentLocation() {
             if (navigator.geolocation) {
                 showLoadingIndicator(); // 顯示載入指示器
                 navigator.geolocation.getCurrentPosition(
@@ -1477,7 +1480,6 @@
                         hideLoadingIndicator(); // 隱藏載入指示器
                         hasLocationPermission = true;
                         lastKnownPosition = position;
-                        document.getElementById('locationPermissionModal').style.display = 'none';
                         console.log('位置權限已獲得，位置:', position);
                     },
                     error => {
@@ -1496,7 +1498,7 @@
             }
         }
 
-        // 手動定位相關函數（保留，供未來使用）
+        // 手動定位相關函數
         function showManualLocationInput() {
             const modal = document.getElementById('manualLocationModal');
             modal.style.display = 'block';
@@ -1542,7 +1544,7 @@
             manualLocationModal.style.display = 'none';
         }
 
-        // 錯誤追蹤函數
+        // 錯誤處理相關函數
         function trackLocationError(error) {
             console.error('Location error:', {
                 code: error.code,
@@ -1551,6 +1553,33 @@
                 userAgent: navigator.userAgent
             });
             // 您可以在此處添加發送到錯誤追蹤系統的代碼
+        }
+
+        function getLocationErrorMessage(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    return '您拒絕了位置權限，無法搜尋附近店家。';
+                case error.POSITION_UNAVAILABLE:
+                    return '位置資訊不可用，請稍後再試。';
+                case error.TIMEOUT:
+                    return '獲取位置超時，請稍後再試。';
+                case error.UNKNOWN_ERROR:
+                default:
+                    return '發生未知錯誤，請稍後再試。';
+            }
+        }
+
+        function showMapError(message) {
+            const modal = document.getElementById('mapErrorModal');
+            const messageElem = document.getElementById('mapErrorMessage');
+            messageElem.textContent = message;
+            modal.style.display = 'block';
+        }
+
+        function retryLocation() {
+            const modal = document.getElementById('mapErrorModal');
+            modal.style.display = 'none';
+            getCurrentLocation();
         }
 
         // 核心功能函數
@@ -1762,9 +1791,75 @@
             modal.style.display = 'block';
         }
 
-        // 將 mapButton 改為 <a> 標籤後，searchNearbyRestaurant 函數不再需要
-        // 因此移除該函數
-        // function searchNearbyRestaurant() { ... }
+        function pickFood() {
+            if (isAnimating) return;
+
+            const resultElem = document.getElementById('result');
+            const buttonElem = document.getElementById('pickButton');
+            const recipeButton = document.getElementById('recipeButton');
+            const mapButton = document.getElementById('mapButton');
+            
+            isAnimating = true;
+            buttonElem.disabled = true;
+            resultElem.classList.add('animating');
+            recipeButton.style.display = 'none';
+            mapButton.style.display = 'none';
+
+            let finalChoice = null;
+            let counter = 0;
+            
+            const spinInterval = setInterval(() => {
+                if (counter === 0) {
+                    finalChoice = getRandomFood();
+                }
+                if (counter < 9) {
+                    const filteredItems = getFilteredItems();
+                    if (filteredItems.length === 0) {
+                        resultElem.textContent = '沒有可選擇的餐點';
+                        clearInterval(spinInterval);
+                        isAnimating = false;
+                        buttonElem.disabled = false;
+                        resultElem.classList.remove('animating');
+                        return;
+                    }
+                    const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
+                    resultElem.textContent = getDisplayName(randomItem);
+                } else {
+                    resultElem.textContent = finalChoice;
+                }
+                
+                counter++;
+                if (counter >= 10) {
+                    clearInterval(spinInterval);
+                    isAnimating = false;
+                    buttonElem.disabled = false;
+                    resultElem.classList.remove('animating');
+                    
+                    if (finalChoice === '餐點都被收藏了喔!') {
+                        // 不進行後續操作，僅顯示訊息
+                        // 可選擇在此處添加額外提示或 UI 變更
+                    } else if (!finalChoice.includes('錯誤')) {
+                        const history = getHistory();
+                        history[finalChoice] = new Date().toISOString();
+                        saveHistory(history);
+                        currentFood = finalChoice;
+                        updateFavoriteButton();
+                        
+                        // 顯示食譜按鈕
+                        if (recipes[getBaseName(currentFood)]) {
+                            recipeButton.style.display = 'flex';
+                        }
+                        
+                        // 設置 mapButton 的 href 並顯示
+                        const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(finalChoice)}`;
+                        mapButton.href = mapUrl;
+                        mapButton.style.display = 'flex';
+                    }
+                    
+                    updateAvailableCount();
+                }
+            }, 50);
+        }
 
         // 取得顯示名稱（飲料時包含品牌）
         function getDisplayName(item) {
@@ -1787,6 +1882,144 @@
                 return `${item.name} ${item.brand}`;
             }
             return item.name;
+        }
+
+        // 位置服務相關函數
+        async function checkLocationPermission() {
+            if (!navigator.permissions) {
+                // 瀏覽器不支援 Permissions API
+                return;
+            }
+            try {
+                const result = await navigator.permissions.query({ name: 'geolocation' });
+                if (result.state === 'denied') {
+                    // 提示用戶在瀏覽器設定中啟用定位權限
+                    showLocationSettings();
+                } else if (result.state === 'granted') {
+                    // 已經獲得位置權限
+                    getCurrentLocation();
+                }
+                // 若為 'prompt'，用戶尚未決定，待用戶操作
+            } catch (error) {
+                console.error('Permission check failed:', error);
+            }
+        }
+
+        function showLocationSettings() {
+            const modal = document.getElementById('mapErrorModal');
+            const messageElem = document.getElementById('mapErrorMessage');
+            messageElem.textContent = '您的瀏覽器已永久封鎖定位權限。請在瀏覽器設定中手動啟用定位權限。';
+            modal.style.display = 'block';
+        }
+
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                showLoadingIndicator(); // 顯示載入指示器
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        hideLoadingIndicator(); // 隱藏載入指示器
+                        hasLocationPermission = true;
+                        lastKnownPosition = position;
+                        console.log('位置權限已獲得，位置:', position);
+                    },
+                    error => {
+                        hideLoadingIndicator(); // 隱藏載入指示器
+                        trackLocationError(error);
+                        showMapError(getLocationErrorMessage(error));
+                        hasLocationPermission = false;
+                        console.error('獲取位置失敗:', error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            }
+        }
+
+        // 手動定位相關函數
+        function showManualLocationInput() {
+            const modal = document.getElementById('manualLocationModal');
+            modal.style.display = 'block';
+        }
+
+        function submitManualLocation() {
+            const address = document.getElementById('manualAddress').value.trim();
+            const latitude = document.getElementById('manualLatitude').value.trim();
+            const longitude = document.getElementById('manualLongitude').value.trim();
+
+            if (!address && (!latitude || !longitude)) {
+                alert('請輸入地址或經緯度。');
+                return;
+            }
+
+            let mapUrl = '';
+
+            if (address) {
+                mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(address)}`;
+            } else {
+                if (!latitude || !longitude) {
+                    alert('請同時輸入經度和緯度。');
+                    return;
+                }
+                mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${latitude},${longitude},16z`;
+            }
+
+            console.log('手動定位打開地圖 URL:', mapUrl);
+
+            // 立即打開新窗口，顯示「正在加載」訊息
+            const loadingWindow = window.open('', '_blank', 'noopener,noreferrer');
+            if (!loadingWindow) {
+                alert('無法打開新窗口。請檢查瀏覽器的彈出窗口設定。');
+                return;
+            }
+            loadingWindow.document.write('<p style="font-size:1.2rem; color:#444; text-align:center; margin-top:20%;">正在加載地圖，請稍候...</p>');
+
+            // 更新新窗口的 URL
+            loadingWindow.location.href = mapUrl;
+
+            // 關閉手動定位輸入框
+            const manualLocationModal = document.getElementById('manualLocationModal');
+            manualLocationModal.style.display = 'none';
+        }
+
+        // 錯誤處理相關函數
+        function trackLocationError(error) {
+            console.error('Location error:', {
+                code: error.code,
+                message: error.message,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            });
+            // 您可以在此處添加發送到錯誤追蹤系統的代碼
+        }
+
+        function getLocationErrorMessage(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    return '您拒絕了位置權限，無法搜尋附近店家。';
+                case error.POSITION_UNAVAILABLE:
+                    return '位置資訊不可用，請稍後再試。';
+                case error.TIMEOUT:
+                    return '獲取位置超時，請稍後再試。';
+                case error.UNKNOWN_ERROR:
+                default:
+                    return '發生未知錯誤，請稍後再試。';
+            }
+        }
+
+        function showMapError(message) {
+            const modal = document.getElementById('mapErrorModal');
+            const messageElem = document.getElementById('mapErrorMessage');
+            messageElem.textContent = message;
+            modal.style.display = 'block';
+        }
+
+        function retryLocation() {
+            const modal = document.getElementById('mapErrorModal');
+            modal.style.display = 'none';
+            getCurrentLocation();
         }
 
         // 頁面載入初始化
