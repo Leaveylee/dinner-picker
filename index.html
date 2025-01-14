@@ -724,10 +724,6 @@
         let currentFood = null;
         let isAnimating = false;
 
-        // 分頁參數
-        const PAGE_SIZE = 10;  // 每頁顯示10筆記錄
-        let currentPage = 1;   // 目前頁數
-
         // 最大歷史紀錄數量
         const MAX_HISTORY_RECORDS = 5;
 
@@ -1186,18 +1182,26 @@
             modal.style.display = 'block';
         }
 
-        // 歷史回顧相關功能（已移除「歷史回顧」按鈕，因此相關函數也被移除）
-
         // 顯示上一個餐點
         function showPreviousFood() {
             if (foodHistory.length > 1) {
                 // 移除當前餐點
                 foodHistory.shift();
                 const previousFood = foodHistory[0];
-                currentFood = previousFood;
+                
+                // 更新全域變數和顯示
+                currentFood = previousFood;  // 確保更新 currentFood
                 document.getElementById('result').textContent = previousFood;
+                
+                // 更新相關按鈕和狀態
                 updateFavoriteButton();
                 updateRelatedButtons(previousFood);
+                
+                // 更新地圖搜尋按鈕的 URL
+                const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(previousFood)}`;
+                document.getElementById('mapButton').href = mapUrl;
+                
+                // 保存更新後的狀態
                 saveHistory(foodHistory);
 
                 // 更新箭頭按鈕顯示狀態
@@ -1213,7 +1217,9 @@
             document.getElementById('recipeButton').style.display = 
                 recipes[getBaseName(food)] ? 'flex' : 'none';
             // 更新地圖按鈕
-            document.getElementById('mapButton').style.display = 'flex';
+            const mapButton = document.getElementById('mapButton');
+            mapButton.href = `https://www.google.com/maps/search/${encodeURIComponent(food)}`;
+            mapButton.style.display = 'flex';
         }
 
         // 保存到歷史紀錄
@@ -1231,9 +1237,6 @@
 
             // 保存到 localStorage
             localStorage.setItem('foodHistory', JSON.stringify(foodHistory));
-
-            // 更新全域變數
-            // foodHistory = history; // 已經更新
 
             // 更新箭頭按鈕顯示狀態
             if (foodHistory.length > 1) {
@@ -1480,10 +1483,16 @@
                 // 移除當前餐點
                 foodHistory.shift();
                 const previousFood = foodHistory[0];
-                currentFood = previousFood;
+                
+                // 更新全域變數和顯示
+                currentFood = previousFood;  // 確保更新 currentFood
                 document.getElementById('result').textContent = previousFood;
+                
+                // 更新相關按鈕和狀態
                 updateFavoriteButton();
                 updateRelatedButtons(previousFood);
+                
+                // 保存更新後的狀態
                 saveHistory(foodHistory);
 
                 // 更新箭頭按鈕顯示狀態
@@ -1499,7 +1508,9 @@
             document.getElementById('recipeButton').style.display = 
                 recipes[getBaseName(food)] ? 'flex' : 'none';
             // 更新地圖按鈕
-            document.getElementById('mapButton').style.display = 'flex';
+            const mapButton = document.getElementById('mapButton');
+            mapButton.href = `https://www.google.com/maps/search/${encodeURIComponent(food)}`;
+            mapButton.style.display = 'flex';
         }
 
         // 保存到歷史紀錄
@@ -1624,8 +1635,16 @@
             // 載入收藏清單
             loadFavorites();
 
-            // 載入歷史記錄
+            // 載入歷史紀錄
             foodHistory = JSON.parse(localStorage.getItem('foodHistory') || '[]');
+
+            // 如果有歷史紀錄，初始化 currentFood 和顯示相關按鈕
+            if (foodHistory.length > 0) {
+                currentFood = foodHistory[0];
+                document.getElementById('result').textContent = currentFood;
+                updateFavoriteButton();
+                updateRelatedButtons(currentFood);
+            }
 
             // 更新可選擇餐點數量
             updateAvailableCount();
