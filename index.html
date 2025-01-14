@@ -784,7 +784,10 @@
             // 150元以下
             { name: "雞腿便當", country: "中式", price: "150以下" },
             { name: "排骨便當", country: "中式", price: "150以下" },
-            // ...（省略中式和日式料理的其他項目，請根據您的需求補全）
+            // 150-500元
+            { name: "牛肉麵", country: "中式", price: "150-500" },
+            { name: "魚香茄子", country: "中式", price: "150-500" },
+            // ...（您可以根據需要補全中式和其他料理的項目）
         ];
 
         // 飲料資料庫
@@ -792,7 +795,10 @@
             // 飲料 - 50嵐
             { name: "茉莉綠茶", country: "飲料", brand: "50嵐" },
             { name: "阿薩姆紅茶", country: "飲料", brand: "50嵐" },
-            // ...（省略其他品牌和飲料項目，請根據您的需求補全）
+            // 飲料 - CoCo
+            { name: "珍珠奶茶", country: "飲料", brand: "CoCo" },
+            { name: "冬瓜茶", country: "飲料", brand: "CoCo" },
+            // ...（您可以根據需要補全其他品牌和飲料項目）
         ];
 
         // 合併飲料資料到 menuItems
@@ -1233,7 +1239,7 @@
 
         // 顯示歷史記錄
         function showHistory() {
-            currentPage = 1; // 重置為第一頁
+            currentPage = 1; // 重置頁數
             const historyList = document.querySelector('.history-list');
             historyList.innerHTML = ''; // 清空現有記錄
             loadHistoryPage(currentPage); // 載入第一頁
@@ -1309,7 +1315,7 @@
             };
             history.unshift(newRecord); // 新記錄放在最前面
 
-            // 管理儲存空間
+            // 限制記錄數量
             if (history.length > MAX_HISTORY_RECORDS) {
                 history.splice(MAX_HISTORY_RECORDS);
             }
@@ -1552,62 +1558,150 @@
 
         // 分頁加載相關功能
 
-        // 顯示歷史記錄
-        function showHistory() {
-            currentPage = 1; // 重置為第一頁
-            const historyList = document.querySelector('.history-list');
-            historyList.innerHTML = ''; // 清空現有記錄
-            loadHistoryPage(currentPage); // 載入第一頁
-
-            // 顯示歷史彈出視窗
-            const modal = document.getElementById('historyModal');
-            modal.style.display = 'block';
-        }
-
-        // 分頁載入函數
-        function loadHistoryPage(page) {
-            const history = JSON.parse(localStorage.getItem('foodHistory') || '[]');
-            const startIndex = (page - 1) * PAGE_SIZE;
-            const endIndex = startIndex + PAGE_SIZE;
-            
-            // 只取出當前頁面需要的記錄
-            const pageRecords = history.slice(startIndex, endIndex);
-
-            if (pageRecords.length === 0) {
-                // 沒有更多記錄
-                return;
-            }
-
-            // 渲染這一頁的記錄
-            const historyList = document.querySelector('.history-list');
-            historyList.innerHTML += pageRecords.map(record => `
-                <div class="history-item" onclick="showFoodDetail('${record.foodName.replace(/'/g, "\\'")}')">
-                    <div class="food-info">
-                        <h3>${record.foodName}</h3>
-                        <p>${new Date(record.timestamp).toLocaleString()}</p>
-                    </div>
-                    <div class="category-tag">${record.category} - ${record.price}</div>
-                </div>
-            `).join('');
-
-            // 檢查是否還有更多記錄需要載入
-            if (endIndex < history.length) {
-                document.getElementById('loadMoreButton').style.display = 'block';
-            } else {
-                document.getElementById('loadMoreButton').style.display = 'none';
-            }
-        }
-
         // 載入更多歷史記錄
         function loadMoreHistory() {
             currentPage++;
             loadHistoryPage(currentPage);
         }
 
+        // 顯示餐點詳細資訊
+        function showFoodDetail(foodName) {
+            currentFood = foodName;
+            document.getElementById('result').textContent = foodName;
+            updateFavoriteButton();
+            document.getElementById('recipeButton').style.display = 
+                recipes[getBaseName(foodName)] ? 'flex' : 'none';
+            document.getElementById('mapButton').style.display = 'flex';
+            document.getElementById('historyModal').style.display = 'none';
+        }
+
+        // 保存到歷史紀錄
+        function saveToHistory(food) {
+            const history = JSON.parse(localStorage.getItem('foodHistory') || '[]');
+            const currentCategory = document.getElementById('countryFilter').value || '不指定';
+            const currentPrice = document.getElementById('priceFilter').value || '不指定';
+
+            const newRecord = {
+                id: Date.now(),
+                foodName: food,
+                timestamp: new Date().toISOString(),
+                category: currentCategory,
+                price: currentPrice
+            };
+            history.unshift(newRecord); // 新記錄放在最前面
+
+            // 限制記錄數量
+            if (history.length > MAX_HISTORY_RECORDS) {
+                history.splice(MAX_HISTORY_RECORDS);
+            }
+
+            localStorage.setItem('foodHistory', JSON.stringify(history));
+            foodHistory = history; // 更新全域變數
+        }
+
+        // 核心功能函數
+        function pickFood() {
+            if (isAnimating) return;
+
+            const resultElem = document.getElementById('result');
+            const buttonElem = document.getElementById('pickButton');
+            const recipeButton = document.getElementById('recipeButton');
+            const mapButton = document.getElementById('mapButton');
+            
+            isAnimating = true;
+            buttonElem.disabled = true;
+            resultElem.classList.add('animating');
+            recipeButton.style.display = 'none';
+            mapButton.style.display = 'none';
+
+            let finalChoice = null;
+            let counter = 0;
+            
+            const spinInterval = setInterval(() => {
+                if (counter === 0) {
+                    finalChoice = getRandomFood();
+                }
+                if (counter < 9) {
+                    const filteredItems = getFilteredItems();
+                    if (filteredItems.length === 0) {
+                        resultElem.textContent = '沒有可選擇的餐點';
+                        clearInterval(spinInterval);
+                        isAnimating = false;
+                        buttonElem.disabled = false;
+                        resultElem.classList.remove('animating');
+                        return;
+                    }
+                    const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
+                    resultElem.textContent = getDisplayName(randomItem);
+                } else {
+                    resultElem.textContent = finalChoice;
+                }
+                
+                counter++;
+                if (counter >= 10) {
+                    clearInterval(spinInterval);
+                    isAnimating = false;
+                    buttonElem.disabled = false;
+                    resultElem.classList.remove('animating');
+                    
+                    if (finalChoice === '餐點都被收藏了喔!') {
+                        // 不進行後續操作，僅顯示訊息
+                        // 可選擇在此處添加額外提示或 UI 變更
+                    } else if (!finalChoice.includes('錯誤')) {
+                        // 保存到歷史紀錄
+                        saveToHistory(finalChoice);
+
+                        currentFood = finalChoice;
+                        updateFavoriteButton();
+                        
+                        // 顯示食譜按鈕
+                        if (recipes[getBaseName(currentFood)]) {
+                            recipeButton.style.display = 'flex';
+                        }
+                        
+                        // 設置 mapButton 的 href 並顯示
+                        const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(finalChoice)}`;
+                        mapButton.href = mapUrl;
+                        mapButton.style.display = 'flex';
+                    }
+                    
+                    updateAvailableCount();
+                }
+            }, 50);
+        }
+
+        // 取得顯示名稱（飲料時包含品牌）
+        function getDisplayName(item) {
+            if (item.country === '飲料') {
+                return `${item.name} ${item.brand}`;
+            }
+            return item.name;
+        }
+
+        // 取得基礎名稱（不包含品牌）
+        function getBaseName(displayName) {
+            const index = displayName.lastIndexOf(' ');
+            if (index === -1) return displayName;
+            return displayName.substring(0, index);
+        }
+
+        // 取得唯一鍵值（飲料時包含品牌）
+        function getUniqueKey(item) {
+            if (item.country === '飲料') {
+                return `${item.name} ${item.brand}`;
+            }
+            return item.name;
+        }
+
         // 頁面載入初始化
         window.onload = function() {
-            loadFavorites(); // 載入收藏清單
+            // 載入收藏清單
+            loadFavorites();
+
+            // 載入歷史記錄
             foodHistory = JSON.parse(localStorage.getItem('foodHistory') || '[]');
+
+            // 更新可選擇餐點數量
             updateAvailableCount();
 
             // 檢查定位權限
