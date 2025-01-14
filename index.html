@@ -1180,6 +1180,14 @@
                 return;
             }
 
+            // 立即打開新窗口，顯示「正在加載」訊息
+            const loadingWindow = window.open('', '_blank', 'noopener,noreferrer');
+            if (!loadingWindow) {
+                alert('無法打開新窗口。請檢查瀏覽器的彈出窗口設定。');
+                return;
+            }
+            loadingWindow.document.write('<p style="font-size:1.2rem; color:#444; text-align:center; margin-top:20%;">正在獲取位置，請稍候...</p>');
+
             showLoadingIndicator();
             
             // 設定較短的超時時間
@@ -1190,42 +1198,33 @@
             };
 
             navigator.geolocation.getCurrentPosition(
-                handleLocationSuccess,
-                handleLocationError,
+                (position) => {
+                    console.log('獲取到位置:', position);
+                    hideLoadingIndicator(); // 隱藏載入指示器
+                    hasLocationPermission = true;
+                    lastKnownPosition = position;
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z`;
+                    console.log('打開地圖 URL:', mapUrl);
+
+                    // 更新新窗口的 URL
+                    loadingWindow.location.href = mapUrl;
+                },
+                (error) => {
+                    console.error('獲取位置錯誤:', error);
+                    hideLoadingIndicator(); // 隱藏載入指示器
+                    trackLocationError(error);
+                    showMapError(getLocationErrorMessage(error));
+
+                    // 在新窗口中顯示錯誤訊息
+                    loadingWindow.document.body.innerHTML = `
+                        <p style="font-size:1.2rem; color:#d93025; text-align:center; margin-top:20%;">${getLocationErrorMessage(error)}</p>
+                    `;
+                },
                 options
             );
-        }
-
-        function handleLocationSuccess(position) {
-            console.log('獲取到位置:', position);
-            hideLoadingIndicator(); // 隱藏載入指示器
-            hasLocationPermission = true;
-            lastKnownPosition = position;
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-
-            const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z`;
-            console.log('打開地圖 URL:', mapUrl);
-
-            // 使用 window.open 打開地圖
-            const newWindow = window.open(mapUrl, '_blank', 'noopener,noreferrer');
-            if (newWindow) {
-                newWindow.focus();
-            } else {
-                // 如果被阻擋，顯示手動鏈接
-                alert('彈出窗口被阻擋，請點擊以下鏈接手動打開地圖：');
-                const manualModal = document.getElementById('manualMapModal');
-                const manualLink = document.getElementById('manualMapLink');
-                manualLink.href = mapUrl;
-                manualMapModal.style.display = 'block';
-            }
-        }
-
-        function handleLocationError(error) {
-            console.error('獲取位置錯誤:', error);
-            hideLoadingIndicator(); // 隱藏載入指示器
-            trackLocationError(error);
-            showMapError(getLocationErrorMessage(error));
         }
 
         function getLocationErrorMessage(error) {
@@ -1284,17 +1283,16 @@
 
             console.log('手動定位打開地圖 URL:', mapUrl);
 
-            // 使用 window.open 打開地圖
-            const newWindow = window.open(mapUrl, '_blank', 'noopener,noreferrer');
-            if (newWindow) {
-                newWindow.focus();
-            } else {
-                alert('彈出窗口被阻擋，請點擊以下鏈接手動打開地圖：');
-                const manualMapModal = document.getElementById('manualMapModal');
-                const manualLink = document.getElementById('manualMapLink');
-                manualLink.href = mapUrl;
-                manualMapModal.style.display = 'block';
+            // 立即打開新窗口，顯示「正在加載」訊息
+            const loadingWindow = window.open('', '_blank', 'noopener,noreferrer');
+            if (!loadingWindow) {
+                alert('無法打開新窗口。請檢查瀏覽器的彈出窗口設定。');
+                return;
             }
+            loadingWindow.document.write('<p style="font-size:1.2rem; color:#444; text-align:center; margin-top:20%;">正在加載地圖，請稍候...</p>');
+
+            // 更新新窗口的 URL
+            loadingWindow.location.href = mapUrl;
 
             // 關閉手動定位輸入框
             const manualLocationModal = document.getElementById('manualLocationModal');
@@ -1706,13 +1704,6 @@
             const closeButtons = document.getElementsByClassName('close');
             Array.from(closeButtons).forEach(button => {
                 const modal = button.closest('.modal');
-                button.onclick = () => modal.style.display = 'none';
-            });
-
-            // 初始化手動定位關閉按鈕
-            const manualCloseButtons = document.querySelectorAll('.manual-location-input .close');
-            manualCloseButtons.forEach(button => {
-                const modal = button.closest('.manual-location-input');
                 button.onclick = () => modal.style.display = 'none';
             });
 
