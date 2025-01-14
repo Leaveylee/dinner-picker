@@ -13,9 +13,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="等下吃什麼？">
 
-    <!-- Font Awesome for enhanced icons (Optional) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
         * {
@@ -111,61 +108,67 @@
             padding: 0.5rem;
             border-radius: 16px;
             background: linear-gradient(135deg, #FFB68E 0%, #FFD0B8 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+            position: relative; /* 為箭頭按鈕定位 */
         }
 
-        /* 改善箭頭按鈕樣式 */
+        /* 添加前進後退按鈕 */
         .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
             background: none;
             border: none;
-            color: #B86E52;  /* 較柔和的顏色 */
-            font-size: 2.5rem;  /* 從1.2rem增加到2.5rem */
+            font-size: 1.5rem;
+            color: #B86E52;
             cursor: pointer;
-            padding: 12px;      /* 從8px增加到12px */
+            padding: 8px;
             transition: all 0.3s ease;
-            z-index: 2;
-            user-select: none;
-            width: 40px;        /* 固定寬度確保足夠點擊區域 */
-            height: 40px;       /* 固定高度確保足夠點擊區域 */
-            display: flex;      /* 使用flex置中 */
-            align-items: center;
-            justify-content: center;
+            user-select: none; /* 防止文字被選取 */
+        }
+
+        .prev-button {
+            left: -40px;
+        }
+
+        .next-button {
+            right: -40px;
         }
 
         .nav-button:hover {
-            transform: scale(1.1);
-            color: #E67E51;  /* 懸停時顏色變化 */
+            transform: translateY(-50%) scale(1.1);
+            color: #E67E51;
         }
 
-        /* 調整結果顯示區域 */
         .result {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            min-height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.4rem;
             font-weight: 500;
             color: #444;
-            padding: 0 1rem;  /* 左右留出空間給按鈕 */
-            flex: 1;
-            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .result.animating {
+            transform: scale(1.02);
+            background: #f8f9fa;
         }
 
-        /* 隨機選擇按鈕樣式 */
         .button {
             background: linear-gradient(135deg, #E67E51 0%, #F1945E 100%);
             color: white;
             border: none;
-            padding: 1.2rem 2.5rem;  /* 增加padding */
+            padding: 1rem 2rem;
             border-radius: 12px;
-            font-size: 1.3rem;      /* 增加字體大小 */
+            font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(230, 126, 81, 0.2);
-            min-width: 200px;       /* 設定最小寬度 */
         }
 
         .button:hover {
@@ -173,10 +176,15 @@
             box-shadow: 0 6px 16px rgba(230, 126, 81, 0.3);
         }
 
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(230, 126, 81, 0.2);
+        }
+
         .button:disabled {
-            background: #ddd;
+            background: linear-gradient(135deg, #FFD0B8 0%, #FFE4D6 100%);
+            transform: none;
             cursor: not-allowed;
-            box-shadow: none;
         }
 
         .button-group {
@@ -463,7 +471,7 @@
                 font-size: 1.8rem;
             }
             .result {
-                font-size: 1.2rem;  /* 更小的結果文字 */
+                font-size: 1.2rem;
             }
             .modal-content {
                 margin: 10% 5%;
@@ -477,16 +485,10 @@
                 width: 100%;
                 justify-content: center;
             }
-            .nav-button {
-                font-size: 2rem;  /* 手機版保持較大尺寸 */
-                padding: 8px;      /* 手機版增加padding */
-                width: 32px;        /* 手機版調整寬度 */
-                height: 32px;       /* 手機版調整高度 */
-            }
-            .button {
-                padding: 1rem 2rem;  /* 手機版調整padding */
-                font-size: 1.2rem;   /* 手機版調整字體大小 */
-                min-width: 180px;     /* 手機版調整最小寬度 */
+            .prev-button, .next-button {
+                left: -30px;
+                right: -30px;
+                font-size: 1.2rem;
             }
         }
 
@@ -595,85 +597,6 @@
             background: #ddd;
             cursor: not-allowed;
         }
-
-        /* 自定義工具提示樣式 */
-        .nav-button[title]:hover::after {
-            content: attr(title);
-            position: absolute;
-            bottom: -1.5rem;
-            background: rgba(0, 0, 0, 0.75);
-            color: #fff;
-            padding: 0.3rem 0.6rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            white-space: nowrap;
-            transform: translateX(-50%);
-            left: 50%;
-        }
-
-        /* 按鈕可被鍵盤聚焦 */
-        .nav-button:focus {
-            outline: 2px solid #B86E52;
-            outline-offset: 2px;
-        }
-
-        /* 按鈕點擊時的視覺反饋 */
-        .nav-button:active {
-            transform: scale(1.05);
-            color: #D35400;
-        }
-
-        /* 新增消息提示框樣式 */
-        .message-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1500;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .message-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 16px;
-            width: 80%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-            position: relative;
-        }
-
-        .message-content h2 {
-            color: #B86E52;
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
-
-        .message-content p {
-            color: #444;
-            margin-bottom: 1.5rem;
-            font-size: 1rem;
-        }
-
-        .message-content button {
-            background: #E67E51;
-            color: white;
-            border: none;
-            padding: 0.5rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
-
-        .message-content button:hover {
-            background: #D35400;
-        }
     </style>
 </head>
 <body>
@@ -707,29 +630,29 @@
         </div>
 
         <div class="result-container">
-            <!-- 前進後退按鈕放在餐點文字的兩側 -->
-            <button id="prevButton" class="nav-button prev-button" onclick="showPreviousFood()" style="display: none" title="返回上一個餐點">
-                ‹
+            <!-- 添加前進後退按鈕 -->
+            <button id="prevButton" class="nav-button prev-button" onclick="showPreviousFood()" style="display: none">
+                ←
+            </button>
+            <button id="nextButton" class="nav-button next-button" onclick="showNextFood()" style="display: none">
+                →
             </button>
             <div id="result" class="result">點擊按鈕選擇餐點</div>
-            <button id="nextButton" class="nav-button next-button" onclick="showNextFood()" style="display: none" title="前往下一個餐點">
-                ›
-            </button>
-        </div>
-        <div class="button-group">
-            <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
-                <span class="favorite-icon">⭐</span>
-                <span class="favorite-text">點擊收藏</span>
-            </button>
-            <button id="recipeButton" class="recipe-button" onclick="showRecipe()" style="display: none">
-                <span class="recipe-icon">📖</span>
-                <span class="recipe-text">點擊看食譜</span>
-            </button>
-            <!-- 將 mapButton 改為 <a> 標籤 -->
-            <a id="mapButton" href="#" target="_blank" rel="noopener noreferrer" class="map-button" style="display: none">
-                <span class="map-icon">🗺️</span>
-                <span class="map-text">搜尋附近店家</span>
-            </a>
+            <div class="button-group">
+                <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
+                    <span class="favorite-icon">⭐</span>
+                    <span class="favorite-text">點擊收藏</span>
+                </button>
+                <button id="recipeButton" class="recipe-button" onclick="showRecipe()" style="display: none">
+                    <span class="recipe-icon">📖</span>
+                    <span class="recipe-text">點擊看食譜</span>
+                </button>
+                <!-- 將 mapButton 改為 <a> 標籤 -->
+                <a id="mapButton" href="#" target="_blank" rel="noopener noreferrer" class="map-button" style="display: none">
+                    <span class="map-icon">🗺️</span>
+                    <span class="map-text">搜尋附近店家</span>
+                </a>
+            </div>
         </div>
 
         <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
@@ -799,15 +722,6 @@
         <div id="loadingIndicator" class="loading-indicator" style="display: none;">
             <div class="spinner"></div>
             <p>正在獲取位置...</p>
-        </div>
-
-        <!-- 消息提示框 -->
-        <div id="messageModal" class="message-modal">
-            <div class="message-content">
-                <h2 id="messageTitle">提示</h2>
-                <p id="messageText">訊息內容</p>
-                <button onclick="closeMessage()">確定</button>
-            </div>
         </div>
     </div>
 
@@ -1143,28 +1057,38 @@
             const filteredItems = getFilteredItems();
             // 排除已收藏的餐點
             const availableFoods = filteredItems.filter(item => {
-                const key = getUniqueKey(item);
+                const key = getUniqueKey(item); // 使用唯一鍵值
                 return isAvailable(key) && !favorites.has(key);
             });
 
             if (availableFoods.length === 0) {
-                // 檢查是否所有餐點都已被收藏
-                const allFavorited = filteredItems.length > 0 && 
-                    filteredItems.every(item => favorites.has(getUniqueKey(item)));
-                
+                // 檢查是否所有篩選後的餐點都已被收藏
+                const allFavorited = filteredItems.length > 0 && filteredItems.every(item => {
+                    const key = getUniqueKey(item); // 使用唯一鍵值
+                    return favorites.has(key);
+                });
                 if (allFavorited) {
-                    return '所有餐點都已收藏，請先取消部分收藏以繼續使用隨機選擇功能。';
+                    return '餐點都被收藏了喔!';
                 }
+                return '發生錯誤，請重試 😅';
             }
 
-            // 如果只剩一個選項，直接返回
+            // 處理單一選項
             if (availableFoods.length === 1) {
                 return getDisplayName(availableFoods[0]);
             }
 
-            // 從可用選項中隨機選擇
-            const randomIndex = Math.floor(Math.random() * availableFoods.length);
-            return getDisplayName(availableFoods[randomIndex]);
+            // 獲取上一次選中的餐點
+            const lastSelectedFood = currentHistoryIndex === -1 ? null : foodHistory[currentHistoryIndex];
+
+            // 從可用選項中排除上一次選中的餐點
+            const foodsExcludeLast = lastSelectedFood ? 
+                availableFoods.filter(item => getUniqueKey(item) !== lastSelectedFood) : 
+                availableFoods;
+
+            // 隨機選擇
+            const randomIndex = Math.floor(Math.random() * foodsExcludeLast.length);
+            return getDisplayName(foodsExcludeLast[randomIndex]);
         }
 
         function clearFilteredHistory() {
@@ -1197,7 +1121,7 @@
             const filteredItems = getFilteredItems();
             // 排除已收藏的餐點
             const availableCount = filteredItems.filter(item => {
-                const key = getUniqueKey(item);
+                const key = getUniqueKey(item); // 使用唯一鍵值
                 return isAvailable(key) && !favorites.has(key);
             }).length;
             const elem = document.getElementById('remainingChoices');
@@ -1268,11 +1192,9 @@
 
         // 顯示上一個餐點
         function showPreviousFood() {
-            if (currentHistoryIndex + 1 >= foodHistory.length) {
-                return; // 已經到達歷史紀錄底部
-            }
+            if (currentHistoryIndex + 1 >= foodHistory.length) return;
 
-            currentHistoryIndex++;  // 向後移動索引
+            currentHistoryIndex++;
             const previousFood = foodHistory[currentHistoryIndex];
             
             if (previousFood) {
@@ -1283,6 +1205,9 @@
                 // 更新相關按鈕
                 updateFavoriteButton();
                 updateRelatedButtons(previousFood);
+                
+                // 保存當前狀態
+                localStorage.setItem('foodHistory', JSON.stringify(foodHistory));
             }
 
             // 更新導航按鈕狀態
@@ -1294,9 +1219,7 @@
 
         // 顯示下一個餐點
         function showNextFood() {
-            if (currentHistoryIndex <= 0) {
-                return; // 已經在最新紀錄
-            }
+            if (currentHistoryIndex <= 0) return;
 
             currentHistoryIndex--;
             const nextFood = foodHistory[currentHistoryIndex];
@@ -1309,6 +1232,9 @@
                 // 更新相關按鈕
                 updateFavoriteButton();
                 updateRelatedButtons(nextFood);
+                
+                // 保存當前狀態
+                localStorage.setItem('foodHistory', JSON.stringify(foodHistory));
             }
 
             // 更新導航按鈕狀態
@@ -1323,11 +1249,11 @@
             const prevButton = document.getElementById('prevButton');
             const nextButton = document.getElementById('nextButton');
             
-            // 根據目前位置更新按鈕顯示狀態
+            // 更新前進後退按鈕狀態
             prevButton.style.display = 
-                (currentHistoryIndex + 1 < foodHistory.length) ? 'block' : 'none';
+                foodHistory.length > currentHistoryIndex + 1 ? 'block' : 'none';
             nextButton.style.display = 
-                (currentHistoryIndex > 0) ? 'block' : 'none';
+                currentHistoryIndex > 0 ? 'block' : 'none';
         }
 
         // 更新相關按鈕顯示
@@ -1335,7 +1261,6 @@
             // 更新食譜按鈕
             document.getElementById('recipeButton').style.display = 
                 recipes[getBaseName(food)] ? 'flex' : 'none';
-                
             // 更新地圖按鈕
             const mapButton = document.getElementById('mapButton');
             mapButton.href = `https://www.google.com/maps/search/${encodeURIComponent(food)}`;
@@ -1348,7 +1273,7 @@
 
             // 當使用者在查看歷史紀錄時選擇新餐點，清除"前進"的歷史
             if (currentHistoryIndex > 0) {
-                foodHistory = foodHistory.slice(0, currentHistoryIndex);
+                foodHistory = foodHistory.slice(currentHistoryIndex);
             }
 
             foodHistory.unshift(food);
@@ -1391,21 +1316,12 @@
                 } else {
                     resultElem.textContent = finalChoice;
                     
-                    if (finalChoice && 
-                        !finalChoice.includes('錯誤') && 
-                        !finalChoice.includes('收藏') && 
-                        !finalChoice.includes('所有餐點')) {
+                    if (finalChoice && !finalChoice.includes('錯誤') && !finalChoice.includes('收藏')) {
                         saveToHistory(finalChoice);
                         currentFood = finalChoice;
                         showAllButtons();
                         updateFavoriteButton();
                         updateRelatedButtons(finalChoice);
-                    }
-
-                    if (finalChoice && finalChoice.includes('所有餐點')) {
-                        showMessage('提示', finalChoice);
-                    } else if (finalChoice && finalChoice.includes('已收藏')) {
-                        showMessage('提示', finalChoice);
                     }
                     
                     clearInterval(spinInterval);
@@ -1655,46 +1571,16 @@
                 if (event.target.classList.contains('manual-location-input')) {
                     event.target.style.display = 'none';
                 }
-                if (event.target.classList.contains('message-modal')) {
-                    event.target.style.display = 'none';
-                }
             };
 
             // 初始化導航按鈕狀態
             updateNavigationButtons();
-
-            // 鍵盤導航支持
-            window.addEventListener('keydown', function(event) {
-                if (event.key === 'ArrowLeft') {
-                    showPreviousFood();
-                } else if (event.key === 'ArrowRight') {
-                    showNextFood();
-                }
-            });
 
             // 調試信息
             console.log('頁面載入完成，歷史紀錄:', foodHistory);
             console.log('當前餐點:', currentFood);
             console.log('當前歷史索引:', currentHistoryIndex);
         };
-
-        // 顯示消息提示框
-        function showMessage(title, message) {
-            const modal = document.getElementById('messageModal');
-            const titleElem = document.getElementById('messageTitle');
-            const textElem = document.getElementById('messageText');
-
-            titleElem.textContent = title;
-            textElem.textContent = message;
-
-            modal.style.display = 'flex';
-        }
-
-        // 關閉消息提示框
-        function closeMessage() {
-            const modal = document.getElementById('messageModal');
-            modal.style.display = 'none';
-        }
     </script>
 </body>
 </html>
