@@ -108,83 +108,41 @@
             padding: 0.5rem;
             border-radius: 16px;
             background: linear-gradient(135deg, #FFB68E 0%, #FFD0B8 100%);
-            position: relative; /* 為箭頭按鈕定位 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
 
-        /* 前進後退按鈕樣式 */
+        /* 改善箭頭按鈕樣式 */
         .nav-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
             background: none;
             border: none;
-            font-size: 1.5rem;
-            color: #B86E52;
+            color: #B86E52;  /* 較柔和的顏色 */
+            font-size: 1.2rem;  /* 稍微縮小字體 */
             cursor: pointer;
             padding: 8px;
             transition: all 0.3s ease;
-            user-select: none; /* 防止文字被選取 */
-        }
-
-        .prev-button {
-            left: -40px;
-        }
-
-        .next-button {
-            right: -40px;
+            z-index: 2;
+            user-select: none;
         }
 
         .nav-button:hover {
-            transform: translateY(-50%) scale(1.1);
-            color: #E67E51;
+            transform: scale(1.1);
+            color: #E67E51;  /* 懸停時顏色變化 */
         }
 
+        /* 調整結果顯示區域 */
         .result {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            min-height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.4rem;
             font-weight: 500;
             color: #444;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        .result.animating {
-            transform: scale(1.02);
-            background: #f8f9fa;
-        }
-
-        .button {
-            background: linear-gradient(135deg, #E67E51 0%, #F1945E 100%);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(230, 126, 81, 0.2);
-        }
-
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(230, 126, 81, 0.3);
-        }
-
-        .button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(230, 126, 81, 0.2);
-        }
-
-        .button:disabled {
-            background: linear-gradient(135deg, #FFD0B8 0%, #FFE4D6 100%);
-            transform: none;
-            cursor: not-allowed;
+            padding: 0 1rem;  /* 左右留出空間給按鈕 */
+            flex: 1;
+            position: relative;
         }
 
         .button-group {
@@ -471,7 +429,7 @@
                 font-size: 1.8rem;
             }
             .result {
-                font-size: 1.2rem;
+                font-size: 1.2rem;  /* 更小的結果文字 */
             }
             .modal-content {
                 margin: 10% 5%;
@@ -485,10 +443,9 @@
                 width: 100%;
                 justify-content: center;
             }
-            .prev-button, .next-button {
-                left: -30px;
-                right: -30px;
-                font-size: 1.2rem;
+            .nav-button {
+                font-size: 1rem;  /* 更小的字體 */
+                padding: 4px;      /* 更小的間距 */
             }
         }
 
@@ -630,29 +587,29 @@
         </div>
 
         <div class="result-container">
-            <!-- 前進後退按鈕 -->
-            <button id="prevButton" class="nav-button prev-button" onclick="showPreviousFood()" style="display: none">
-                ←
-            </button>
-            <button id="nextButton" class="nav-button next-button" onclick="showNextFood()" style="display: none">
-                →
+            <!-- 前進後退按鈕放在餐點文字的兩側 -->
+            <button id="prevButton" class="nav-button prev-button" onclick="showPreviousFood()" style="display: none" title="返回上一個餐點">
+                ‹
             </button>
             <div id="result" class="result">點擊按鈕選擇餐點</div>
-            <div class="button-group">
-                <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
-                    <span class="favorite-icon">⭐</span>
-                    <span class="favorite-text">點擊收藏</span>
-                </button>
-                <button id="recipeButton" class="recipe-button" onclick="showRecipe()" style="display: none">
-                    <span class="recipe-icon">📖</span>
-                    <span class="recipe-text">點擊看食譜</span>
-                </button>
-                <!-- 將 mapButton 改為 <a> 標籤 -->
-                <a id="mapButton" href="#" target="_blank" rel="noopener noreferrer" class="map-button" style="display: none">
-                    <span class="map-icon">🗺️</span>
-                    <span class="map-text">搜尋附近店家</span>
-                </a>
-            </div>
+            <button id="nextButton" class="nav-button next-button" onclick="showNextFood()" style="display: none" title="前往下一個餐點">
+                ›
+            </button>
+        </div>
+        <div class="button-group">
+            <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
+                <span class="favorite-icon">⭐</span>
+                <span class="favorite-text">點擊收藏</span>
+            </button>
+            <button id="recipeButton" class="recipe-button" onclick="showRecipe()" style="display: none">
+                <span class="recipe-icon">📖</span>
+                <span class="recipe-text">點擊看食譜</span>
+            </button>
+            <!-- 將 mapButton 改為 <a> 標籤 -->
+            <a id="mapButton" href="#" target="_blank" rel="noopener noreferrer" class="map-button" style="display: none">
+                <span class="map-icon">🗺️</span>
+                <span class="map-text">搜尋附近店家</span>
+            </a>
         </div>
 
         <button id="pickButton" class="button" onclick="pickFood()">✨ 隨機選擇 ✨</button>
@@ -1272,7 +1229,7 @@
 
             // 當使用者在查看歷史紀錄時選擇新餐點，清除"前進"的歷史
             if (currentHistoryIndex > 0) {
-                foodHistory = foodHistory.slice(currentHistoryIndex);
+                foodHistory = foodHistory.slice(0, currentHistoryIndex);
             }
 
             foodHistory.unshift(food);
