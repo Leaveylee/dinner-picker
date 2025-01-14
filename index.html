@@ -108,6 +108,27 @@
             padding: 0.5rem;
             border-radius: 16px;
             background: linear-gradient(135deg, #FFB68E 0%, #FFD0B8 100%);
+            position: relative; /* 為箭頭按鈕定位 */
+        }
+
+        .prev-button {
+            position: absolute;
+            left: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #B86E52;
+            cursor: pointer;
+            padding: 8px;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .prev-button:hover {
+            transform: translateY(-50%) scale(1.1);
+            color: #E67E51;
         }
 
         .result {
@@ -165,7 +186,7 @@
             justify-content: center;
         }
 
-        .favorite-button, .recipe-button, .map-button, .history-button {
+        .favorite-button, .recipe-button, .map-button {
             background: none;
             border: none;
             padding: 0.5rem 1rem;
@@ -197,11 +218,7 @@
             color: #4285f4;
         }
 
-        .history-button {
-            color: #6A1B9A;
-        }
-
-        .favorite-button:hover, .recipe-button:hover, .map-button:hover, .history-button:hover {
+        .favorite-button:hover, .recipe-button:hover, .map-button:hover {
             transform: scale(1.1);
         }
 
@@ -215,10 +232,6 @@
 
         .map-button:hover {
             background: rgba(66, 133, 244, 0.1);
-        }
-
-        .history-button:hover {
-            background: rgba(106, 27, 154, 0.1);
         }
 
         .favorite-button.active {
@@ -464,6 +477,10 @@
                 width: 100%;
                 justify-content: center;
             }
+            .prev-button {
+                left: -30px; /* 調整小螢幕上的箭頭位置 */
+                font-size: 1.2rem;
+            }
         }
 
         /* 載入指示器樣式 */
@@ -550,55 +567,6 @@
             background: #3367d6;
         }
 
-        /* 歷史回顧相關樣式 */
-        .history-button {
-            background: linear-gradient(135deg, #6A1B9A 0%, #AB47BC 100%);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(106, 27, 154, 0.2);
-        }
-
-        .history-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(106, 27, 154, 0.3);
-        }
-
-        .history-button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(106, 27, 154, 0.2);
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .history-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .category-tag {
-            padding: 0.3rem 0.8rem;
-            background: #FFE4D6;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            color: #B86E52;
-        }
-
         /* 分頁按鈕樣式 */
         .load-more-button {
             background: #B86E52;
@@ -653,6 +621,10 @@
         </div>
 
         <div class="result-container">
+            <!-- 新增返回上一頁按鈕 -->
+            <button id="prevButton" class="prev-button" onclick="showPreviousFood()" style="display: none">
+                ←
+            </button>
             <div id="result" class="result">點擊按鈕選擇餐點</div>
             <div class="button-group">
                 <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
@@ -668,11 +640,6 @@
                     <span class="map-icon">🗺️</span>
                     <span class="map-text">搜尋附近店家</span>
                 </a>
-                <!-- 新增歷史回顧按鈕 -->
-                <button id="historyButton" class="history-button" onclick="showHistory()">
-                    <span class="history-icon">📜</span>
-                    <span class="history-text">歷史回顧</span>
-                </button>
             </div>
         </div>
 
@@ -699,19 +666,6 @@
                         <div id="stepsList"></div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- 歷史回顧彈出視窗 -->
-        <div id="historyModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2 class="modal-title">歷史記錄</h2>
-                <div class="history-list">
-                    <!-- 動態生成歷史記錄 -->
-                </div>
-                <!-- 分頁按鈕 -->
-                <button id="loadMoreButton" class="load-more-button" onclick="loadMoreHistory()" style="display: none;">載入更多</button>
             </div>
         </div>
 
@@ -775,7 +729,7 @@
         let currentPage = 1;   // 目前頁數
 
         // 最大歷史紀錄數量
-        const MAX_HISTORY_RECORDS = 50;
+        const MAX_HISTORY_RECORDS = 5;
 
         // 餐點資料庫
         const menuItems = [
@@ -1072,15 +1026,12 @@
         }
 
         function isAvailable(food) {
-            const history = getHistory();
-            const lastPickTime = history.find(record => record.foodName === food)?.timestamp;
-            
-            if (!lastPickTime) return true;
+            if (foodHistory.length === 0) return true;
 
+            // 檢查是否所有篩選後的餐點都已被選過
             const filteredItems = getFilteredItems();
             const allSelected = filteredItems.every(item => {
-                const record = history.find(r => r.foodName === getDisplayName(item));
-                return record && new Date(record.timestamp) >= new Date(lastPickTime);
+                return foodHistory.includes(getUniqueKey(item));
             });
 
             if (allSelected) {
@@ -1088,7 +1039,7 @@
                 return true;
             }
 
-            return false;
+            return !foodHistory.includes(food);
         }
 
         function getRandomFood() {
@@ -1112,7 +1063,7 @@
             }
 
             // 獲取上一次選中的餐點
-            const lastSelectedFood = foodHistory.length > 0 ? foodHistory[0].foodName : null;
+            const lastSelectedFood = foodHistory.length > 0 ? foodHistory[0] : null;
 
             // 如果只有一個選項可用，且是上一次選的，就重置歷史
             if (availableFoods.length === 1 && getUniqueKey(availableFoods[0]) === lastSelectedFood) {
@@ -1140,8 +1091,8 @@
             const filteredItems = getFilteredItems();
 
             // 保留與篩選後餐點相關的歷史紀錄
-            const filteredNames = filteredItems.map(item => getDisplayName(item));
-            foodHistory = foodHistory.filter(record => !filteredNames.includes(record.foodName));
+            const filteredKeys = filteredItems.map(item => getUniqueKey(item));
+            foodHistory = foodHistory.filter(record => !filteredKeys.includes(record));
 
             saveHistory(foodHistory);
             updateAvailableCount();
@@ -1235,93 +1186,59 @@
             modal.style.display = 'block';
         }
 
-        // 歷史回顧相關功能
+        // 歷史回顧相關功能（已移除「歷史回顧」按鈕，因此相關函數也被移除）
 
-        // 顯示歷史記錄
-        function showHistory() {
-            currentPage = 1; // 重置頁數
-            const historyList = document.querySelector('.history-list');
-            historyList.innerHTML = ''; // 清空現有記錄
-            loadHistoryPage(currentPage); // 載入第一頁
+        // 顯示上一個餐點
+        function showPreviousFood() {
+            if (foodHistory.length > 1) {
+                // 移除當前餐點
+                foodHistory.shift();
+                const previousFood = foodHistory[0];
+                currentFood = previousFood;
+                document.getElementById('result').textContent = previousFood;
+                updateFavoriteButton();
+                updateRelatedButtons(previousFood);
+                saveHistory(foodHistory);
 
-            // 顯示歷史彈出視窗
-            const modal = document.getElementById('historyModal');
-            modal.style.display = 'block';
-        }
-
-        // 分頁載入函數
-        function loadHistoryPage(page) {
-            const history = JSON.parse(localStorage.getItem('foodHistory') || '[]');
-            const startIndex = (page - 1) * PAGE_SIZE;
-            const endIndex = startIndex + PAGE_SIZE;
-            
-            // 只取出當前頁面需要的記錄
-            const pageRecords = history.slice(startIndex, endIndex);
-
-            if (pageRecords.length === 0) {
-                // 沒有更多記錄
-                return;
-            }
-
-            // 渲染這一頁的記錄
-            const historyList = document.querySelector('.history-list');
-            historyList.innerHTML += pageRecords.map(record => `
-                <div class="history-item" onclick="showFoodDetail('${record.foodName.replace(/'/g, "\\'")}')">
-                    <div class="food-info">
-                        <h3>${record.foodName}</h3>
-                        <p>${new Date(record.timestamp).toLocaleString()}</p>
-                    </div>
-                    <div class="category-tag">${record.category} - ${record.price}</div>
-                </div>
-            `).join('');
-
-            // 檢查是否還有更多記錄需要載入
-            if (endIndex < history.length) {
-                document.getElementById('loadMoreButton').style.display = 'block';
-            } else {
-                document.getElementById('loadMoreButton').style.display = 'none';
+                // 更新箭頭按鈕顯示狀態
+                if (foodHistory.length <= 1) {
+                    document.getElementById('prevButton').style.display = 'none';
+                }
             }
         }
 
-        // 載入更多歷史記錄
-        function loadMoreHistory() {
-            currentPage++;
-            loadHistoryPage(currentPage);
-        }
-
-        // 顯示餐點詳細資訊
-        function showFoodDetail(foodName) {
-            currentFood = foodName;
-            document.getElementById('result').textContent = foodName;
-            updateFavoriteButton();
+        // 更新相關按鈕顯示
+        function updateRelatedButtons(food) {
+            // 更新食譜按鈕
             document.getElementById('recipeButton').style.display = 
-                recipes[getBaseName(foodName)] ? 'flex' : 'none';
+                recipes[getBaseName(food)] ? 'flex' : 'none';
+            // 更新地圖按鈕
             document.getElementById('mapButton').style.display = 'flex';
-            document.getElementById('historyModal').style.display = 'none';
         }
 
         // 保存到歷史紀錄
         function saveToHistory(food) {
-            const history = JSON.parse(localStorage.getItem('foodHistory') || '[]');
-            const currentCategory = document.getElementById('countryFilter').value || '不指定';
-            const currentPrice = document.getElementById('priceFilter').value || '不指定';
+            // 取得當前的歷史紀錄
+            foodHistory = JSON.parse(localStorage.getItem('foodHistory') || '[]');
 
-            const newRecord = {
-                id: Date.now(),
-                foodName: food,
-                timestamp: new Date().toISOString(),
-                category: currentCategory,
-                price: currentPrice
-            };
-            history.unshift(newRecord); // 新記錄放在最前面
+            // 新記錄放在最前面
+            foodHistory.unshift(food);
 
             // 限制記錄數量
-            if (history.length > MAX_HISTORY_RECORDS) {
-                history.splice(MAX_HISTORY_RECORDS);
+            if (foodHistory.length > MAX_HISTORY_RECORDS) {
+                foodHistory.pop();
             }
 
-            localStorage.setItem('foodHistory', JSON.stringify(history));
-            foodHistory = history; // 更新全域變數
+            // 保存到 localStorage
+            localStorage.setItem('foodHistory', JSON.stringify(foodHistory));
+
+            // 更新全域變數
+            // foodHistory = history; // 已經更新
+
+            // 更新箭頭按鈕顯示狀態
+            if (foodHistory.length > 1) {
+                document.getElementById('prevButton').style.display = 'block';
+            }
         }
 
         // 核心功能函數
@@ -1338,6 +1255,7 @@
             resultElem.classList.add('animating');
             recipeButton.style.display = 'none';
             mapButton.style.display = 'none';
+            document.getElementById('prevButton').style.display = 'none'; // 隱藏返回按鈕
 
             let finalChoice = null;
             let counter = 0;
@@ -1556,47 +1474,54 @@
             getCurrentLocation();
         }
 
-        // 分頁加載相關功能
+        // 顯示上一個餐點
+        function showPreviousFood() {
+            if (foodHistory.length > 1) {
+                // 移除當前餐點
+                foodHistory.shift();
+                const previousFood = foodHistory[0];
+                currentFood = previousFood;
+                document.getElementById('result').textContent = previousFood;
+                updateFavoriteButton();
+                updateRelatedButtons(previousFood);
+                saveHistory(foodHistory);
 
-        // 載入更多歷史記錄
-        function loadMoreHistory() {
-            currentPage++;
-            loadHistoryPage(currentPage);
+                // 更新箭頭按鈕顯示狀態
+                if (foodHistory.length <= 1) {
+                    document.getElementById('prevButton').style.display = 'none';
+                }
+            }
         }
 
-        // 顯示餐點詳細資訊
-        function showFoodDetail(foodName) {
-            currentFood = foodName;
-            document.getElementById('result').textContent = foodName;
-            updateFavoriteButton();
+        // 更新相關按鈕顯示
+        function updateRelatedButtons(food) {
+            // 更新食譜按鈕
             document.getElementById('recipeButton').style.display = 
-                recipes[getBaseName(foodName)] ? 'flex' : 'none';
+                recipes[getBaseName(food)] ? 'flex' : 'none';
+            // 更新地圖按鈕
             document.getElementById('mapButton').style.display = 'flex';
-            document.getElementById('historyModal').style.display = 'none';
         }
 
         // 保存到歷史紀錄
         function saveToHistory(food) {
-            const history = JSON.parse(localStorage.getItem('foodHistory') || '[]');
-            const currentCategory = document.getElementById('countryFilter').value || '不指定';
-            const currentPrice = document.getElementById('priceFilter').value || '不指定';
+            // 取得當前的歷史紀錄
+            foodHistory = JSON.parse(localStorage.getItem('foodHistory') || '[]');
 
-            const newRecord = {
-                id: Date.now(),
-                foodName: food,
-                timestamp: new Date().toISOString(),
-                category: currentCategory,
-                price: currentPrice
-            };
-            history.unshift(newRecord); // 新記錄放在最前面
+            // 新記錄放在最前面
+            foodHistory.unshift(food);
 
             // 限制記錄數量
-            if (history.length > MAX_HISTORY_RECORDS) {
-                history.splice(MAX_HISTORY_RECORDS);
+            if (foodHistory.length > MAX_HISTORY_RECORDS) {
+                foodHistory.pop();
             }
 
-            localStorage.setItem('foodHistory', JSON.stringify(history));
-            foodHistory = history; // 更新全域變數
+            // 保存到 localStorage
+            localStorage.setItem('foodHistory', JSON.stringify(foodHistory));
+
+            // 更新箭頭按鈕顯示狀態
+            if (foodHistory.length > 1) {
+                document.getElementById('prevButton').style.display = 'block';
+            }
         }
 
         // 核心功能函數
@@ -1613,6 +1538,7 @@
             resultElem.classList.add('animating');
             recipeButton.style.display = 'none';
             mapButton.style.display = 'none';
+            document.getElementById('prevButton').style.display = 'none'; // 隱藏返回按鈕
 
             let finalChoice = null;
             let counter = 0;
@@ -1733,6 +1659,11 @@
                     event.target.style.display = 'none';
                 }
             };
+
+            // 初始化「返回上一頁」按鈕顯示狀態
+            if (foodHistory.length > 1) {
+                document.getElementById('prevButton').style.display = 'block';
+            }
         };
     </script>
 </body>
