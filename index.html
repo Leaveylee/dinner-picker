@@ -1184,31 +1184,30 @@
 
         // 顯示上一個餐點
         function showPreviousFood() {
-            if (foodHistory.length > 1) {
-                // 移除當前餐點
-                foodHistory.shift();
-                const previousFood = foodHistory[0];
-                
-                // 更新全域變數和顯示
-                currentFood = previousFood;  // 確保更新 currentFood
+            if (!Array.isArray(foodHistory) || foodHistory.length <= 1) {
+                document.getElementById('prevButton').style.display = 'none';
+                return;
+            }
+
+            foodHistory.shift(); // 移除當前餐點
+            const previousFood = foodHistory[0];
+            
+            if (previousFood) {
+                // 更新當前顯示
+                currentFood = previousFood;
                 document.getElementById('result').textContent = previousFood;
                 
-                // 更新相關按鈕和狀態
+                // 更新相關按鈕
                 updateFavoriteButton();
                 updateRelatedButtons(previousFood);
                 
-                // 更新地圖搜尋按鈕的 URL
-                const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(previousFood)}`;
-                document.getElementById('mapButton').href = mapUrl;
-                
-                // 保存更新後的狀態
-                saveHistory(foodHistory);
-
-                // 更新箭頭按鈕顯示狀態
-                if (foodHistory.length <= 1) {
-                    document.getElementById('prevButton').style.display = 'none';
-                }
+                // 保存當前狀態
+                localStorage.setItem('foodHistory', JSON.stringify(foodHistory));
             }
+
+            // 更新返回按鈕狀態
+            document.getElementById('prevButton').style.display = 
+                foodHistory.length > 1 ? 'block' : 'none';
         }
 
         // 更新相關按鈕顯示
@@ -1224,24 +1223,36 @@
 
         // 保存到歷史紀錄
         function saveToHistory(food) {
-            // 取得當前的歷史紀錄
-            foodHistory = JSON.parse(localStorage.getItem('foodHistory') || '[]');
+            if (!food) return;
 
-            // 新記錄放在最前面
-            foodHistory.unshift(food);
+            // 確保歷史紀錄是陣列
+            if (!Array.isArray(foodHistory)) {
+                foodHistory = [];
+            }
 
-            // 限制記錄數量
+            // 防止重複添加相同餐點
+            if (foodHistory.length === 0 || foodHistory[0] !== food) {
+                // 當使用者在查看過去的餐點後選擇新餐點時，清除「前進」的歷史
+                if (foodHistory.length > 1) {
+                    foodHistory = [foodHistory[0]];
+                }
+                foodHistory.unshift(food);
+            }
+
+            // 限制歷史紀錄數量
             if (foodHistory.length > MAX_HISTORY_RECORDS) {
                 foodHistory.pop();
             }
 
-            // 保存到 localStorage
+            // 儲存到 localStorage
             localStorage.setItem('foodHistory', JSON.stringify(foodHistory));
 
-            // 更新箭頭按鈕顯示狀態
-            if (foodHistory.length > 1) {
-                document.getElementById('prevButton').style.display = 'block';
-            }
+            // 更新返回按鈕狀態
+            const prevButton = document.getElementById('prevButton');
+            prevButton.style.display = foodHistory.length > 1 ? 'block' : 'none';
+
+            // 調試信息
+            console.log('保存歷史記錄:', foodHistory);
         }
 
         // 核心功能函數
@@ -1293,6 +1304,7 @@
                     if (finalChoice === '餐點都被收藏了喔!') {
                         // 不進行後續操作，僅顯示訊息
                         // 可選擇在此處添加額外提示或 UI 變更
+                        alert(finalChoice);
                     } else if (!finalChoice.includes('錯誤')) {
                         // 保存到歷史紀錄
                         saveToHistory(finalChoice);
@@ -1312,6 +1324,9 @@
                     }
                     
                     updateAvailableCount();
+
+                    // 調試信息
+                    console.log('選擇完成:', finalChoice);
                 }
             }, 50);
         }
@@ -1477,31 +1492,6 @@
             getCurrentLocation();
         }
 
-        // 顯示上一個餐點
-        function showPreviousFood() {
-            if (foodHistory.length > 1) {
-                // 移除當前餐點
-                foodHistory.shift();
-                const previousFood = foodHistory[0];
-                
-                // 更新全域變數和顯示
-                currentFood = previousFood;  // 確保更新 currentFood
-                document.getElementById('result').textContent = previousFood;
-                
-                // 更新相關按鈕和狀態
-                updateFavoriteButton();
-                updateRelatedButtons(previousFood);
-                
-                // 保存更新後的狀態
-                saveHistory(foodHistory);
-
-                // 更新箭頭按鈕顯示狀態
-                if (foodHistory.length <= 1) {
-                    document.getElementById('prevButton').style.display = 'none';
-                }
-            }
-        }
-
         // 更新相關按鈕顯示
         function updateRelatedButtons(food) {
             // 更新食譜按鈕
@@ -1513,130 +1503,23 @@
             mapButton.style.display = 'flex';
         }
 
-        // 保存到歷史紀錄
-        function saveToHistory(food) {
-            // 取得當前的歷史紀錄
-            foodHistory = JSON.parse(localStorage.getItem('foodHistory') || '[]');
-
-            // 新記錄放在最前面
-            foodHistory.unshift(food);
-
-            // 限制記錄數量
-            if (foodHistory.length > MAX_HISTORY_RECORDS) {
-                foodHistory.pop();
-            }
-
-            // 保存到 localStorage
-            localStorage.setItem('foodHistory', JSON.stringify(foodHistory));
-
-            // 更新箭頭按鈕顯示狀態
-            if (foodHistory.length > 1) {
-                document.getElementById('prevButton').style.display = 'block';
-            }
-        }
-
-        // 核心功能函數
-        function pickFood() {
-            if (isAnimating) return;
-
-            const resultElem = document.getElementById('result');
-            const buttonElem = document.getElementById('pickButton');
-            const recipeButton = document.getElementById('recipeButton');
-            const mapButton = document.getElementById('mapButton');
-            
-            isAnimating = true;
-            buttonElem.disabled = true;
-            resultElem.classList.add('animating');
-            recipeButton.style.display = 'none';
-            mapButton.style.display = 'none';
-            document.getElementById('prevButton').style.display = 'none'; // 隱藏返回按鈕
-
-            let finalChoice = null;
-            let counter = 0;
-            
-            const spinInterval = setInterval(() => {
-                if (counter === 0) {
-                    finalChoice = getRandomFood();
-                }
-                if (counter < 9) {
-                    const filteredItems = getFilteredItems();
-                    if (filteredItems.length === 0) {
-                        resultElem.textContent = '沒有可選擇的餐點';
-                        clearInterval(spinInterval);
-                        isAnimating = false;
-                        buttonElem.disabled = false;
-                        resultElem.classList.remove('animating');
-                        return;
-                    }
-                    const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
-                    resultElem.textContent = getDisplayName(randomItem);
-                } else {
-                    resultElem.textContent = finalChoice;
-                }
-                
-                counter++;
-                if (counter >= 10) {
-                    clearInterval(spinInterval);
-                    isAnimating = false;
-                    buttonElem.disabled = false;
-                    resultElem.classList.remove('animating');
-                    
-                    if (finalChoice === '餐點都被收藏了喔!') {
-                        // 不進行後續操作，僅顯示訊息
-                        // 可選擇在此處添加額外提示或 UI 變更
-                    } else if (!finalChoice.includes('錯誤')) {
-                        // 保存到歷史紀錄
-                        saveToHistory(finalChoice);
-
-                        currentFood = finalChoice;
-                        updateFavoriteButton();
-                        
-                        // 顯示食譜按鈕
-                        if (recipes[getBaseName(currentFood)]) {
-                            recipeButton.style.display = 'flex';
-                        }
-                        
-                        // 設置 mapButton 的 href 並顯示
-                        const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(finalChoice)}`;
-                        mapButton.href = mapUrl;
-                        mapButton.style.display = 'flex';
-                    }
-                    
-                    updateAvailableCount();
-                }
-            }, 50);
-        }
-
-        // 取得顯示名稱（飲料時包含品牌）
-        function getDisplayName(item) {
-            if (item.country === '飲料') {
-                return `${item.name} ${item.brand}`;
-            }
-            return item.name;
-        }
-
-        // 取得基礎名稱（不包含品牌）
-        function getBaseName(displayName) {
-            const index = displayName.lastIndexOf(' ');
-            if (index === -1) return displayName;
-            return displayName.substring(0, index);
-        }
-
-        // 取得唯一鍵值（飲料時包含品牌）
-        function getUniqueKey(item) {
-            if (item.country === '飲料') {
-                return `${item.name} ${item.brand}`;
-            }
-            return item.name;
-        }
-
-        // 頁面載入初始化
+        // 初始化頁面載入
         window.onload = function() {
             // 載入收藏清單
             loadFavorites();
 
             // 載入歷史紀錄
-            foodHistory = JSON.parse(localStorage.getItem('foodHistory') || '[]');
+            try {
+                foodHistory = JSON.parse(localStorage.getItem('foodHistory') || '[]');
+                if (!Array.isArray(foodHistory)) {
+                    foodHistory = [];
+                    localStorage.setItem('foodHistory', '[]');
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+                foodHistory = [];
+                localStorage.setItem('foodHistory', '[]');
+            }
 
             // 如果有歷史紀錄，初始化 currentFood 和顯示相關按鈕
             if (foodHistory.length > 0) {
@@ -1682,7 +1565,13 @@
             // 初始化「返回上一頁」按鈕顯示狀態
             if (foodHistory.length > 1) {
                 document.getElementById('prevButton').style.display = 'block';
+            } else {
+                document.getElementById('prevButton').style.display = 'none';
             }
+
+            // 調試信息
+            console.log('頁面載入完成，歷史紀錄:', foodHistory);
+            console.log('當前餐點:', currentFood);
         };
     </script>
 </body>
