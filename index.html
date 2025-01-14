@@ -1151,12 +1151,14 @@
                         hasLocationPermission = true;
                         lastKnownPosition = position;
                         document.getElementById('locationPermissionModal').style.display = 'none';
+                        console.log('位置權限已獲得，位置:', position);
                     },
                     error => {
                         hideLoadingIndicator(); // 隱藏載入指示器
                         trackLocationError(error);
                         showMapError(getLocationErrorMessage(error));
                         hasLocationPermission = false;
+                        console.error('獲取位置失敗:', error);
                     },
                     {
                         enableHighAccuracy: true,
@@ -1168,7 +1170,10 @@
         }
 
         function searchNearbyRestaurant() {
-            if (!currentFood) return;
+            if (!currentFood) {
+                alert('請先選擇一個餐點！');
+                return;
+            }
 
             if (!navigator.geolocation) {
                 showManualLocationInput();
@@ -1192,6 +1197,7 @@
         }
 
         function handleLocationSuccess(position) {
+            console.log('獲取到位置:', position);
             hideLoadingIndicator(); // 隱藏載入指示器
             hasLocationPermission = true;
             lastKnownPosition = position;
@@ -1199,26 +1205,24 @@
             const lng = position.coords.longitude;
 
             const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${lat},${lng},16z`;
+            console.log('打開地圖 URL:', mapUrl);
 
-            // 嘗試使用隱藏的 <a> 標籤打開
-            try {
-                const a = document.createElement('a');
-                a.href = mapUrl;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            } catch (error) {
-                // 如果自動打開失敗，顯示手動鏈接
+            // 使用 window.open 打開地圖
+            const newWindow = window.open(mapUrl, '_blank', 'noopener,noreferrer');
+            if (newWindow) {
+                newWindow.focus();
+            } else {
+                // 如果被阻擋，顯示手動鏈接
+                alert('彈出窗口被阻擋，請點擊以下鏈接手動打開地圖：');
                 const manualModal = document.getElementById('manualMapModal');
                 const manualLink = document.getElementById('manualMapLink');
                 manualLink.href = mapUrl;
-                manualModal.style.display = 'block';
+                manualMapModal.style.display = 'block';
             }
         }
 
         function handleLocationError(error) {
+            console.error('獲取位置錯誤:', error);
             hideLoadingIndicator(); // 隱藏載入指示器
             trackLocationError(error);
             showMapError(getLocationErrorMessage(error));
@@ -1271,20 +1275,21 @@
             if (address) {
                 mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(address)}`;
             } else {
+                if (!latitude || !longitude) {
+                    alert('請同時輸入經度和緯度。');
+                    return;
+                }
                 mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}/@${latitude},${longitude},16z`;
             }
 
-            // 打開地圖
-            try {
-                const a = document.createElement('a');
-                a.href = mapUrl;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            } catch (error) {
-                alert('無法打開地圖，請手動點擊鏈接。');
+            console.log('手動定位打開地圖 URL:', mapUrl);
+
+            // 使用 window.open 打開地圖
+            const newWindow = window.open(mapUrl, '_blank', 'noopener,noreferrer');
+            if (newWindow) {
+                newWindow.focus();
+            } else {
+                alert('彈出窗口被阻擋，請點擊以下鏈接手動打開地圖：');
                 const manualMapModal = document.getElementById('manualMapModal');
                 const manualLink = document.getElementById('manualMapLink');
                 manualLink.href = mapUrl;
