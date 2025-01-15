@@ -834,6 +834,7 @@
             const priceFilter = document.getElementById('priceFilter');
 
             if (category === '飲料') {
+                // 當選擇飲料時，修改標題和圖標
                 titleElement.textContent = '等下喝什麼？';
                 iconElement.textContent = '🥤';
                 priceFilterLabel.textContent = '品牌';
@@ -853,28 +854,8 @@
                     option.textContent = brand;
                     priceFilter.appendChild(option);
                 });
-            } else if (["中式", "日式"].includes(category)) {
-                titleElement.textContent = `等下${category}料理？`;
-                switch(category) {
-                    case "中式":
-                        iconElement.textContent = '🍜';
-                        break;
-                    case "日式":
-                        iconElement.textContent = '🍣';
-                        break;
-                    default:
-                        iconElement.textContent = '🍽️';
-                }
-                priceFilterLabel.textContent = '價格區間';
-
-                // 重設價格選項
-                priceFilter.innerHTML = `
-                    <option value="">不指定</option>
-                    <option value="150以下">150元以下</option>
-                    <option value="150-500">150-500元</option>
-                `;
             } else {
-                // 當選擇「不指定」
+                // 當選擇其他料理形式或不指定時，保持標題為 "等下吃什麼？"
                 titleElement.textContent = '等下吃什麼？';
                 iconElement.textContent = '🍚';
                 priceFilterLabel.textContent = '價格區間';
