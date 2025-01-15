@@ -143,6 +143,9 @@
             transition: all 0.3s ease;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
             flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .result.animating {
             transform: scale(1.02);
@@ -691,7 +694,7 @@
         let currentFood = null;
         let isAnimating = false;
 
-        // 新增歷史紀錄堆疊
+        // 新增歷史紀錄堆疊（僅保存一個歷史紀錄）
         let historyStack = [];
 
         // 餐點資料庫（簡化至10種）
@@ -790,8 +793,7 @@
                     "燉煮豬腳：將豬腳放入醬料中，確保完全浸泡。用中小火燉煮約2小時，直到豬腳軟嫩入味。",
                     "完成與裝盤：將燉煮好的豬腳盛放在白飯上，淋上燉煮的醬汁，即可享用。"
                 ]
-            },
-            // 可以根據需要添加更多食譜
+            }
         };
 
         // 初始化收藏清單
@@ -1025,39 +1027,26 @@
             });
 
             if (availableFoods.length === 0) {
-                // 檢查是否所有篩選後的餐點都已被收藏
-                const allFavorited = filteredItems.length > 0 && filteredItems.every(item => {
-                    const key = getUniqueKey(item); // 使用唯一鍵值
-                    return favorites.has(key);
-                });
-                if (allFavorited) {
-                    return '餐點都被收藏了喔!';
-                }
-                return '發生錯誤，請重試 😅';
+                // 全部餐點已被選過，重置歷史並重新選擇
+                clearFilteredHistory();
+                return getRandomFood();
             }
 
             // 獲取上一次選中的餐點
             const lastSelectedFood = historyStack.length > 0 ? historyStack[historyStack.length - 1] : null;
 
-            // 如果只有一個選項可用，且是上一次選的，就重置歷史
-            if (availableFoods.length === 1 && availableFoods[0].name === lastSelectedFood) {
-                clearFilteredHistory();
-                return getRandomFood(); // 遞迴調用重新選擇
-            }
-
             // 從可用選項中排除上一次選中的餐點
             const foodsExcludeLast = availableFoods.filter(item => getUniqueKey(item) !== lastSelectedFood);
-            
-            // 如果還有其他選項，就從其他選項中選擇
+
+            let selectedItem;
             if (foodsExcludeLast.length > 0) {
                 const randomIndex = Math.floor(Math.random() * foodsExcludeLast.length);
-                const selectedItem = foodsExcludeLast[randomIndex];
-                return getDisplayName(selectedItem);
+                selectedItem = foodsExcludeLast[randomIndex];
+            } else {
+                // 如果沒有其他選項，允許選中上一個選項
+                selectedItem = availableFoods[0];
             }
-            
-            // 否則，從所有可用選項中隨機選擇
-            const randomIndex = Math.floor(Math.random() * availableFoods.length);
-            const selectedItem = availableFoods[randomIndex];
+
             return getDisplayName(selectedItem);
         }
 
@@ -1065,17 +1054,9 @@
             const history = getHistory();
             const filteredItems = getFilteredItems();
             
-            let earliestTime = new Date().toISOString();
             filteredItems.forEach(item => {
                 const key = getUniqueKey(item); // 使用唯一鍵值
                 if (history[key]) {
-                    earliestTime = history[key] < earliestTime ? history[key] : earliestTime;
-                }
-            });
-
-            filteredItems.forEach(item => {
-                const key = getUniqueKey(item); // 使用唯一鍵值
-                if (history[key] && history[key] >= earliestTime) {
                     delete history[key];
                 }
             });
@@ -1217,13 +1198,15 @@
                     buttonElem.disabled = false;
                     resultElem.classList.remove('animating');
                     
-                    if (finalChoice === '餐點都被收藏了喔!') {
-                        // 不進行後續操作，僅顯示訊息
-                        // 可選擇在此處添加額外提示或 UI 變更
-                    } else if (!finalChoice.includes('錯誤')) {
-                        // 推入歷史堆疊
-                        historyStack.push(currentFood);
-                        backButton.style.display = 'block';
+                    if (finalChoice !== '餐點都被收藏了喔!') {
+                        // 推入歷史堆疊（僅保存一個歷史紀錄）
+                        if (currentFood) {
+                            historyStack.push(currentFood);
+                            if (historyStack.length > 1) {
+                                historyStack.shift(); // 保持堆疊長度為1
+                            }
+                        }
+                        backButton.style.display = historyStack.length > 0 ? 'block' : 'none';
 
                         const history = getHistory();
                         history[finalChoice] = new Date().toISOString();
@@ -1247,7 +1230,7 @@
             }, 50);
         }
 
-        // 返回上一動功能
+        // 返回上一動功能（僅允許返回一次）
         function goBack() {
             if (historyStack.length === 0) return;
 
@@ -1275,8 +1258,8 @@
             mapButton.href = mapUrl;
             mapButton.style.display = 'flex';
 
-            // 更新返回按鈕顯示狀態
-            backButton.style.display = historyStack.length > 0 ? 'block' : 'none';
+            // 更新返回按鈕顯示狀態（僅允許返回一次）
+            backButton.style.display = 'none';
         }
 
         // 取得顯示名稱（飲料時包含品牌）
