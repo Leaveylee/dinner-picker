@@ -108,6 +108,25 @@
             padding: 0.5rem;
             border-radius: 16px;
             background: linear-gradient(135deg, #FFB68E 0%, #FFD0B8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        /* 新增返回按鈕樣式 */
+        .back-button {
+            background: none;
+            border: none;
+            color: #B86E52;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: scale(1.2);
         }
 
         .result {
@@ -123,6 +142,7 @@
             color: #444;
             transition: all 0.3s ease;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            flex: 1;
         }
         .result.animating {
             transform: scale(1.02);
@@ -556,10 +576,6 @@
                     <option value="">不指定</option>
                     <option value="中式">中式</option>
                     <option value="日式">日式</option>
-                    <option value="韓式">韓式</option>
-                    <option value="義式">義式</option>
-                    <option value="美式">美式</option>
-                    <option value="越式">越式</option>
                     <option value="飲料">🥤 飲料</option> <!-- 保留飲料分類 -->
                 </select>
             </div>
@@ -574,6 +590,8 @@
         </div>
 
         <div class="result-container">
+            <!-- 新增返回按鈕 -->
+            <button id="backButton" class="back-button" onclick="goBack()" style="display: none;">⬅️</button>
             <div id="result" class="result">點擊按鈕選擇餐點</div>
             <div class="button-group">
                 <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
@@ -673,234 +691,29 @@
         let currentFood = null;
         let isAnimating = false;
 
-        // 餐點資料庫
+        // 新增歷史紀錄堆疊
+        let historyStack = [];
+
+        // 餐點資料庫（簡化至10種）
         const menuItems = [
-            // 中式料理
-
-            // 150元以下
-            { name: "雞腿便當", country: "中式", price: "150以下" },
-            { name: "排骨便當", country: "中式", price: "150以下" },
-            { name: "魯肉便當", country: "中式", price: "150以下" },
-            { name: "控肉便當", country: "中式", price: "150以下" },
-            { name: "豬排便當", country: "中式", price: "150以下" },
-            { name: "雞排便當", country: "中式", price: "150以下" },
-            { name: "叉燒便當", country: "中式", price: "150以下" },
-            { name: "油雞便當", country: "中式", price: "150以下" },
-            { name: "燒鴨便當", country: "中式", price: "150以下" },
-            { name: "炸雞便當", country: "中式", price: "150以下" },
-            { name: "滷雞腿飯", country: "中式", price: "150以下" },
-            { name: "三寶飯", country: "中式", price: "150以下" },
-            { name: "雞絲飯", country: "中式", price: "150以下" },
+            { name: "雞排飯", country: "中式", price: "150以下" },
             { name: "豬腳飯", country: "中式", price: "150以下" },
-            { name: "滷肉飯", country: "中式", price: "150以下" },
-            { name: "肉燥飯", country: "中式", price: "150以下" },
-            { name: "火雞肉飯", country: "中式", price: "150以下" },
-            { name: "爌肉飯", country: "中式", price: "150以下" },
-            { name: "雞肉飯", country: "中式", price: "150以下" },
-            { name: "排骨蛋炒飯", country: "中式", price: "150以下" },
-
-            // 150-500元
             { name: "紅燒牛肉麵", country: "中式", price: "150-500" },
-            { name: "清燉牛肉麵", country: "中式", price: "150-500" },
-            { name: "牛肉炒飯", country: "中式", price: "150-500" },
-            { name: "蝦仁炒飯", country: "中式", price: "150-500" },
-            { name: "揚州炒飯", country: "中式", price: "150-500" },
-            { name: "三杯雞飯", country: "中式", price: "150-500" },
-            { name: "宮保雞丁飯", country: "中式", price: "150-500" },
-            { name: "蔥爆牛肉飯", country: "中式", price: "150-500" },
-            { name: "左宗棠雞飯", country: "中式", price: "150-500" },
-            { name: "蒜泥白肉飯", country: "中式", price: "150-500" },
-            { name: "糖醋排骨飯", country: "中式", price: "150-500" },
-            { name: "東坡肉飯", country: "中式", price: "150-500" },
-            { name: "獅子頭飯", country: "中式", price: "150-500" },
-            { name: "黑胡椒牛肉飯", country: "中式", price: "150-500" },
-            { name: "麻婆豆腐飯", country: "中式", price: "150-500" },
-            { name: "鹹魚雞粒炒飯", country: "中式", price: "150-500" },
-            { name: "蒜蓉豬肉飯", country: "中式", price: "150-500" },
-            { name: "蔥燒豬肉飯", country: "中式", price: "150-500" },
-            { name: "京醬肉絲飯", country: "中式", price: "150-500" },
-            { name: "叉燒燒鴨飯", country: "中式", price: "150-500" },
-
-            // 日式料理
-
-            // 150元以下
-            { name: "豬排丼", country: "日式", price: "150以下" },
-            { name: "炸雞丼", country: "日式", price: "150以下" },
-            { name: "親子丼", country: "日式", price: "150以下" },
             { name: "牛丼", country: "日式", price: "150以下" },
-            { name: "豬肉丼", country: "日式", price: "150以下" },
-            { name: "豬肉咖哩飯", country: "日式", price: "150以下" },
-            { name: "雞肉咖哩飯", country: "日式", price: "150以下" },
-            { name: "日式炒麵", country: "日式", price: "150以下" },
-            { name: "日式烏龍麵", country: "日式", price: "150以下" },
-            { name: "炸豬排烏龍麵", country: "日式", price: "150以下" },
-            { name: "鮪魚蓋飯", country: "日式", price: "150以下" },
-            { name: "滑蛋牛肉飯", country: "日式", price: "150以下" },
-            { name: "炸雞咖哩飯", country: "日式", price: "150以下" },
-            { name: "豬肉蓋飯", country: "日式", price: "150以下" },
-            { name: "唐揚雞飯", country: "日式", price: "150以下" },
-            { name: "雞排咖哩飯", country: "日式", price: "150以下" },
-            { name: "豬排咖哩飯", country: "日式", price: "150以下" },
-            { name: "蔥花豬肉飯", country: "日式", price: "150以下" },
-            { name: "明太子烏龍麵", country: "日式", price: "150以下" },
-            { name: "豬肉味噌湯飯", country: "日式", price: "150以下" },
-
-            // 150-500元
             { name: "鰻魚飯", country: "日式", price: "150-500" },
-            { name: "生魚片丼", country: "日式", price: "150-500" },
-            { name: "海鮮丼", country: "日式", price: "150-500" },
-            { name: "炸豬排定食", country: "日式", price: "150-500" },
-            { name: "炸雞定食", country: "日式", price: "150-500" },
-            { name: "鮭魚定食", country: "日式", price: "150-500" },
-            { name: "豪華壽司套餐", country: "日式", price: "150-500" },
-            { name: "綜合天婦羅定食", country: "日式", price: "150-500" },
-            { name: "炸蝦定食", country: "日式", price: "150-500" },
-            { name: "薑燒豬肉定食", country: "日式", price: "150-500" },
-            { name: "牛肉豆腐鍋", country: "日式", price: "150-500" },
-            { name: "辣炒魷魚", country: "日式", price: "150-500" },
-            { name: "春川炒雞", country: "日式", price: "150-500" },
-            { name: "泡菜炒豬肉", country: "日式", price: "150-500" },
-            { name: "韓式炸雞", country: "日式", price: "150-500" },
-            { name: "起司薯條套餐", country: "日式", price: "150-500" },
-            { name: "美式牛排套餐", country: "日式", price: "150-500" },
+            { name: "親子丼", country: "日式", price: "150以下" },
+            { name: "珍珠奶茶", country: "飲料", brand: "50嵐" },
+            { name: "焙烏龍", country: "飲料", brand: "得正" },
+            { name: "翡翠綠茶", country: "飲料", brand: "龜記" },
+            { name: "珍珠鮮奶", country: "飲料", brand: "龜記" },
         ];
 
-        // 飲料資料庫
+        // 飲料資料庫（簡化）
         const beverageItems = [
-            // 飲料 - 50嵐
-            { name: "茉莉綠茶", country: "飲料", brand: "50嵐" },
-            { name: "阿薩姆紅茶", country: "飲料", brand: "50嵐" },
-            { name: "四季春青茶", country: "飲料", brand: "50嵐" },
-            { name: "黃金烏龍", country: "飲料", brand: "50嵐" },
-            { name: "檸檬綠", country: "飲料", brand: "50嵐" },
-            { name: "梅の綠", country: "飲料", brand: "50嵐" },
-            { name: "桔子綠", country: "飲料", brand: "50嵐" },
-            { name: "8冰綠", country: "飲料", brand: "50嵐" },
-            { name: "養樂多綠", country: "飲料", brand: "50嵐" },
-            { name: "冰淇淋紅茶", country: "飲料", brand: "50嵐" },
-            { name: "旺來紅", country: "飲料", brand: "50嵐" },
-            { name: "鮮柚綠", country: "飲料", brand: "50嵐" },
-            { name: "奶茶", country: "飲料", brand: "50嵐" },
-            { name: "奶綠", country: "飲料", brand: "50嵐" },
-            { name: "紅茶瑪奇朵", country: "飲料", brand: "50嵐" },
-            { name: "烏龍瑪奇朵", country: "飲料", brand: "50嵐" },
-            { name: "四季奶青", country: "飲料", brand: "50嵐" },
-            { name: "黃金烏龍奶茶", country: "飲料", brand: "50嵐" },
-            { name: "阿華田", country: "飲料", brand: "50嵐" },
-            { name: "可可芭蕾", country: "飲料", brand: "50嵐" },
-            { name: "四季春+珍波椰", country: "飲料", brand: "50嵐" },
-            { name: "波霸紅茶", country: "飲料", brand: "50嵐" },
-            { name: "波霸綠茶", country: "飲料", brand: "50嵐" },
-            { name: "波霸青茶", country: "飲料", brand: "50嵐" },
-            { name: "波霸烏龍茶", country: "飲料", brand: "50嵐" },
-            { name: "波霸奶茶", country: "飲料", brand: "50嵐" },
-            { name: "波霸奶綠", country: "飲料", brand: "50嵐" },
-            { name: "波霸烏龍奶茶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠紅茶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠綠茶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠青茶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠烏龍茶", country: "飲料", brand: "50嵐" },
             { name: "珍珠奶茶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠奶綠", country: "飲料", brand: "50嵐" },
-            { name: "椰果奶茶", country: "飲料", brand: "50嵐" },
-            { name: "布丁奶茶", country: "飲料", brand: "50嵐" },
-            { name: "布丁奶綠", country: "飲料", brand: "50嵐" },
-            { name: "布丁紅茶", country: "飲料", brand: "50嵐" },
-            { name: "布丁綠茶", country: "飲料", brand: "50嵐" },
-            { name: "布丁青茶", country: "飲料", brand: "50嵐" },
-            { name: "布丁烏龍茶", country: "飲料", brand: "50嵐" },
-            { name: "檸檬汁", country: "飲料", brand: "50嵐" },
-            { name: "金桔檸檬", country: "飲料", brand: "50嵐" },
-            { name: "檸檬梅汁", country: "飲料", brand: "50嵐" },
-            { name: "檸檬養樂多", country: "飲料", brand: "50嵐" },
-            { name: "8冰茶", country: "飲料", brand: "50嵐" },
-            { name: "鮮柚汁", country: "飲料", brand: "50嵐" },
-            { name: "葡萄柚多多", country: "飲料", brand: "50嵐" },
-            { name: "紅茶拿鐵", country: "飲料", brand: "50嵐" },
-            { name: "綠茶拿鐵", country: "飲料", brand: "50嵐" },
-            { name: "黃金烏龍拿鐵", country: "飲料", brand: "50嵐" },
-            { name: "阿華田拿鐵", country: "飲料", brand: "50嵐" },
-            { name: "可可芭蕾拿鐵", country: "飲料", brand: "50嵐" },
-            { name: "波霸鮮奶", country: "飲料", brand: "50嵐" },
-            { name: "珍珠鮮奶", country: "飲料", brand: "50嵐" },
-            { name: "檸檬紅茶", country: "飲料", brand: "50嵐" },
-            { name: "檸檬梅汁綠", country: "飲料", brand: "50嵐" },
-            { name: "混珠黃金烏龍", country: "飲料", brand: "50嵐" },
-
-            // 飲料 - 得正
             { name: "焙烏龍", country: "飲料", brand: "得正" },
-            { name: "輕烏龍", country: "飲料", brand: "得正" },
-            { name: "春烏龍", country: "飲料", brand: "得正" },
-            { name: "綠茶", country: "飲料", brand: "得正" },
-            { name: "紅茶", country: "飲料", brand: "得正" },
-            { name: "烘吉奶茶", country: "飲料", brand: "得正" },
-            { name: "黃金珍珠奶綠", country: "飲料", brand: "得正" },
-            { name: "珍珠奶茶", country: "飲料", brand: "得正" },
-            { name: "焙烏龍奶茶", country: "飲料", brand: "得正" },
-            { name: "奶茶", country: "飲料", brand: "得正" },
-            { name: "雙柚金烏龍", country: "飲料", brand: "得正" },
-            { name: "百香果綠茶", country: "飲料", brand: "得正" },
-            { name: "優酪春烏龍", country: "飲料", brand: "得正" },
-            { name: "青梅春烏龍", country: "飲料", brand: "得正" },
-            { name: "甘蔗春烏龍", country: "飲料", brand: "得正" },
-            { name: "香橙春烏龍", country: "飲料", brand: "得正" },
-            { name: "檸檬春烏龍", country: "飲料", brand: "得正" },
-            { name: "烘吉鮮奶", country: "飲料", brand: "得正" },
-            { name: "焙烏龍鮮奶茶", country: "飲料", brand: "得正" },
-            { name: "輕烏龍鮮奶茶", country: "飲料", brand: "得正" },
-            { name: "紅茶鮮奶", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋阿華田", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋烘吉茶", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋焙烏龍", country: "飲料", brand: "得正" },
-            { name: "芝士奶蓋春烏龍", country: "飲料", brand: "得正" },
-
-            // 飲料 - 龜記
-            { name: "極品紅茶", country: "飲料", brand: "龜記" },
             { name: "翡翠綠茶", country: "飲料", brand: "龜記" },
-            { name: "青四季春", country: "飲料", brand: "龜記" },
-            { name: "三韻紅萱", country: "飲料", brand: "龜記" },
-            { name: "紅水烏龍", country: "飲料", brand: "龜記" },
-            { name: "三十三茶王", country: "飲料", brand: "龜記" },
-            { name: "碎銀普洱茶", country: "飲料", brand: "龜記" },
-            { name: "花沫烏龍", country: "飲料", brand: "龜記" },
-            { name: "鮮果百香紅茶", country: "飲料", brand: "龜記" },
-            { name: "鮮果百香綠茶", country: "飲料", brand: "龜記" },
-            { name: "翡翠雷夢", country: "飲料", brand: "龜記" },
-            { name: "柳丁翡翠", country: "飲料", brand: "龜記" },
-            { name: "蘋果紅萱", country: "飲料", brand: "龜記" },
-            { name: "旺梨四季春", country: "飲料", brand: "龜記" },
-            { name: "蜜桃烏龍", country: "飲料", brand: "龜記" },
-            { name: "香柚雷夢綠", country: "飲料", brand: "龜記" },
-            { name: "紅柚翡翠", country: "飲料", brand: "龜記" },
-            { name: "豆漿紅茶", country: "飲料", brand: "龜記" },
-            { name: "冬瓜茶王", country: "飲料", brand: "龜記" },
-            { name: "冬瓜雷夢", country: "飲料", brand: "龜記" },
-            { name: "阿源楊桃紅茶", country: "飲料", brand: "龜記" },
-            { name: "阿源楊桃綠茶", country: "飲料", brand: "龜記" },
-            { name: "楊桃雷夢", country: "飲料", brand: "龜記" },
-            { name: "甘蔗四季春", country: "飲料", brand: "龜記" },
-            { name: "極品奶茶", country: "飲料", brand: "龜記" },
-            { name: "翡翠奶茶", country: "飲料", brand: "龜記" },
-            { name: "茶王奶茶", country: "飲料", brand: "龜記" },
-            { name: "碎銀普洱奶茶", country: "飲料", brand: "龜記" },
-            { name: "珍珠奶茶", country: "飲料", brand: "龜記" },
-            { name: "極品鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "翡翠鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "龜記濃乳茶", country: "飲料", brand: "龜記" },
-            { name: "冬瓜鮮乳", country: "飲料", brand: "龜記" },
-            { name: "紅烏鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "巧克鮮乳茶", country: "飲料", brand: "龜記" },
-            { name: "碎銀普洱鮮乳", country: "飲料", brand: "龜記" },
-            { name: "蜂蜜綠茶", country: "飲料", brand: "龜記" },
-            { name: "蜂蜜四季春", country: "飲料", brand: "龜記" },
-            { name: "三韻奶茶", country: "飲料", brand: "龜記" },
-            { name: "蜂蜜雷夢", country: "飲料", brand: "龜記" },
-            { name: "雷夢蘆薈蜜", country: "飲料", brand: "龜記" },
-            { name: "原味薑茶", country: "飲料", brand: "龜記" },
-            { name: "薑汁奶茶", country: "飲料", brand: "龜記" },
-            { name: "薑汁雷夢", country: "飲料", brand: "龜記" },
-            { name: "薑汁桂圓", country: "飲料", brand: "龜記" },
-            { name: "桂圓紅棗茶", country: "飲料", brand: "龜記" },
+            { name: "珍珠鮮奶", country: "飲料", brand: "龜記" },
         ];
 
         // 合併飲料資料到 menuItems
@@ -934,11 +747,10 @@
                     "享用：可搭配味噌湯和醃漬小菜，組成豐富的一餐。"
                 ]
             },
-            // 其他食譜範例
-            "雞腿便當": {
+            "雞排飯": {
                 ingredients: {
                     main: [
-                        "雞腿肉：1份（約200克），去骨切塊",
+                        "雞排：1塊（約200克），去骨切塊",
                         "醬油：30毫升",
                         "糖：15克",
                         "蒜末：1湯匙",
@@ -952,13 +764,34 @@
                 },
                 steps: [
                     "準備醬料：在碗中混合醬油、糖、蒜末和薑末，攪拌均勻。",
-                    "醃製雞肉：將雞腿肉放入醬料中，醃製至少30分鐘。",
-                    "加熱油鍋：在平底鍋中加熱適量油，放入醃製好的雞肉塊，用中火煎至兩面金黃。",
+                    "醃製雞肉：將雞排放入醬料中，醃製至少30分鐘。",
+                    "加熱油鍋：在平底鍋中加熱適量油，放入醃製好的雞排塊，用中火煎至兩面金黃。",
                     "加入醬料：將剩餘的醬料倒入鍋中，蓋上鍋蓋，用小火燉煮約15分鐘，直到雞肉完全熟透。",
-                    "裝盤：將煮好的雞腿肉盛放在便當盒中，撒上蔥段裝飾，搭配白飯即可享用。"
+                    "裝盤：將煮好的雞排肉盛放在便當盒中，撒上蔥段裝飾，搭配白飯即可享用。"
                 ]
-            }
-            // 您可以根據需要添加更多餐點的食譜
+            },
+            "豬腳飯": {
+                ingredients: {
+                    main: [
+                        "豬腳：1隻（約500克），清洗乾淨",
+                        "醬油：50毫升",
+                        "糖：30克",
+                        "八角：2顆",
+                        "蔥：2根，切段",
+                        "薑片：5片"
+                    ],
+                    seasoning: [
+                        "水：適量",
+                        "白飯：1碗"
+                    ]
+                },
+                steps: [
+                    "準備醬料：在鍋中混合醬油、糖、八角、蔥段和薑片，加入適量水。",
+                    "燉煮豬腳：將豬腳放入醬料中，確保完全浸泡。用中小火燉煮約2小時，直到豬腳軟嫩入味。",
+                    "完成與裝盤：將燉煮好的豬腳盛放在白飯上，淋上燉煮的醬汁，即可享用。"
+                ]
+            },
+            // 可以根據需要添加更多食譜
         };
 
         // 初始化收藏清單
@@ -1018,7 +851,7 @@
                     option.textContent = brand;
                     priceFilter.appendChild(option);
                 });
-            } else if (["中式", "日式", "韓式", "義式", "美式", "越式"].includes(category)) {
+            } else if (["中式", "日式"].includes(category)) {
                 titleElement.textContent = `等下${category}料理？`;
                 switch(category) {
                     case "中式":
@@ -1026,18 +859,6 @@
                         break;
                     case "日式":
                         iconElement.textContent = '🍣';
-                        break;
-                    case "韓式":
-                        iconElement.textContent = '🍱';
-                        break;
-                    case "義式":
-                        iconElement.textContent = '🍝';
-                        break;
-                    case "美式":
-                        iconElement.textContent = '🍔';
-                        break;
-                    case "越式":
-                        iconElement.textContent = '🍲';
                         break;
                     default:
                         iconElement.textContent = '🍽️';
@@ -1216,12 +1037,10 @@
             }
 
             // 獲取上一次選中的餐點
-            const lastSelectedFood = Object.entries(getHistory())
-                .sort((a, b) => new Date(b[1]) - new Date(a[1]))
-                [0]?.[0];
+            const lastSelectedFood = historyStack.length > 0 ? historyStack[historyStack.length - 1] : null;
 
             // 如果只有一個選項可用，且是上一次選的，就重置歷史
-            if (availableFoods.length === 1 && getUniqueKey(availableFoods[0]) === lastSelectedFood) {
+            if (availableFoods.length === 1 && availableFoods[0].name === lastSelectedFood) {
                 clearFilteredHistory();
                 return getRandomFood(); // 遞迴調用重新選擇
             }
@@ -1358,12 +1177,14 @@
             const buttonElem = document.getElementById('pickButton');
             const recipeButton = document.getElementById('recipeButton');
             const mapButton = document.getElementById('mapButton');
+            const backButton = document.getElementById('backButton');
             
             isAnimating = true;
             buttonElem.disabled = true;
             resultElem.classList.add('animating');
             recipeButton.style.display = 'none';
             mapButton.style.display = 'none';
+            backButton.style.display = historyStack.length > 0 ? 'block' : 'none';
 
             let finalChoice = null;
             let counter = 0;
@@ -1380,6 +1201,7 @@
                         isAnimating = false;
                         buttonElem.disabled = false;
                         resultElem.classList.remove('animating');
+                        backButton.style.display = historyStack.length > 0 ? 'block' : 'none';
                         return;
                     }
                     const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
@@ -1399,6 +1221,10 @@
                         // 不進行後續操作，僅顯示訊息
                         // 可選擇在此處添加額外提示或 UI 變更
                     } else if (!finalChoice.includes('錯誤')) {
+                        // 推入歷史堆疊
+                        historyStack.push(currentFood);
+                        backButton.style.display = 'block';
+
                         const history = getHistory();
                         history[finalChoice] = new Date().toISOString();
                         saveHistory(history);
@@ -1419,6 +1245,38 @@
                     updateAvailableCount();
                 }
             }, 50);
+        }
+
+        // 返回上一動功能
+        function goBack() {
+            if (historyStack.length === 0) return;
+
+            const previousFood = historyStack.pop();
+            currentFood = previousFood;
+
+            const resultElem = document.getElementById('result');
+            const recipeButton = document.getElementById('recipeButton');
+            const mapButton = document.getElementById('mapButton');
+            const backButton = document.getElementById('backButton');
+
+            resultElem.textContent = currentFood;
+
+            updateFavoriteButton();
+
+            // 顯示食譜按鈕
+            if (recipes[getBaseName(currentFood)]) {
+                recipeButton.style.display = 'flex';
+            } else {
+                recipeButton.style.display = 'none';
+            }
+            
+            // 設置 mapButton 的 href 並顯示
+            const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(currentFood)}`;
+            mapButton.href = mapUrl;
+            mapButton.style.display = 'flex';
+
+            // 更新返回按鈕顯示狀態
+            backButton.style.display = historyStack.length > 0 ? 'block' : 'none';
         }
 
         // 取得顯示名稱（飲料時包含品牌）
