@@ -109,32 +109,42 @@
             border-radius: 16px;
             background: linear-gradient(135deg, #FFB68E 0%, #FFD0B8 100%);
             position: relative;
+            display: flex; /* 添加 Flex 布局 */
+            justify-content: center; /* 水平置中 */
+            align-items: center; /* 垂直置中 */
         }
 
         .result-wrapper {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
+            position: relative;  /* 改為相對定位 */
+            width: 100%; /* 佔滿容器寬度 */
+            display: flex; /* 使用 Flex 布局 */
+            justify-content: center; /* 水平置中內容 */
+            align-items: center; /* 垂直置中內容 */
         }
 
         .back-button {
+            position: absolute;  /* 改為絕對定位 */
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
             background: none;
             border: none;
             color: #B86E52;
             font-size: 1.5rem;
             cursor: pointer;
             transition: transform 0.3s ease;
-            margin-right: 0.5rem;
-            flex-shrink: 0;
+            z-index: 1;
         }
 
         .back-button:hover {
-            transform: scale(1.2);
+            transform: translateY(-50%) scale(1.2);
         }
 
         .result {
             background: white;
             padding: 1.5rem;
+            padding-left: 3rem;  /* 為返回按鈕預留空間 */
+            padding-right: 3rem;  /* 保持對稱 */
             border-radius: 12px;
             min-height: 80px;
             display: flex;
@@ -145,11 +155,10 @@
             color: #444;
             transition: all 0.3s ease;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-            flex: 1;
-            margin: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            margin: 0 auto;  /* 確保置中 */
+            word-break: break-word;
+            position: relative;
+            max-width: 100%; /* 防止超出容器 */
         }
         .result.animating {
             transform: scale(1.02);
@@ -1437,7 +1446,7 @@
             getCurrentLocation();
         }
 
-        // 頁面載入初始化
+        // 初始化收藏清單和檢查位置權限
         window.onload = function() {
             loadFavorites(); // 載入收藏清單
             updateAvailableCount();
