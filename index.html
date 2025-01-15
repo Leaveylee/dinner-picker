@@ -108,14 +108,15 @@
             padding: 0.5rem;
             border-radius: 16px;
             background: linear-gradient(135deg, #FFB68E 0%, #FFD0B8 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
             position: relative;
         }
 
-        /* 新增返回按鈕樣式 */
+        .result-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
         .back-button {
             background: none;
             border: none;
@@ -123,6 +124,8 @@
             font-size: 1.5rem;
             cursor: pointer;
             transition: transform 0.3s ease;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
         }
 
         .back-button:hover {
@@ -143,6 +146,7 @@
             transition: all 0.3s ease;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
             flex: 1;
+            margin: 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -183,9 +187,9 @@
 
         .button-group {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
             justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
         }
 
         .favorite-button, .recipe-button, .map-button {
@@ -593,9 +597,10 @@
         </div>
 
         <div class="result-container">
-            <!-- 新增返回按鈕 -->
-            <button id="backButton" class="back-button" onclick="goBack()" style="display: none;">⬅️</button>
-            <div id="result" class="result">點擊按鈕選擇餐點</div>
+            <div class="result-wrapper">
+                <button id="backButton" class="back-button" onclick="goBack()" style="display: none;">⬅️</button>
+                <div id="result" class="result">點擊按鈕選擇餐點</div>
+            </div>
             <div class="button-group">
                 <button id="favoriteButton" class="favorite-button" onclick="toggleFavorite()" style="display: none">
                     <span class="favorite-icon">⭐</span>
@@ -793,7 +798,8 @@
                     "燉煮豬腳：將豬腳放入醬料中，確保完全浸泡。用中小火燉煮約2小時，直到豬腳軟嫩入味。",
                     "完成與裝盤：將燉煮好的豬腳盛放在白飯上，淋上燉煮的醬汁，即可享用。"
                 ]
-            }
+            },
+            // 可以根據需要添加更多食譜
         };
 
         // 初始化收藏清單
